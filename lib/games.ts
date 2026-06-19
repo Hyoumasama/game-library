@@ -1,6 +1,9 @@
 import { supabase } from "./supabase";
 
 export type Game = {
+  id: number;
+  slug: string;
+
   Title: string;
   Release: string;
   "Date of Purchase": string;
@@ -24,6 +27,9 @@ export function slugify(title: string) {
 
 function mapGame(game: any): Game {
   return {
+    id: game.id,
+    slug: game.slug,
+
     Title: game.title || "",
     Release: game.release || "",
     "Date of Purchase": game.date_of_purchase || "",

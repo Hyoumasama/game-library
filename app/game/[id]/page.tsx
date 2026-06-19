@@ -1,5 +1,7 @@
+import DeleteGameButton from "@/components/games/DeleteGameButton";
 import { getGameBySlug, getGames } from "@/lib/games";
 import Link from "next/link";
+import EditGameModal from "@/components/games/EditGameModal";
 import { getIgdbCoverUrl, getIgdbGame, getIgdbImageUrl } from "@/lib/igdb";
 import { getRawgGame } from "@/lib/rawg";
 
@@ -14,14 +16,14 @@ export default async function GamePage({
   const games = await getGames();
 
   if (!game) {
-    return (
-      <main className="min-h-screen bg-black p-8 text-white">
-        Game not found
-      </main>
-    );
-  }
+  return (
+    <main className="min-h-screen bg-black p-8 text-white">
+      Game not found
+    </main>
+  );
+}
 
-  const rawgGame = await getRawgGame(game.Title);
+const rawgGame = await getRawgGame(game.Title);
 
   function formatHours(hours: string) {
   const value = Number(hours || 0);
@@ -207,9 +209,17 @@ const daysToComplete = getDaysBetween(
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12 -mt-56">
-        <Link href="/" className="text-sm text-zinc-300 hover:text-white">
-          ← Back to Library
-        </Link>
+        <div className="flex items-center justify-between">
+  <Link href="/" className="text-sm text-zinc-300 hover:text-white">
+    ← Back to Library
+  </Link>
+
+  <div className="flex items-center gap-3">
+  <EditGameModal game={game} />
+
+  <DeleteGameButton gameId={game.id} />
+</div>
+</div>
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
