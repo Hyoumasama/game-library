@@ -1,7 +1,6 @@
-import DeleteGameButton from "@/components/games/DeleteGameButton";
+import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameBySlug, getGames } from "@/lib/games";
 import Link from "next/link";
-import EditGameModal from "@/components/games/EditGameModal";
 import { getIgdbCoverUrl, getIgdbGame, getIgdbImageUrl } from "@/lib/igdb";
 import { getRawgGame } from "@/lib/rawg";
 
@@ -210,14 +209,13 @@ const daysToComplete = getDaysBetween(
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12 -mt-56">
         <div className="flex items-center justify-between">
+  
+  <div className="flex items-center justify-between">
   <Link href="/" className="text-sm text-zinc-300 hover:text-white">
     ← Back to Library
   </Link>
 
-  <div className="flex items-center gap-3">
-  <EditGameModal game={game} />
-
-  <DeleteGameButton gameId={game.id} />
+  <GameAdminActions game={game} />
 </div>
 </div>
 

@@ -3,6 +3,7 @@
 import AddGameModal from "@/components/games/AddGameModal";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import AuthButton from "@/components/admin/AuthButton";
 
 type Game = {
   Title: string;
@@ -80,6 +81,7 @@ function getPlatformLogo(platform?: string) {
 }
 
 export default function Home() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -90,37 +92,50 @@ export default function Home() {
   const [coverUrls, setCoverUrls] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
-    async function loadGames() {
-      const response = await fetch("/api/games");
-      const data = await response.json();
+  async function loadGames() {
+    const response = await fetch("/api/games");
+    const data = await response.json();
 
-      const formattedGames = data.map((game: any) => ({
-        ...game,
-        Title: game.title,
-        Store: game.store,
-        Platform: game.platform,
-        Hardware: game.hardware,
-        Genre: game.genre,
-        Score: game.score,
-        Status: game.status,
-        Price: game.price,
-        "Hours Played": game.hours_played,
-        Release: game.release,
-        "Date of Purchase": game.date_of_purchase,
-        "Completion Last Played": game.completion_last_played,
-        "Completion / Last Played": game.completion_last_played,
-        Cover: game.cover_url,
-        Hero: game.hero_url,
-        Summary: game.summary,
-        Developer: game.developer,
-        Publisher: game.publisher,
-      }));
+    const formattedGames = data.map((game: any) => ({
+      ...game,
+      Title: game.title,
+      Store: game.store,
+      Platform: game.platform,
+      Hardware: game.hardware,
+      Genre: game.genre,
+      Score: game.score,
+      Status: game.status,
+      Price: game.price,
+      "Hours Played": game.hours_played,
+      Release: game.release,
+      "Date of Purchase": game.date_of_purchase,
+      "Completion Last Played": game.completion_last_played,
+      "Completion / Last Played": game.completion_last_played,
+      Cover: game.cover_url,
+      Hero: game.hero_url,
+      Summary: game.summary,
+      Developer: game.developer,
+      Publisher: game.publisher,
+    }));
 
-      setGames(formattedGames);
-    }
+    setGames(formattedGames);
+  }
 
-    loadGames();
-  }, []);
+  loadGames();
+}, []);
+
+useEffect(() => {
+  async function checkAdmin() {
+    const response = await fetch("/api/admin/me");
+    const data = await response.json();
+
+    console.log("ADMIN ME:", data);
+
+    setIsAdmin(data.isAdmin);
+  }
+
+  checkAdmin();
+}, []);
 
   const dashboard = useMemo(() => {
     const completed = games.filter((g) => g.Status?.trim() === "Completed").length;
@@ -307,14 +322,9 @@ const matchesCompletionYear =
               Assets
             </Link>
 
-            <Link
-              href="/admin"
-              className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
-            >
-              Admin
-            </Link>
+            <AuthButton />
 
-            <AddGameModal />
+            {isAdmin && <AddGameModal />}
           </div>
         </div>
 
