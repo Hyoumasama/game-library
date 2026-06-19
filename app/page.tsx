@@ -27,6 +27,7 @@ function slugify(title: string) {
 function getCompletionDate(game: Game) {
   return game["Completion Last Played"] || game["Completion / Last Played"] || "";
 }
+
 function getReleaseYear(game: Game) {
   const match = game.Release?.match(/\b(19|20)\d{2}\b/);
   return match ? match[0] : "";
@@ -118,7 +119,7 @@ export default function Home() {
     };
   }, [games]);
 
-  const stores = useMemo(() => {
+const stores = useMemo(() => {
   const uniqueStores = new Set<string>();
 
   games.forEach((game) => {
@@ -129,7 +130,7 @@ export default function Home() {
   return Array.from(uniqueStores).sort();
 }, [games]);
 
-  const years = useMemo(() => {
+    const years = useMemo(() => {
     const uniqueYears = new Set<string>();
 
     games.forEach((game) => {
@@ -338,6 +339,8 @@ const missingGames = gamesNeedingCovers.filter(
             <option value="Dropped">Dropped</option>
             <option value="Wishlist">Wishlist</option>
           </select>
+
+          
 <select
   value={storeFilter}
   onChange={(event) => setStoreFilter(event.target.value)}

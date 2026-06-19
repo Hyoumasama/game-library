@@ -15,14 +15,18 @@ export async function GET(request: Request) {
     const igdbCoverUrl = getIgdbCoverUrl(igdbGame?.cover?.image_id);
 
     if (igdbCoverUrl) {
-      return Response.json({ coverUrl: igdbCoverUrl });
+      return Response.json({
+  coverUrl: igdbCoverUrl,
+  genres: igdbGame?.genres?.map((genre) => genre.name) || [],
+});
     }
 
     const rawgGame = await getRawgGame(title);
 
     return Response.json({
-      coverUrl: rawgGame?.background_image || null,
-    });
+  coverUrl: rawgGame?.background_image || null,
+  genres: [],
+});
   } catch {
     return Response.json({ coverUrl: null });
   }

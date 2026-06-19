@@ -1,6 +1,4 @@
-import fs from "fs/promises";
-import path from "path";
-import { parse } from "csv-parse/sync";
+import { supabase } from "./supabase";
 
 export type Game = {
   Title: string;
@@ -24,23 +22,46 @@ export function slugify(title: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function mapGame(game: any): Game {
+  return {
+    Title: game.title || "",
+    Release: game.release || "",
+    "Date of Purchase": game.date_of_purchase || "",
+    "Completion Last Played": game.completion_last_played || "",
+    Score: game.score?.toString() || "",
+    Price: game.price || "",
+    Hours: game.hours_played?.toString() || "",
+    "Hours Played": game.hours_played?.toString() || "",
+    Status: game.status || "",
+    Store: game.store || "",
+    Platform: game.platform || "",
+    "Hardware (1)": game.hardware || "",
+  };
+}
+
 export async function getGames(): Promise<Game[]> {
-  const filePath = path.join(process.cwd(), "public", "games.csv");
+  const { data, error } = await supabase
+    .from("games")
+    .select("*");
 
-  const csv = await fs.readFile(filePath, "utf8");
+  if (error) {
+    throw error;
+  }
 
-  const records = parse(csv, {
-    columns: true,
-    skip_empty_lines: true,
-  });
-
-  return records;
+  return data.map(mapGame);
 }
 
 export async function getGameBySlug(slug: string) {
-  const games = await getGames();
+  const { data, error } = await supabase
+    .from("games")
+    .select("*")
+    .eq("slug", slug)
+    .limit(1)
+    .single();
 
-  return games.find(
-    (game) => slugify(game.Title) === slug
-  );
+  if (error || !data) {
+    return null;
+  }
+
+  return mapGame(data);
 }
