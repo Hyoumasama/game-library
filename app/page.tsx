@@ -10,6 +10,7 @@ type Game = {
   Status: string;
   Platform: string;
   Store: string;
+  Release?: string;
   "Hours Played": string;
   Price: string;
   "Completion Last Played"?: string;

@@ -13,11 +13,14 @@ type IgdbGame = {
     name: string;
   }[];
 
-  involved_companies?: {
-    company: {
-      name: string;
-    };
-  }[];
+ involved_companies?: {
+  publisher?: boolean;
+  developer?: boolean;
+
+  company: {
+    name: string;
+  };
+}[];
 
   first_release_date?: number;
 
@@ -29,11 +32,32 @@ type IgdbGame = {
 
 function cleanIgdbSearchTitle(title: string) {
   return title
+  .replace(/\([^)]*\)/g, "")
+    .replace(/\+.*$/g, "")
     .replace(/:/g, "")
+
+    // Editions
     .replace(/\bGOTY\b/gi, "")
     .replace(/\bEdition\b/gi, "")
-    .replace(/\bRemastered\b/gi, "")
     .replace(/\bComplete\b/gi, "")
+    .replace(/\bDefinitive\b/gi, "")
+    .replace(/\bUltimate\b/gi, "")
+    .replace(/\bDeluxe\b/gi, "")
+    .replace(/\bGold\b/gi, "")
+
+    // DLC / Passes
+    .replace(/\bExpansion Pass\b/gi, "")
+    .replace(/\bSeason Pass\b/gi, "")
+    .replace(/\bDLC\b/gi, "")
+    .replace(/\bDemo\b/gi, "")
+
+    // Store tags
+    .replace(/\bSteam\b/gi, "")
+    .replace(/\bEpic\b/gi, "")
+    .replace(/\bGOG\b/gi, "")
+    .replace(/\bPSN\b/gi, "")
+    .replace(/\bXbox\b/gi, "")
+
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -72,8 +96,17 @@ export async function getIgdbGame(
     },
     body: `
       search "${searchTitle}";
-      fields name, summary, genres.name, cover.image_id, involved_companies.company.name, first_release_date, screenshots.image_id, category;
-      limit 10;
+      fields name,
+summary,
+genres.name,
+cover.image_id,
+involved_companies.publisher,
+involved_companies.developer,
+involved_companies.company.name,
+first_release_date,
+screenshots.image_id,
+category;
+limit 10;
     `,
     cache: "no-store",
   });
@@ -110,9 +143,36 @@ export async function getIgdbGame(
     if (yearMatch) return yearMatch;
   }
 
-  const baseGame = nameMatches.find((game) => game.category === 0);
+  function normalizeTitle(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/:/g, "")
+    .replace(/\+.*$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  return baseGame || nameMatches[0] || data?.[0] || null;
+const safeMatches = data.filter((game) => {
+  const name = game.name?.toLowerCase() || "";
+
+  return (
+    !name.includes("+") &&
+    !name.includes("bundle") &&
+    !name.includes("pack") &&
+    !name.includes("collection") &&
+    !name.includes("blood and wine") &&
+    !name.includes("hearts of stone") &&
+    !name.includes("songs of the past")
+  );
+});
+
+const exactSafeMatch = safeMatches.find(
+  (game) => normalizeTitle(game.name) === normalizeTitle(searchTitle)
+);
+
+const baseGame = safeMatches.find((game) => game.category === 0);
+
+return exactSafeMatch || baseGame || safeMatches[0] || nameMatches[0] || data?.[0] || null;
 }
 
 export function getIgdbCoverUrl(imageId?: string) {
