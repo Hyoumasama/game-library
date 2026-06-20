@@ -2,6 +2,55 @@ import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameById, getGames } from "@/lib/games";
 import Link from "next/link";
 
+function getPlatformLogo(platform?: string) {
+  const value = platform?.toLowerCase() || "";
+
+  if (value.includes("steam")) return "/platforms/steam.png";
+  if (value.includes("epic")) return "/platforms/epicgames.png";
+  if (value.includes("psn")) return "/platforms/psn.png";
+  if (value.includes("playstation")) return "/platforms/psn.png";
+  if (value.includes("xbox")) return "/platforms/xbox.png";
+  if (value.includes("switch")) return "/platforms/switch.png";
+  if (value.includes("ea desktop")) return "/platforms/eadesktop.ico";
+
+  if (value.includes("pcsx2")) return "/platforms/pcsx2.png";
+  if (value.includes("duckstation")) return "/platforms/duckstation.png";
+  if (value.includes("rpcs3")) return "/platforms/rpcs3.png";
+  if (value.includes("xenia")) return "/platforms/xenia.png";
+  if (value.includes("citra")) return "/platforms/citra.png";
+  if (value.includes("yuzu")) return "/platforms/yuzu.png";
+  if (value.includes("ryujinx")) return "/platforms/ryujinx.png";
+  if (value.includes("cemu")) return "/platforms/cemu.png";
+  if (value.includes("retroarch")) return "/platforms/retroarch.png";
+
+  if (value.includes("gog")) return "/platforms/gog.jpeg";
+  if (value.includes("piracy")) return "/platforms/piracy.png";
+
+  return null;
+}
+
+function getHardwareLogo(hardware?: string) {
+  const value = hardware?.toLowerCase().replace(/\s+/g, "") || "";
+
+  if (value === "pc") return "/hardware/pc.png";
+  if (value.includes("steamdeck")) return "/hardware/steamdeck.png";
+  if (value.includes("xbox")) return "/hardware/xbox.png";
+
+  if (value.includes("playstation4") || value.includes("ps4"))
+    return "/hardware/playstation4.png";
+
+  if (value.includes("playstation3") || value.includes("ps3"))
+    return "/hardware/playstation3.png";
+
+  if (value.includes("playstation2") || value.includes("ps2"))
+    return "/hardware/playstation2.png";
+
+  if (value.includes("playstation") || value.includes("ps5"))
+    return "/hardware/playstation.png";
+
+  return null;
+}
+
 function formatDisplayDate(value: string | null | undefined) {
   if (!value) return "-";
 
@@ -118,9 +167,9 @@ function getHardwareLogo(hardware: string) {
 
   if (value.includes("pc")) return "/hardware/pc.png";
   if (value.includes("steamdeck") || value.includes("steam deck"))
-    return "/hardware/steamdeck.svg";
-  if (value.includes("steamdeck ico") || value.includes("deck icon"))
-    return "/hardware/steamdeck.ico";
+    return "/hardware/steamdeck.png";
+  if (value.includes("steamdeck png") || value.includes("deck icon"))
+    return "/hardware/steamdeck.png";
 
   if (value.includes("playstation 1") || value.includes("ps1"))
     return "/hardware/playstation.png";
@@ -211,7 +260,7 @@ const daysToComplete = getDaysBetween(
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-[#0b0f14]/70 to-[#0b0f14]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12 -mt-56">
+      <div className="relative z-10 mx-auto hidden max-w-6xl px-6 pb-12 -mt-56 md:block">
        <div className="mb-6 flex items-center justify-between">
   <Link
     href="/"
@@ -415,6 +464,187 @@ const daysToComplete = getDaysBetween(
   </section>
 ) : null}
       </div>
+      <div className="relative z-10 mx-auto block px-4 pb-10 -mt-76 md:hidden">
+  <div className="mb-4 flex items-center justify-between gap-3">
+    <Link href="/" className="text-sm font-bold text-white">
+      ← Library
+    </Link>
+
+    <GameAdminActions game={game} />
+  </div>
+
+  <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+    {heroImage ? (
+      <img
+        src={heroImage}
+        alt={game.Title}
+        className="aspect-video w-full object-cover"
+      />
+    ) : coverImage ? (
+      <img
+        src={coverImage}
+        alt={game.Title}
+        className="aspect-video w-full object-cover"
+      />
+    ) : (
+      <div className="flex aspect-video items-center justify-center bg-zinc-900 text-6xl">
+        🎮
+      </div>
+    )}
+
+    <div className="p-4">
+      <span
+        style={{
+          ...statusStyle,
+          padding: "4px 8px",
+          borderRadius: "6px",
+          fontSize: "12px",
+        }}
+      >
+        {status}
+      </span>
+
+      <h1 className="mt-3 text-3xl font-black leading-tight">
+        {game.Title}
+      </h1>
+
+      <p className="mt-3 line-clamp-5 text-sm leading-6 text-zinc-300">
+        {game.summary || "No description available."}
+      </p>
+
+            <>
+  <div className="mt-4 flex flex-wrap gap-2">
+    {game.genre
+      ? game.genre.split(",").map((genre: string) => (
+          <span
+            key={genre}
+            className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200"
+          >
+            {genre.trim()}
+          </span>
+        ))
+      : null}
+  </div>
+</>
+
+  <div className="mt-2 flex flex-wrap items-center gap-2">
+  <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">
+          {game.Price && !isNaN(Number(game.Price))
+            ? `${game.Price} SAR`
+            : game.Price || "-"}
+        </span>
+
+        {getPlatformLogo(game.Platform) && (
+          <span className="rounded-md bg-zinc-800 px-2 py-1">
+            <img
+              src={getPlatformLogo(game.Platform)!}
+              alt=""
+              className="h-4 w-4 object-contain"
+            />
+          </span>
+        )}
+
+        {getHardwareLogo(game["Hardware (1)"]) && (
+          <span className="rounded-md bg-zinc-800 px-2 py-1">
+            <img
+              src={getHardwareLogo(game["Hardware (1)"])!}
+              alt=""
+              className="h-4 w-4 object-contain"
+            />
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-4 grid grid-cols-2 gap-3">
+  <Stat label="Score" value={game.Score || "-"} rank={scoreRank} />
+
+  <Stat
+    label="Playtime"
+    value={`${formatHours(game["Hours Played"])} Hours`}
+    rank={playtimeRank}
+  />
+
+</div>
+
+  <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4">
+    <h2 className="mb-4 text-xl font-bold">Library Details</h2>
+
+    <div className="space-y-3 text-sm">
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Release Date</span>
+    <span>{formatDisplayDate(game.Release)}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Purchase Date</span>
+    <span>{formatDisplayDate(game["Date of Purchase"])}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Completion / Last Played</span>
+    <span>{formatDisplayDate(game["Completion Last Played"])}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Days to Purchase</span>
+    <span>{daysToPurchase}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Days to Complete</span>
+    <span>{daysToComplete}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Developer</span>
+    <span>{game.developer || "-"}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Publisher</span>
+    <span>{game.publisher || "-"}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Store</span>
+    <span>{game.Store || "-"}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Platform</span>
+    <span>{game.Platform || "-"}</span>
+  </div>
+
+  <div className="flex justify-between">
+    <span className="text-zinc-400">Hardware</span>
+    <span>{game["Hardware (1)"] || "-"}</span>
+  </div>
+</div>
+  </section>
+
+  {game.screenshots ? (
+    <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4">
+      <h2 className="mb-4 text-xl font-bold">Screenshots</h2>
+
+      <div className="flex gap-3 overflow-x-auto pb-2">
+        {game.screenshots
+          .split(",")
+          .map((url: string) => url.trim())
+          .filter(Boolean)
+          .map((url: string) => (
+            <img
+              key={url}
+              src={url}
+              alt={`${game.Title} screenshot`}
+              className="aspect-video w-[260px] shrink-0 rounded-xl border border-zinc-800 object-cover"
+            />
+          ))}
+      </div>
+    </section>
+  ) : null}
+</div>
     </main>
     
   );

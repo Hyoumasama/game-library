@@ -70,6 +70,14 @@ const [status, setStatus] = useState(game.Status || game.status || "");
 
   const [message, setMessage] = useState("");
 
+  function closeModal() {
+  setOpen(false);
+  setQuery("");
+  setResults([]);
+  setSelectedGame(null);
+  setMessage("");
+}
+
   const [options, setOptions] = useState({
     stores: [] as string[],
     platforms: [] as string[],
@@ -181,20 +189,26 @@ steamAppId,
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-white">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6">
+          <div className="h-[95dvh] w-full max-w-4xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 text-white sm:rounded-2xl sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-2xl font-bold">Edit Game</h2>
-              <button onClick={() => setOpen(false)}>✕</button>
+              <button onClick={closeModal}>✕</button>
             </div>
 
             <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    searchGames();
+  }
+}}
                   placeholder="Search IGDB"
-                  className="flex-1 rounded-xl border border-zinc-700 bg-black px-4 py-3"
+                  className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
                 />
 <select
   value={searchSource}

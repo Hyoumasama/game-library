@@ -105,6 +105,7 @@ function getHardwareLogo(hardware?: string) {
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
 const [isLoading, setIsLoading] = useState(true);
 
@@ -227,26 +228,80 @@ const recentlyCompletedGames = useMemo(() => {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <h1 className="mb-2 text-4xl font-bold">
-              🎮 Nawaf&apos;s Game Library
+            Nawaf&apos;s Game Library
             </h1>
 
-            <p className="text-zinc-400">
-              Personal gaming database, playtime tracker, and year-in-review hub.
-            </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 sm:flex">
             <Link
-              href="/assets"
-              className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
-            >
-              Assets
-            </Link>
+  href="/all-games"
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
+>
+  All Games
+</Link>
+  <Link
+    href="/assets"
+    className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
+  >
+    Assets
+  </Link>
 
-            <AuthButton />
+  <AuthButton />
 
-            {isAdmin && <AddGameModal />}
-          </div>
+  {isAdmin && <AddGameModal />}
+</div>
+
+<button
+  onClick={() => setIsMenuOpen(true)}
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-2xl font-bold text-white sm:hidden"
+>
+  ☰
+</button>
+
+{isMenuOpen && (
+  <div className="fixed inset-0 z-50 sm:hidden">
+    <button
+      onClick={() => setIsMenuOpen(false)}
+      className="absolute inset-0 bg-black/70"
+    />
+
+    <div className="absolute right-0 top-0 h-full w-72 border-l border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-lg font-bold">Menu</h2>
+
+        <button
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-bold"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Link
+  href="/all-games"
+  onClick={() => setIsMenuOpen(false)}
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+>
+  All Games
+</Link>
+
+<Link
+  href="/assets"
+  onClick={() => setIsMenuOpen(false)}
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+>
+  Assets
+</Link>
+
+{isAdmin && <AddGameModal />}
+
+<AuthButton />
+      </div>
+    </div>
+  </div>
+)}
         </div>
 
         <section className="mb-8">
@@ -283,12 +338,12 @@ function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-5 md:gap-4 md:overflow-visible lg:grid-cols-7">
         {games.map((game, index) => (
           <Link
             key={`currently-playing-${game.id || game.Title}-${index}`}
             href={`/game/${game.id}`}
-            className="group"
+            className="group w-[150px] shrink-0 md:w-auto"
           >
             <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
               {game.Cover ? (
@@ -359,12 +414,12 @@ function GameSection({
         </Link>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-3">
+      <div className="flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-5 md:overflow-visible lg:grid-cols-7">
         {games.map((game, index) => (
           <Link
             key={`${title}-${game.id || game.Title}-${index}`}
             href={`/game/${game.id}`}
-            className="group w-[150px] shrink-0"
+            className="group w-[150px] shrink-0 md:w-auto"
           >
             <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
               {game.Cover ? (
