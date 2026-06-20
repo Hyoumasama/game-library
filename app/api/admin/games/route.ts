@@ -33,8 +33,16 @@ export async function POST(request: Request) {
     hardware: body.hardware || null,
 
     igdb_id: body.igdbId || null,
-    cover_url: body.coverUrl || null,
-    summary: body.summary || null,
+steam_appid: body.steamAppId || null,
+
+cover_url: body.coverUrl || null,
+hero_url: body.heroUrl || null,
+
+summary: body.summary || null,
+genre: body.genre || null,
+screenshots: body.screenshots || null,
+developer: body.developer || null,
+publisher: body.publisher || null,
   });
 
   if (error) {

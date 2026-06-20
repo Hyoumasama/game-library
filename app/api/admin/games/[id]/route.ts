@@ -17,19 +17,29 @@ export async function PATCH(
   const { data, error } = await supabase
     .from("games")
     .update({
-      title: body.title,
-      slug: slugify(body.title),
-      release: body.release || null,
-      date_of_purchase: body.dateOfPurchase || null,
-      completion_last_played: body.completionLastPlayed || null,
-      status: body.status || null,
-      score: body.score || null,
-      hours_played: body.hoursPlayed || null,
-      price: body.price || null,
-      store: body.store || null,
-      platform: body.platform || null,
-      hardware: body.hardware || null,
-    })
+  title: body.title,
+  slug: slugify(body.title),
+  release: body.release || null,
+  date_of_purchase: body.dateOfPurchase || null,
+  completion_last_played: body.completionLastPlayed || null,
+  status: body.status || null,
+  score: body.score || null,
+  hours_played: body.hoursPlayed || null,
+  price: body.price || null,
+  store: body.store || null,
+  platform: body.platform || null,
+  hardware: body.hardware || null,
+
+  cover_url: body.coverUrl || null,
+  hero_url: body.heroUrl || null,
+  summary: body.summary || null,
+  genre: body.genre || null,
+  screenshots: body.screenshots || null,
+  developer: body.developer || null,
+  publisher: body.publisher || null,
+  igdb_id: body.igdbId || null,
+steam_appid: body.steamAppId || null,
+})
     .eq("id", Number(id))
     .select()
     .single();

@@ -3,13 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type IgdbResult = {
-  igdbId: number;
+type SearchResult = {
+  source?: "igdb" | "steam";
+  igdbId: number | null;
+  steamAppId?: number | null;
   title: string;
   year: number | null;
   releaseDate?: string;
+  
+
   coverUrl: string | null;
+  heroUrl?: string | null;
+
   summary: string;
+
+genre?: string | null;
+screenshots?: string | null;
+developer?: string | null;
+publisher?: string | null;
 };
 
 export default function AddGameModal() {
@@ -17,8 +28,9 @@ export default function AddGameModal() {
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<IgdbResult[]>([]);
-  const [selectedGame, setSelectedGame] = useState<IgdbResult | null>(null);
+  const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
+const [results, setResults] = useState<SearchResult[]>([]);
+const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
 
   const [title, setTitle] = useState("");
   const [release, setRelease] = useState("");
@@ -29,6 +41,15 @@ export default function AddGameModal() {
   const [store, setStore] = useState("");
   const [platform, setPlatform] = useState("");
   const [hardware, setHardware] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
+const [heroUrl, setHeroUrl] = useState("");
+const [summary, setSummary] = useState("");
+const [genre, setGenre] = useState("");
+const [developer, setDeveloper] = useState("");
+const [publisher, setPublisher] = useState("");
+const [screenshots, setScreenshots] = useState("");
+const [igdbId, setIgdbId] = useState<number | null>(null);
+const [steamAppId, setSteamAppId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
   const [dateOfPurchase, setDateOfPurchase] = useState(
@@ -48,27 +69,44 @@ useEffect(() => {
     .then((data) => setOptions(data));
 }, []);
 
-  async function searchIgdb() {
-    if (!query.trim()) return;
+  async function searchGames() {
+  if (!query.trim()) return;
 
-    setMessage("Searching...");
+  setMessage("Searching...");
 
-    const response = await fetch(
-      `/api/admin/igdb-search?query=${encodeURIComponent(query)}`
-    );
+  const endpoint =
+    searchSource === "steam"
+      ? "/api/admin/steam-search"
+      : "/api/admin/igdb-search";
 
-    const data = await response.json();
+  const response = await fetch(
+    `${endpoint}?query=${encodeURIComponent(query)}`
+  );
 
-    setResults(data.results || []);
-    setMessage("");
-  }
+  const data = await response.json();
 
-  function selectGame(game: IgdbResult) {
-    setSelectedGame(game);
-    setTitle(game.title);
-    setRelease(game.releaseDate || "");
-    setResults([]);
-  }
+  setResults(data.results || []);
+  setMessage("");
+}
+
+  function selectGame(game: SearchResult) {
+  setSelectedGame(game);
+  setTitle(game.title);
+  setRelease(game.releaseDate || "");
+console.log("Selected Steam game:", game);
+
+  setCoverUrl(game.coverUrl || "");
+  setHeroUrl(game.heroUrl || "");
+  setSummary(game.summary || "");
+  setGenre(game.genre || "");
+  setDeveloper(game.developer || "");
+  setPublisher(game.publisher || "");
+  setScreenshots(game.screenshots || "");
+  setIgdbId(game.igdbId || null);
+setSteamAppId(game.steamAppId || null);
+
+  setResults([]);
+}
 
   async function addGame(event: React.FormEvent) {
     event.preventDefault();
@@ -80,21 +118,29 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title,
-        release,
-        dateOfPurchase,
-completionLastPlayed,
-        status,
-        score,
-        hoursPlayed,
-        price,
-        store,
-        platform,
-        hardware,
-        igdbId: selectedGame?.igdbId || null,
-        coverUrl: selectedGame?.coverUrl || null,
-        summary: selectedGame?.summary || null,
-      }),
+  title,
+  release,
+  dateOfPurchase,
+  completionLastPlayed,
+  status,
+  score,
+  hoursPlayed,
+  price,
+  store,
+  platform,
+  hardware,
+
+  igdbId,
+  steamAppId,
+
+coverUrl,
+heroUrl,
+summary,
+genre,
+developer,
+publisher,
+screenshots,
+}),
     });
 
     if (!response.ok) {
@@ -132,27 +178,36 @@ completionLastPlayed,
 
             <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <div className="flex gap-3">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search IGDB, example: Batman"
-                  className="flex-1 rounded-xl border border-zinc-700 bg-black px-4 py-3"
-                />
+  <select
+    value={searchSource}
+    onChange={(e) => setSearchSource(e.target.value as "igdb" | "steam")}
+    className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  >
+    <option value="igdb">IGDB</option>
+    <option value="steam">Steam</option>
+  </select>
 
-                <button
-                  onClick={searchIgdb}
-                  type="button"
-                  className="rounded-xl bg-white px-5 py-3 font-bold text-black"
-                >
-                  Search
-                </button>
-              </div>
+  <input
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+    placeholder={`Search ${searchSource.toUpperCase()}, example: Batman`}
+    className="flex-1 rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  />
+
+  <button
+    onClick={searchGames}
+    type="button"
+    className="rounded-xl bg-white px-5 py-3 font-bold text-black"
+  >
+    Search
+  </button>
+</div>
 
               {results.length > 0 && (
                 <div className="mt-5 grid grid-cols-1 gap-3">
                   {results.map((game) => (
                     <button
-                      key={game.igdbId}
+                      key={`${game.source}-${game.igdbId || game.steamAppId || game.title}`}
                       onClick={() => selectGame(game)}
                       type="button"
                       className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-black p-3 text-left transition hover:border-zinc-500"
@@ -172,7 +227,10 @@ completionLastPlayed,
                       <div>
                         <p className="font-bold">{game.title}</p>
                         <p className="text-sm text-zinc-400">
-                          {game.year || "Unknown year"} · IGDB ID: {game.igdbId}
+                          {game.year || "Unknown year"} ·{" "}
+{game.source === "steam"
+  ? `Steam ID: ${game.steamAppId}`
+  : `IGDB ID: ${game.igdbId}`}
                         </p>
                         <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
                           {game.summary || "No summary"}
@@ -256,7 +314,55 @@ completionLastPlayed,
     <option key={item} value={item} />
   ))}
 </datalist>
+<textarea
+  value={summary}
+  onChange={(e) => setSummary(e.target.value)}
+  placeholder="Summary"
+  rows={5}
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
+/>
 
+<input
+  value={coverUrl}
+  onChange={(e) => setCoverUrl(e.target.value)}
+  placeholder="Cover URL"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
+/>
+
+<input
+  value={heroUrl}
+  onChange={(e) => setHeroUrl(e.target.value)}
+  placeholder="Hero URL"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
+/>
+
+<input
+  value={genre}
+  onChange={(e) => setGenre(e.target.value)}
+  placeholder="Genre"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
+
+<input
+  value={developer}
+  onChange={(e) => setDeveloper(e.target.value)}
+  placeholder="Developer"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
+
+<input
+  value={publisher}
+  onChange={(e) => setPublisher(e.target.value)}
+  placeholder="Publisher"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
+
+<input
+  value={screenshots}
+  onChange={(e) => setScreenshots(e.target.value)}
+  placeholder="Screenshots URLs separated by comma"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
+/>
               <button type="submit" className="rounded-xl bg-white px-4 py-3 font-bold text-black md:col-span-2">
                 Save Game
               </button>

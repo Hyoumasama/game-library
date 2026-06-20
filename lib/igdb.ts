@@ -37,13 +37,20 @@ function cleanIgdbSearchTitle(title: string) {
     .replace(/:/g, "")
 
     // Editions
-    .replace(/\bGOTY\b/gi, "")
-    .replace(/\bEdition\b/gi, "")
-    .replace(/\bComplete\b/gi, "")
-    .replace(/\bDefinitive\b/gi, "")
-    .replace(/\bUltimate\b/gi, "")
-    .replace(/\bDeluxe\b/gi, "")
-    .replace(/\bGold\b/gi, "")
+.replace(/\bGOTY\b/gi, "")
+.replace(/\bEdition\b/gi, "")
+.replace(/\bComplete\b/gi, "")
+.replace(/\bDefinitive\b/gi, "")
+.replace(/\bUltimate\b/gi, "")
+.replace(/\bDeluxe\b/gi, "")
+.replace(/\bGold\b/gi, "")
+.replace(/\bSpecial\b/gi, "")
+.replace(/\bSpecial Edition\b/gi, "")
+.replace(/\bSpecial Edition Steelbook\b/gi, "")
+.replace(/\bDigital Deluxe\b/gi, "")
+.replace(/\bDigital Deluxe Edition\b/gi, "")
+.replace(/\bPremium\b/gi, "")
+.replace(/\bPremium Edition\b/gi, "")
 
     // DLC / Passes
     .replace(/\bExpansion Pass\b/gi, "")
@@ -57,6 +64,14 @@ function cleanIgdbSearchTitle(title: string) {
     .replace(/\bGOG\b/gi, "")
     .replace(/\bPSN\b/gi, "")
     .replace(/\bXbox\b/gi, "")
+
+    // Add-ons / cosmetics
+.replace(/\bSkin\b/gi, "")
+.replace(/\bCostume\b/gi, "")
+.replace(/\bPack\b/gi, "")
+.replace(/\bAdd-on\b/gi, "")
+.replace(/\bAddon\b/gi, "")
+.replace(/\bMovie\b/gi, "")
 
     .replace(/\s+/g, " ")
     .trim();
@@ -151,30 +166,52 @@ limit 10;
     .replace(/\s+/g, " ")
     .trim();
 }
+const blockedResultWords = [
+  "dlc",
+  "demo",
+  "bundle",
+  "pack",
+  "collection",
+  "skin",
+  "costume",
+  "add-on",
+  "addon",
+  "season pass",
+  "expansion pass",
+  "soundtrack",
+  "blood and wine",
+  "hearts of stone",
+  "songs of the past",
+];
 
 const safeMatches = data.filter((game) => {
   const name = game.name?.toLowerCase() || "";
 
-  return (
-    !name.includes("+") &&
-    !name.includes("bundle") &&
-    !name.includes("pack") &&
-    !name.includes("collection") &&
-    !name.includes("blood and wine") &&
-    !name.includes("hearts of stone") &&
-    !name.includes("songs of the past")
-  );
+  return blockedResultWords.every((word) => !name.includes(word));
 });
+
+const baseGames = safeMatches.filter((game) => game.category === 0);
+
+const exactBaseMatch = baseGames.find(
+  (game) => normalizeTitle(game.name) === normalizeTitle(searchTitle)
+);
+
+if (releaseYear) {
+  const yearBaseMatch = baseGames.find(
+    (game) => getIgdbYear(game) === releaseYear
+  );
+
+  if (yearBaseMatch) return yearBaseMatch;
+}
 
 const exactSafeMatch = safeMatches.find(
   (game) => normalizeTitle(game.name) === normalizeTitle(searchTitle)
 );
 
-const baseGame = safeMatches.find((game) => game.category === 0);
+const baseGame = baseGames[0];
 
-return exactSafeMatch || baseGame || safeMatches[0] || nameMatches[0] || data?.[0] || null;
+return exactBaseMatch || baseGame || exactSafeMatch || safeMatches[0] || null;
 }
-
 export function getIgdbCoverUrl(imageId?: string) {
   if (!imageId) return null;
 

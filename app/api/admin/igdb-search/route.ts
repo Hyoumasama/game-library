@@ -36,8 +36,18 @@ export async function GET(request: Request) {
     },
     body: `
       search "${query}";
-      fields name, first_release_date, cover.image_id, summary;
-      limit 10;
+      fields
+  name,
+  first_release_date,
+  cover.image_id,
+  summary,
+genres.name,
+artworks.image_id,
+screenshots.image_id,
+  involved_companies.company.name,
+  involved_companies.developer,
+  involved_companies.publisher;
+      limit 15;
     `,
     cache: "no-store",
   });
@@ -55,7 +65,35 @@ releaseDate: game.first_release_date
   ? new Date(game.first_release_date * 1000).toISOString().slice(0, 10)
   : "",
     coverUrl: getIgdbCoverUrl(game.cover?.image_id),
-    summary: game.summary || "",
+
+heroUrl:
+  game.artworks?.[0]?.image_id
+    ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.artworks[0].image_id}.jpg`
+    : game.screenshots?.[0]?.image_id
+    ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
+    : null,
+
+summary: game.summary || "",
+
+genre:
+  game.genres?.map((g: any) => g.name).join(", ") || null,
+
+screenshots:
+  game.screenshots
+    ?.slice(0, 8)
+    .map(
+      (s: any) =>
+        `https://images.igdb.com/igdb/image/upload/t_1080p/${s.image_id}.jpg`
+    )
+    .join(",") || null,
+
+developer:
+  game.involved_companies?.find((x: any) => x.developer)?.company?.name ||
+  null,
+
+publisher:
+  game.involved_companies?.find((x: any) => x.publisher)?.company?.name ||
+  null,
   }));
 
   return Response.json({ results });

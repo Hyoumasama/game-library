@@ -80,45 +80,61 @@ function getPlatformLogo(platform?: string) {
   return null;
 }
 
+function getHardwareLogo(hardware?: string) {
+  const value = hardware?.toLowerCase().replace(/\s+/g, "") || "";
+
+  if (value === "pc") return "/hardware/pc.png";
+  if (value.includes("steamdeck")) return "/hardware/steamdeck.png";
+  if (value.includes("xbox")) return "/hardware/xbox.png";
+
+  if (value.includes("playstation4") || value.includes("ps4"))
+    return "/hardware/playstation4.png";
+
+  if (value.includes("playstation3") || value.includes("ps3"))
+    return "/hardware/playstation3.png";
+
+  if (value.includes("playstation2") || value.includes("ps2"))
+    return "/hardware/playstation2.png";
+
+  if (value.includes("playstation") || value.includes("ps5"))
+    return "/hardware/playstation.png";
+
+  return null;
+}
+
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [storeFilter, setStoreFilter] = useState("All");
-  const [yearFilter, setYearFilter] = useState("All");
-  const [completionYearFilter, setCompletionYearFilter] = useState("All");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [coverUrls, setCoverUrls] = useState<Record<string, string | null>>({});
+const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
   async function loadGames() {
-    const response = await fetch("/api/games");
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/games");
+      const data = await response.json();
 
-    const formattedGames = data.map((game: any) => ({
-      ...game,
-      Title: game.title,
-      Store: game.store,
-      Platform: game.platform,
-      Hardware: game.hardware,
-      Genre: game.genre,
-      Score: game.score,
-      Status: game.status,
-      Price: game.price,
-      "Hours Played": game.hours_played,
-      Release: game.release,
-      "Date of Purchase": game.date_of_purchase,
-      "Completion Last Played": game.completion_last_played,
-      "Completion / Last Played": game.completion_last_played,
-      Cover: game.cover_url,
-      Hero: game.hero_url,
-      Summary: game.summary,
-      Developer: game.developer,
-      Publisher: game.publisher,
-    }));
+      const formattedGames = data.map((game: any) => ({
+        ...game,
+        Title: game.title,
+        Store: game.store,
+        Platform: game.platform,
+        Hardware: game.hardware,
+        Genre: game.genre,
+        Score: game.score,
+        Status: game.status,
+        Price: game.price,
+        "Hours Played": game.hours_played,
+        Release: game.release,
+        "Date of Purchase": game.date_of_purchase,
+        "Completion Last Played": game.completion_last_played,
+        "Completion / Last Played": game.completion_last_played,
+        Cover: game.cover_url,
+              }));
 
-    setGames(formattedGames);
+      setGames(formattedGames);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   loadGames();
@@ -159,147 +175,53 @@ useEffect(() => {
     };
   }, [games]);
 
-  const stores = useMemo(() => {
-    const uniqueStores = new Set<string>();
-
-    games.forEach((game) => {
-      const store = game.Store?.trim();
-      if (store) uniqueStores.add(store);
-    });
-
-    return Array.from(uniqueStores).sort();
-  }, [games]);
-
-  const years = useMemo(() => {
-  const uniqueYears = new Set<string>();
-
-  games.forEach((game) => {
-    const year = getYearFromDate(game.Release || "");
-    if (year) uniqueYears.add(year);
-  });
-
-  return Array.from(uniqueYears).sort((a, b) => Number(b) - Number(a));
-}, [games]);
-
-const completionYears = useMemo(() => {
-  const uniqueYears = new Set<string>();
-
-  games.forEach((game) => {
-    const year = getYearFromDate(getCompletionDate(game));
-    if (year) uniqueYears.add(year);
-  });
-
-  return Array.from(uniqueYears).sort((a, b) => Number(b) - Number(a));
-}, [games]);
-
-  const filteredGames = useMemo(() => {
-    return games
-      .filter((game) => {
-        const status = game.Status?.trim();
-        const title = game.Title || "";
-        const releaseYear = getYearFromDate(game.Release || "");
-const completionYear = getYearFromDate(getCompletionDate(game));
-
-        const matchesSearch = title
-          .toLowerCase()
-          .includes(search.toLowerCase());
-
-        const matchesStatus =
-          statusFilter === "All" || status === statusFilter;
-
-        const matchesStore =
-          storeFilter === "All" ||
-          game.Store?.trim().toLowerCase() === storeFilter.toLowerCase();
-
-        const matchesYear =
-  yearFilter === "All" || releaseYear === yearFilter;
-
-const matchesCompletionYear =
-  completionYearFilter === "All" ||
-  completionYear === completionYearFilter;
-
-                return (
-          matchesSearch &&
-          matchesStatus &&
-          matchesStore &&
-          matchesYear &&
-          matchesCompletionYear
-        );
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a["Date of Purchase"] || "").getTime();
-        const dateB = new Date(b["Date of Purchase"] || "").getTime();
-
-        return dateB - dateA;
-      });
-  }, [games, search, statusFilter, storeFilter, yearFilter, completionYearFilter]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter]);
-
-  const gamesPerPage = 20;
-  const totalPages = Math.max(1, Math.ceil(filteredGames.length / gamesPerPage));
-
   const currentlyPlayingGames = useMemo(() => {
-    return games
-      .filter((game) => game.Status?.trim() === "Playing")
-      .sort((a, b) => Number(b["Hours Played"] || 0) - Number(a["Hours Played"] || 0))
-      .slice(0, 4);
-  }, [games]);
+  return games
+    .filter(
+      (game) =>
+        game.Status?.trim().toLowerCase() === "playing" ||
+        game.Status?.trim().toLowerCase() === "currently playing" ||
+        game.status?.trim().toLowerCase() === "playing" ||
+        game.status?.trim().toLowerCase() === "currently playing"
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a["Date of Purchase"] || a.date_of_purchase || "").getTime();
+      const dateB = new Date(b["Date of Purchase"] || b.date_of_purchase || "").getTime();
 
-  const visibleGames = filteredGames.slice(
-    (currentPage - 1) * gamesPerPage,
-    currentPage * gamesPerPage
+      return dateB - dateA;
+    });
+}, [games]);
+
+  const recentlyAddedGames = useMemo(() => {
+  return games
+    .filter((game) => game["Date of Purchase"])
+    .sort((a, b) => {
+      const dateA = new Date(a["Date of Purchase"] || "").getTime();
+      const dateB = new Date(b["Date of Purchase"] || "").getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 7);
+}, [games]);
+
+const recentlyCompletedGames = useMemo(() => {
+  return games
+    .filter((game) => game.Status?.trim() === "Completed")
+    .filter((game) => getCompletionDate(game))
+    .sort((a, b) => {
+      const dateA = new Date(getCompletionDate(a)).getTime();
+      const dateB = new Date(getCompletionDate(b)).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 7);
+}, [games]);
+
+  if (isLoading) {
+  return (
+    <main className="min-h-screen bg-black p-8 text-white">
+      Loading Game Library...
+    </main>
   );
-
-  useEffect(() => {
-    async function loadCovers() {
-      const gamesNeedingCovers = [...currentlyPlayingGames, ...visibleGames];
-
-      const missingGames = gamesNeedingCovers.filter(
-        (game) => game.Title && coverUrls[game.Title] === undefined
-      );
-
-      if (missingGames.length === 0) return;
-
-      const results = await Promise.all(
-        missingGames.map(async (game) => {
-          try {
-            if (game.Cover) {
-              return [game.Title, game.Cover] as const;
-            }
-
-            const response = await fetch(
-              `/api/igdb-cover?title=${encodeURIComponent(
-                game.Title
-              )}&year=${encodeURIComponent(getReleaseYear(game))}`
-            );
-
-            const data = await response.json();
-
-            return [game.Title, data.coverUrl || null] as const;
-          } catch (error) {
-            console.error("COVER ERROR:", game.Title, error);
-            return [game.Title, null] as const;
-          }
-        })
-      );
-
-      setCoverUrls((current) => ({
-        ...current,
-        ...Object.fromEntries(results),
-      }));
-    }
-
-    if (visibleGames.length > 0 || currentlyPlayingGames.length > 0) {
-      loadCovers();
-    }
-  }, [
-    currentlyPlayingGames.map((game) => game.Title).join("|"),
-    visibleGames.map((game) => game.Title).join("|"),
-  ]);
-
+}
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       <div className="mx-auto max-w-6xl">
@@ -329,238 +251,164 @@ const matchesCompletionYear =
         </div>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-bold">Currently Playing</h2>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {currentlyPlayingGames.map((game, index) => (
-              <Link
-                key={`${game.Title}-${index}`}
-                href={`/game/${slugify(game.Title)}`}
-                className="group flex overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 transition hover:-translate-y-1 hover:border-zinc-500"
-              >
-                <div
-                  style={{
-                    width: "130px",
-                    minWidth: "130px",
-                    height: "180px",
-                  }}
-                  className="overflow-hidden bg-zinc-800"
-                >
-                  {coverUrls[game.Title] ? (
-                    <img
-                      src={coverUrls[game.Title] || ""}
-                      alt={game.Title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl">
-                      🎮
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex min-w-0 flex-1 flex-col justify-center p-5">
-                  <h3 className="line-clamp-2 text-xl font-bold leading-6">
-                    {game.Title}
-                  </h3>
-
-                  <div className="mt-3 flex items-center gap-2 text-sm text-zinc-400">
-                    {getPlatformLogo(game.Platform) && (
-                      <img
-                        src={getPlatformLogo(game.Platform)!}
-                        alt={game.Platform || ""}
-                        style={{
-                          width: "24px",
-                          height: "24px",
-                          objectFit: "contain",
-                        }}
-                      />
-                    )}
-
-                    <span>{game.Platform || "-"}</span>
-                  </div>
-
-                  <p className="mt-3 text-sm text-zinc-400">
-                    Hours: {formatHours(game["Hours Played"])}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <CurrentlyPlayingGrid games={currentlyPlayingGames} />
         </section>
 
-        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-6">
-          <StatCard label="Total Games" value={dashboard.total} />
-          <StatCard label="Completed" value={dashboard.completed} />
-          <StatCard label="Playing" value={dashboard.playing} />
-          <StatCard label="Unplayed" value={dashboard.unplayed} />
-          <StatCard label="Dropped" value={dashboard.dropped} />
-          <StatCard label="Wishlist" value={dashboard.wishlist} />
-        </div>
+      
+<GameSection
+  title="Recently Added"
+  games={recentlyAddedGames}
+  href="/all-games?sort=recently-added"
+/>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <StatCard
-            label="Total Hours Played"
-            value={Math.round(dashboard.totalHours).toLocaleString()}
-          />
-
-          <StatCard label="Search Results" value={filteredGames.length} />
-        </div>
-
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-5">
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
-          >
-            <option value="All">All Status</option>
-            <option value="Playing">Playing</option>
-            <option value="Completed">Completed</option>
-            <option value="Unplayed">Unplayed</option>
-            <option value="Dropped">Dropped</option>
-            <option value="Wishlist">Wishlist</option>
-          </select>
-
-          <select
-            value={storeFilter}
-            onChange={(event) => setStoreFilter(event.target.value)}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
-          >
-            <option value="All">All Stores</option>
-            {stores.map((store) => (
-              <option key={store} value={store}>
-                {store}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={yearFilter}
-            onChange={(event) => setYearFilter(event.target.value)}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
-          >
-            <option value="All">Release</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-
-          <select
-  value={completionYearFilter}
-  onChange={(event) => setCompletionYearFilter(event.target.value)}
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
->
-  <option value="All">Completion</option>
-  {completionYears.map((year) => (
-    <option key={year} value={year}>
-      {year}
-    </option>
-  ))}
-</select>
-
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search games..."
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
-          />
-        </div>
-
-        <section>
-          <h2 className="mb-4 text-2xl font-bold">
-            {statusFilter === "All" ? "All Games" : statusFilter}
-          </h2>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {visibleGames.map((game, index) => (
-              <Link
-                key={`${game.Title}-${index}`}
-                href={`/game/${slugify(game.Title)}`}
-                className="group flex overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 transition hover:-translate-y-1 hover:border-zinc-500"
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    minWidth: "80px",
-                    height: "112px",
-                  }}
-                  className="overflow-hidden bg-zinc-800"
-                >
-                  {coverUrls[game.Title] ? (
-                    <img
-                      src={coverUrls[game.Title] || ""}
-                      alt={game.Title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl">
-                      🎮
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex min-w-0 flex-1 flex-col justify-center p-4">
-                  <h3 className="line-clamp-2 text-sm font-bold leading-5">
-                    {game.Title}
-                  </h3>
-
-                  <div className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
-                    {getPlatformLogo(game.Platform) && (
-                      <img
-                        src={getPlatformLogo(game.Platform)!}
-                        alt={game.Platform || ""}
-                        style={{
-                          width: "18px",
-                          height: "18px",
-                          maxWidth: "18px",
-                          maxHeight: "18px",
-                          objectFit: "contain",
-                          display: "inline-block",
-                        }}
-                      />
-                    )}
-
-                    <span>{game.Platform || "-"}</span>
-                  </div>
-
-                  <p className="mt-1 text-sm text-zinc-500">
-                    Score: {game.Score || "-"} | Hours:{" "}
-                    {formatHours(game["Hours Played"])}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 disabled:opacity-30"
-            >
-              ← Prev
-            </button>
-
-            <span className="text-zinc-400">
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 disabled:opacity-30"
-            >
-              Next →
-            </button>
-          </div>
-        </section>
+<GameSection
+  title="Recently Completed"
+  games={recentlyCompletedGames}
+  href="/all-games?status=Completed&sort=completion-newest"
+/>
       </div>
     </main>
   );
 }
+function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
+  return (
+    <section className="mb-12">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Currently Playing</h2>
 
+        <Link
+          href="/all-games?status=Playing"
+          className="text-sm font-bold text-zinc-400 hover:text-white"
+        >
+          All Games →
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {games.map((game, index) => (
+          <Link
+            key={`currently-playing-${game.id || game.Title}-${index}`}
+            href={`/game/${game.id}`}
+            className="group"
+          >
+            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
+              {game.Cover ? (
+                <img
+                  src={game.Cover}
+                  alt={game.Title}
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-4xl">
+                  🎮
+                </div>
+              )}
+            </div>
+
+            <h3 className="mt-3 line-clamp-2 text-sm font-bold leading-5">
+              {game.Title}
+            </h3>
+
+            <div className="mt-2 flex items-center gap-2">
+              {getPlatformLogo(game.Platform) && (
+                <img
+                  src={getPlatformLogo(game.Platform)!}
+                  alt=""
+                  style={{ width: "20px", height: "20px", objectFit: "contain" }}
+                />
+              )}
+
+              {getHardwareLogo(game.Hardware) && (
+                <img
+                  src={getHardwareLogo(game.Hardware)!}
+                  alt=""
+                  style={{ width: "20px", height: "20px", objectFit: "contain" }}
+                />
+              )}
+            </div>
+
+            {game.Price && (
+              <p className="mt-2 text-sm font-bold text-zinc-400">
+                {game.Price}
+              </p>
+            )}
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+function GameSection({
+  title,
+  games,
+  href,
+}: {
+  title: string;
+  games: Game[];
+  href: string;
+}) {
+  return (
+    <section className="mb-12">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-bold">{title}</h2>
+
+        <Link
+  href={href}
+          className="text-sm font-bold text-zinc-400 hover:text-white"
+        >
+          All Games →
+        </Link>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto pb-3">
+        {games.map((game, index) => (
+          <Link
+            key={`${title}-${game.id || game.Title}-${index}`}
+            href={`/game/${game.id}`}
+            className="group w-[150px] shrink-0"
+          >
+            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
+              {game.Cover ? (
+                <img
+                  src={game.Cover}
+                  alt={game.Title}
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-4xl">
+                  🎮
+                </div>
+              )}
+            </div>
+
+            <h3 className="mt-3 line-clamp-2 text-sm font-bold leading-5">
+              {game.Title}
+            </h3>
+
+            <div className="mt-2 flex items-center gap-2">
+  {getPlatformLogo(game.Platform) && (
+    <img
+      src={getPlatformLogo(game.Platform)!}
+      alt=""
+      style={{ width: "20px", height: "20px", objectFit: "contain" }}
+    />
+  )}
+
+  {getHardwareLogo(game.Hardware) && (
+    <img
+      src={getHardwareLogo(game.Hardware)!}
+      alt=""
+      style={{ width: "20px", height: "20px", objectFit: "contain" }}
+    />
+  )}
+</div>
+
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">

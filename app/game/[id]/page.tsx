@@ -1,8 +1,21 @@
 import GameAdminActions from "@/components/games/GameAdminActions";
-import { getGameBySlug, getGames } from "@/lib/games";
+import { getGameById, getGames } from "@/lib/games";
 import Link from "next/link";
-import { getIgdbCoverUrl, getIgdbGame, getIgdbImageUrl } from "@/lib/igdb";
-import { getRawgGame } from "@/lib/rawg";
+
+function formatDisplayDate(value: string | null | undefined) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const formatted = date.toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+return formatted.replace(/ (\d{4})$/, ", $1");
+}
 
 export default async function GamePage({
   params,
@@ -10,19 +23,18 @@ export default async function GamePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const game = await getGameBySlug(id);
+ const game = await getGameById(Number(id));
+console.log("GAME DATA:");
+console.log(game);
+const games = await getGames();
 
-  const games = await getGames();
-
-  if (!game) {
+if (!game) {
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       Game not found
     </main>
   );
 }
-
-const rawgGame = await getRawgGame(game.Title);
 
   function formatHours(hours: string) {
   const value = Number(hours || 0);
@@ -130,18 +142,10 @@ function getHardwareLogo(hardware: string) {
 
   return null;
 }
+const coverImage = game.cover_url;
+const heroImage = game.hero_url;
 
-  let igdbGame = null;
-
-  try {
-    igdbGame = await getIgdbGame(game.Title, getYear(game.Release));
-  } catch (error) {
-    console.error(error);
-  }
-
-  const igdbCover = getIgdbCoverUrl(igdbGame?.cover?.image_id);
-  const igdbHero = getIgdbImageUrl(igdbGame?.screenshots?.[0]?.image_id);
-const releaseYear = getYear(game.Release);
+ const releaseYear = getYear(game.Release);
 
 const scoreRank = getRankText({
   games,
@@ -196,9 +200,9 @@ const daysToComplete = getDaysBetween(
   return (
     <main className="min-h-screen bg-[#0b0f14] text-white">
       <div className="pointer-events-none relative h-80 overflow-hidden">
-        {igdbHero && (
-          <img
-            src={igdbHero}
+        {heroImage && (
+  <img
+    src={heroImage}
             alt=""
             className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
           />
@@ -208,28 +212,28 @@ const daysToComplete = getDaysBetween(
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12 -mt-56">
-        <div className="flex items-center justify-between">
-  
-  <div className="flex items-center justify-between">
-  <Link href="/" className="text-sm text-zinc-300 hover:text-white">
+       <div className="mb-6 flex items-center justify-between">
+  <Link
+    href="/"
+    className="text-white hover:text-zinc-300"
+  >
     ← Back to Library
   </Link>
 
   <GameAdminActions game={game} />
 </div>
-</div>
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
-            {igdbCover ? (
+            {coverImage ? (
               <img
-                src={igdbCover}
+                src={coverImage}
                 alt={game.Title}
                 className="aspect-[2/3] w-full object-cover"
               />
-            ) : rawgGame?.background_image ? (
+            ) : coverImage?.background_image ? (
               <img
-                src={rawgGame.background_image}
+                src={coverImage.background_image}
                 alt={game.Title}
                 className="aspect-[2/3] w-full object-cover"
               />
@@ -260,41 +264,37 @@ const daysToComplete = getDaysBetween(
             </h1>
 
             <p className="mb-4 max-w-3xl text-lg leading-8 text-zinc-300">
-              {igdbGame?.summary || "No description available."}
+              {game.summary || "No description available."}
             </p>
 
-            {igdbGame?.genres?.length ? (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {igdbGame.genres.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="rounded-md border border-zinc-600 bg-zinc-900 px-3 py-1 text-sm text-zinc-200"
-                  >
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+           {game.genre ? (
+  <div className="mb-4 flex flex-wrap gap-2">
+    {game.genre.split(",").map((genre: string) => (
+      <span
+        key={genre}
+        className="rounded-md border border-zinc-600 bg-zinc-900 px-3 py-1 text-sm text-zinc-200"
+      >
+        {genre.trim()}
+      </span>
+    ))}
+  </div>
+) : null}
 
-            {igdbGame?.involved_companies?.length ? (
+            {game.developer || game.publisher ? (
   <div className="mb-4 flex flex-wrap gap-x-8 gap-y-2 text-zinc-400">
     <p>
-      Developers:{" "}
+      Developers:
       <span className="text-zinc-200">
-        {igdbGame.involved_companies
-          .filter((item) => item.developer)
-          .map((item) => item.company.name)
-          .join(", ") || "-"}
+        {" "}
+        {game.developer || "-"}
       </span>
     </p>
 
     <p>
-      Publishers:{" "}
+      Publishers:
       <span className="text-zinc-200">
-        {igdbGame.involved_companies
-          .filter((item) => item.publisher)
-          .map((item) => item.company.name)
-          .join(", ") || "-"}
+        {" "}
+        {game.publisher || "-"}
       </span>
     </p>
   </div>
@@ -328,11 +328,11 @@ const daysToComplete = getDaysBetween(
           <h2 className="mb-5 text-2xl font-bold">Library Details</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-  <Info label="Release Date" value={game.Release} />
-  <Info label="Purchase Date" value={game["Date of Purchase"]} />
+  <Info label="Release Date" value={formatDisplayDate(game.Release)} />
+  <Info label="Purchase Date" value={formatDisplayDate(game["Date of Purchase"])} />
   <Info
     label="Completion / Last Played"
-    value={game["Completion Last Played"]}
+    value={formatDisplayDate(game["Completion Last Played"])}
   />
 
   <Info label="Status" value={game.Status} />
@@ -400,27 +400,23 @@ const daysToComplete = getDaysBetween(
   </div>
 </div>
         </section>
-        {igdbGame?.screenshots?.length ? (
+        {game.screenshots ? (
   <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6">
     <h2 className="mb-5 text-2xl font-bold">Screenshots</h2>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      {igdbGame.screenshots.slice(0, 6).map((shot) => {
-        const imageUrl = getIgdbImageUrl(shot.image_id);
-
-        return (
-          <div
-            key={shot.image_id}
-            className="overflow-hidden rounded-xl border border-zinc-800 bg-black"
-          >
-            <img
-              src={imageUrl}
-              alt={`${game.Title} screenshot`}
-              className="aspect-video w-full object-cover transition duration-300 hover:scale-105"
-            />
-          </div>
-        );
-      })}
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {game.screenshots
+        .split(",")
+        .map((url: string) => url.trim())
+        .filter(Boolean)
+        .map((url: string) => (
+          <img
+            key={url}
+            src={url}
+            alt={`${game.Title} screenshot`}
+            className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
+          />
+        ))}
     </div>
   </section>
 ) : null}
