@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import AuthButton from "@/components/admin/AuthButton";
 
 type Game = {
+  id: number;
   Title: string;
   Score?: string | number;
   Status?: string;
@@ -24,7 +25,7 @@ type Game = {
   Summary?: string;
   Developer?: string;
   Publisher?: string;
-};
+  };
 
 function slugify(title?: string) {
   return (title || "")
