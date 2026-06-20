@@ -2,7 +2,7 @@
 
 import AddGameModal from "@/components/games/AddGameModal";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import AuthButton from "@/components/admin/AuthButton";
 
@@ -81,7 +81,7 @@ function getPlatformLogo(platform?: string) {
 
   return null;
 }
-export default function Home() {
+function AllGamesContent() {
   const searchParams = useSearchParams();
 
   const [isAdmin, setIsAdmin] = useState(false);
@@ -563,5 +563,12 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
       <p className="text-sm text-zinc-400">{label}</p>
       <p className="mt-2 text-3xl font-bold">{value}</p>
     </div>
+  );
+}
+export default function AllGamesPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-[#0b0f14] text-white" />}>
+      <AllGamesContent />
+    </Suspense>
   );
 }

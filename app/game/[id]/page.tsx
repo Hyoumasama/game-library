@@ -226,22 +226,16 @@ const daysToComplete = getDaysBetween(
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
             {coverImage ? (
-              <img
-                src={coverImage}
-                alt={game.Title}
-                className="aspect-[2/3] w-full object-cover"
-              />
-            ) : coverImage?.background_image ? (
-              <img
-                src={coverImage.background_image}
-                alt={game.Title}
-                className="aspect-[2/3] w-full object-cover"
-              />
-            ) : (
-              <div className="flex aspect-[2/3] items-center justify-center text-7xl">
-                🎮
-              </div>
-            )}
+  <img
+    src={coverImage}
+    alt={game.Title}
+    className="aspect-[2/3] w-full object-cover"
+  />
+) : (
+  <div className="flex aspect-[2/3] items-center justify-center text-7xl">
+    🎮
+  </div>
+)}
           </div>
 
           <div>

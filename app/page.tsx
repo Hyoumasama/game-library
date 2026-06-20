@@ -181,13 +181,11 @@ useEffect(() => {
     .filter(
       (game) =>
         game.Status?.trim().toLowerCase() === "playing" ||
-        game.Status?.trim().toLowerCase() === "currently playing" ||
-        game.status?.trim().toLowerCase() === "playing" ||
-        game.status?.trim().toLowerCase() === "currently playing"
+game.Status?.trim().toLowerCase() === "currently playing"
     )
     .sort((a, b) => {
-      const dateA = new Date(a["Date of Purchase"] || a.date_of_purchase || "").getTime();
-      const dateB = new Date(b["Date of Purchase"] || b.date_of_purchase || "").getTime();
+      const dateA = new Date(a["Date of Purchase"] || "").getTime();
+const dateB = new Date(b["Date of Purchase"] || "").getTime();
 
       return dateB - dateA;
     });

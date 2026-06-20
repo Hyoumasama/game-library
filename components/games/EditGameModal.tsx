@@ -11,6 +11,7 @@ type SearchResult = {
   year: number | null;
   releaseDate?: string;
   coverUrl: string | null;
+  screenshots?: string;
   heroUrl?: string | null;
   summary: string;
   genre?: string | null;
