@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import AuthButton from "@/components/admin/AuthButton";
 
 type Game = {
+  id?: number | string;
   Title: string;
   Score?: string | number;
   Status?: string;
