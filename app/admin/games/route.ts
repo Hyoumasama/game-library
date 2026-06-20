@@ -34,6 +34,3 @@ export async function POST(request: Request) {
 
   return Response.json({ success: true });
 }
-igdb_id: body.igdbId || null,
-cover_url: body.coverUrl || null,
-summary: body.summary || null,
