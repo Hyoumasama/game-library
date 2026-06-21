@@ -17,8 +17,9 @@ export type Game = {
   Platform: string;
   "Hardware (1)": string;
     cover_url: string;
-  hero_url: string;
-  summary: string;
+hero_url: string;
+wide_cover_url: string;
+summary: string;
   genre: string;
   developer: string;
   publisher: string;
@@ -52,6 +53,7 @@ function mapGame(game: any): Game {
     "Hardware (1)": game.hardware || "",
     cover_url: game.cover_url || "",
 hero_url: game.hero_url || "",
+wide_cover_url: game.wide_cover_url || "",
 summary: game.summary || "",
 genre: game.genre || "",
 developer: game.developer || "",

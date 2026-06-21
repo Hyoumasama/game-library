@@ -193,6 +193,7 @@ function getHardwareLogo(hardware: string) {
 }
 const coverImage = game.cover_url;
 const heroImage = game.hero_url;
+const wideCoverImage = game.wide_cover_url;
 
  const releaseYear = getYear(game.Release);
 
@@ -474,19 +475,25 @@ const daysToComplete = getDaysBetween(
   </div>
 
   <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
-    {heroImage ? (
-      <img
-        src={heroImage}
-        alt={game.Title}
-        className="aspect-video w-full object-cover"
-      />
-    ) : coverImage ? (
-      <img
-        src={coverImage}
-        alt={game.Title}
-        className="aspect-video w-full object-cover"
-      />
-    ) : (
+    {wideCoverImage ? (
+  <img
+    src={wideCoverImage}
+    alt={game.Title}
+    className="aspect-video w-full object-cover"
+  />
+) : heroImage ? (
+  <img
+    src={heroImage}
+    alt={game.Title}
+    className="aspect-video w-full object-cover"
+  />
+) : coverImage ? (
+  <img
+    src={coverImage}
+    alt={game.Title}
+    className="aspect-video w-full object-cover"
+  />
+) : (
       <div className="flex aspect-video items-center justify-center bg-zinc-900 text-6xl">
         🎮
       </div>

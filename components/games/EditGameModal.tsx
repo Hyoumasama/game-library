@@ -13,6 +13,7 @@ type SearchResult = {
   coverUrl: string | null;
   screenshots?: string;
   heroUrl?: string | null;
+  wideCoverUrl?: string | null;
   summary: string;
   genre?: string | null;
   developer?: string | null;
@@ -60,6 +61,7 @@ const [status, setStatus] = useState(game.Status || game.status || "");
 
   const [coverUrl, setCoverUrl] = useState(game.cover_url || "");
   const [heroUrl, setHeroUrl] = useState(game.hero_url || "");
+  const [wideCoverUrl, setWideCoverUrl] = useState(game.wide_cover_url || "");
   const [summary, setSummary] = useState(game.summary || "");
   const [genre, setGenre] = useState(game.genre || "");
   const [screenshots, setScreenshots] = useState(game.screenshots || "");
@@ -119,13 +121,36 @@ const [status, setStatus] = useState(game.Status || game.status || "");
   setMessage("");
 }
 
-  function selectGame(game: SearchResult) {
+  async function selectGame(game: SearchResult) {
     setSelectedGame(game);
 
     setTitle(game.title || "");
     setRelease(game.releaseDate || "");
     setCoverUrl(game.coverUrl || "");
     setHeroUrl(game.heroUrl || "");
+    setWideCoverUrl("");
+
+try {
+  const params = new URLSearchParams();
+
+  if (game.title) {
+    params.set("title", game.title);
+  }
+
+  if (game.steamAppId) {
+    params.set("steamAppId", String(game.steamAppId));
+  }
+
+  const wideResponse = await fetch(
+    `/api/admin/steamgriddb-search?${params.toString()}`
+  );
+
+  const wideData = await wideResponse.json();
+  setWideCoverUrl(wideData.wideCoverUrl || "");
+} catch (error) {
+  console.error("Failed to fetch wide cover:", error);
+  setWideCoverUrl("");
+}
     setSummary(game.summary || "");
     setGenre(game.genre || "");
     setScreenshots(game.screenshots || "");
@@ -159,6 +184,7 @@ setSteamAppId(game.steamAppId || null);
 
         coverUrl,
         heroUrl,
+        wideCoverUrl,
         summary,
         genre,
         screenshots,
@@ -305,12 +331,28 @@ steamAppId,
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
 />
 
-<input
-  value={coverUrl}
-  onChange={(e) => setCoverUrl(e.target.value)}
-  placeholder="Cover URL"
-  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
-/>
+<div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+  <p className="mb-3 text-sm font-bold text-zinc-300">Cover Preview</p>
+
+  {coverUrl ? (
+    <img
+      src={coverUrl}
+      alt="Cover preview"
+      className="h-56 w-40 rounded-xl object-cover"
+    />
+  ) : (
+    <div className="flex h-56 w-40 items-center justify-center rounded-xl bg-zinc-800 text-4xl">
+      🎮
+    </div>
+  )}
+
+  <input
+    value={coverUrl}
+    onChange={(e) => setCoverUrl(e.target.value)}
+    placeholder="Cover URL"
+    className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  />
+</div>
 
 <input
   value={heroUrl}
@@ -318,6 +360,31 @@ steamAppId,
   placeholder="Hero URL"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
 />
+
+<div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+  <p className="mb-3 text-sm font-bold text-zinc-300">
+    Wide Cover Preview
+  </p>
+
+  {wideCoverUrl ? (
+    <img
+      src={wideCoverUrl}
+      alt="Wide cover preview"
+      className="aspect-[92/43] w-full rounded-xl object-cover"
+    />
+  ) : (
+    <div className="flex aspect-[92/43] w-full items-center justify-center rounded-xl bg-zinc-800 text-4xl">
+      🎮
+    </div>
+  )}
+
+  <input
+    value={wideCoverUrl}
+    onChange={(e) => setWideCoverUrl(e.target.value)}
+    placeholder="Wide Cover URL"
+    className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  />
+</div>
 
 <input
   value={genre}

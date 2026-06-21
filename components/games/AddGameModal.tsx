@@ -14,6 +14,7 @@ type SearchResult = {
 
   coverUrl: string | null;
   heroUrl?: string | null;
+  wideCoverUrl?: string | null;
 
   summary: string;
 
@@ -43,6 +44,7 @@ const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
   const [hardware, setHardware] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
 const [heroUrl, setHeroUrl] = useState("");
+const [wideCoverUrl, setWideCoverUrl] = useState("");
 const [summary, setSummary] = useState("");
 const [genre, setGenre] = useState("");
 const [developer, setDeveloper] = useState("");
@@ -89,7 +91,7 @@ useEffect(() => {
   setMessage("");
 }
 
-  function selectGame(game: SearchResult) {
+  async function selectGame(game: SearchResult) {
   setSelectedGame(game);
   setTitle(game.title);
   setRelease(game.releaseDate || "");
@@ -97,6 +99,45 @@ console.log("Selected Steam game:", game);
 
   setCoverUrl(game.coverUrl || "");
   setHeroUrl(game.heroUrl || "");
+  let steamWideCover = "";
+
+if (game.source === "steam" && game.steamAppId) {
+  steamWideCover = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.steamAppId}/header.jpg`;
+}
+
+setWideCoverUrl(steamWideCover);
+
+if (!steamWideCover) {
+  try {
+    const steamResponse = await fetch(
+      `/api/admin/steam-search?q=${encodeURIComponent(game.title)}`
+    );
+
+    const steamData = await steamResponse.json();
+    const steamGame = steamData?.results?.[0];
+
+    if (steamGame?.steamAppId) {
+      const steamHeaderUrl = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${steamGame.steamAppId}/header.jpg`;
+      setWideCoverUrl(steamHeaderUrl);
+    } else {
+      const params = new URLSearchParams();
+
+      if (game.title) {
+        params.set("title", game.title);
+      }
+
+      const wideResponse = await fetch(
+        `/api/admin/steamgriddb-search?${params.toString()}`
+      );
+
+      const wideData = await wideResponse.json();
+      setWideCoverUrl(wideData.wideCoverUrl || "");
+    }
+  } catch (error) {
+    console.error("Failed to fetch wide cover:", error);
+    setWideCoverUrl("");
+  }
+}
   setSummary(game.summary || "");
   setGenre(game.genre || "");
   setDeveloper(game.developer || "");
@@ -135,6 +176,7 @@ setSteamAppId(game.steamAppId || null);
 
 coverUrl,
 heroUrl,
+wideCoverUrl,
 summary,
 genre,
 developer,
@@ -185,6 +227,7 @@ screenshots,
     setHardware("");
     setCoverUrl("");
     setHeroUrl("");
+    setWideCoverUrl("");
     setSummary("");
     setGenre("");
     setDeveloper("");
@@ -353,12 +396,28 @@ screenshots,
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
 />
 
-<input
-  value={coverUrl}
-  onChange={(e) => setCoverUrl(e.target.value)}
-  placeholder="Cover URL"
-  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
-/>
+<div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+  <p className="mb-3 text-sm font-bold text-zinc-300">Cover Preview</p>
+
+  {coverUrl ? (
+    <img
+      src={coverUrl}
+      alt="Cover preview"
+      className="h-56 w-40 rounded-xl object-cover"
+    />
+  ) : (
+    <div className="flex h-56 w-40 items-center justify-center rounded-xl bg-zinc-800 text-4xl">
+      🎮
+    </div>
+  )}
+
+  <input
+    value={coverUrl}
+    onChange={(e) => setCoverUrl(e.target.value)}
+    placeholder="Cover URL"
+    className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  />
+</div>
 
 <input
   value={heroUrl}
@@ -366,6 +425,31 @@ screenshots,
   placeholder="Hero URL"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
 />
+
+<div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+  <p className="mb-3 text-sm font-bold text-zinc-300">
+    Wide Cover Preview
+  </p>
+
+  {wideCoverUrl ? (
+    <img
+      src={wideCoverUrl}
+      alt="Wide cover preview"
+      className="aspect-[92/43] w-full rounded-xl object-cover"
+    />
+  ) : (
+    <div className="flex aspect-[92/43] w-full items-center justify-center rounded-xl bg-zinc-800 text-4xl">
+      🎮
+    </div>
+  )}
+
+  <input
+    value={wideCoverUrl}
+    onChange={(e) => setWideCoverUrl(e.target.value)}
+    placeholder="Wide Cover URL"
+    className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
+  />
+</div>
 
 <input
   value={genre}

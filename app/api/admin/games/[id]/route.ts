@@ -31,8 +31,9 @@ export async function PATCH(
   hardware: body.hardware || null,
 
   cover_url: body.coverUrl || null,
-  hero_url: body.heroUrl || null,
-  summary: body.summary || null,
+hero_url: body.heroUrl || null,
+wide_cover_url: body.wideCoverUrl || null,
+summary: body.summary || null,
   genre: body.genre || null,
   screenshots: body.screenshots || null,
   developer: body.developer || null,
