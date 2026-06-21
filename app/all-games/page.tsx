@@ -114,7 +114,7 @@ function AllGamesContent() {
   useEffect(() => {
   async function loadGames() {
     try {
-      const response = await fetch("/api/games");
+      const response = await fetch("/api/games-lite");
       const data = await response.json();
 
       const formattedGames = data.map((game: any) => ({
@@ -481,6 +481,7 @@ if (isLoading) {
   <img
     src={game.Cover}
                       alt={game.Title}
+                      loading="lazy"
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                     />
                   ) : (

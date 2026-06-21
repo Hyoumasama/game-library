@@ -112,7 +112,7 @@ const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
   async function loadGames() {
     try {
-      const response = await fetch("/api/games");
+      const response = await fetch("/api/home-games");
       const data = await response.json();
 
       const formattedGames = data.map((game: any) => ({
@@ -362,6 +362,7 @@ function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
                 <img
                   src={game.Cover}
                   alt={game.Title}
+                  loading="lazy"
                   className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                 />
               ) : (
@@ -438,6 +439,7 @@ function GameSection({
                 <img
                   src={game.Cover}
                   alt={game.Title}
+                  loading="lazy"
                   className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                 />
               ) : (

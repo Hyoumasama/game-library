@@ -265,12 +265,7 @@ const daysToComplete = getDaysBetween(
 
       <div className="relative z-10 mx-auto hidden max-w-6xl px-6 pb-12 -mt-56 md:block">
        <div className="mb-6 flex items-center justify-between">
-  <Link
-    href="/"
-    className="text-white hover:text-zinc-300"
-  >
-    ← Back to Library
-  </Link>
+  <BackButton />
 
   <GameAdminActions game={game} />
 </div>
