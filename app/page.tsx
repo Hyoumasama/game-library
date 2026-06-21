@@ -240,6 +240,12 @@ const recentlyCompletedGames = useMemo(() => {
 >
   All Games
 </Link>
+<Link
+  href="/stats"
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
+>
+  Stats
+</Link>
   <Link
     href="/assets"
     className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
@@ -286,7 +292,13 @@ const recentlyCompletedGames = useMemo(() => {
 >
   All Games
 </Link>
-
+<Link
+  href="/stats"
+  onClick={() => setIsMenuOpen(false)}
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+>
+  Stats
+</Link>
 <Link
   href="/assets"
   onClick={() => setIsMenuOpen(false)}

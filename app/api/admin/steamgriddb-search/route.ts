@@ -5,26 +5,29 @@ export async function GET(request: Request) {
     const steamAppId = searchParams.get("steamAppId");
     const title = searchParams.get("title");
 
-    async function fetchGridBySteamAppId(appId: string) {
-      const response = await fetch(
-        `https://www.steamgriddb.com/api/v2/grids/steam/${appId}?dimensions=920x430,460x215&types=static&nsfw=false&humor=false&epilepsy=false&limit=50`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.STEAMGRIDDB_API_KEY}`,
-          },
-          cache: "no-store",
-        }
-      );
+    async function fetchGrids(url: string) {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.STEAMGRIDDB_API_KEY}`,
+        },
+        cache: "no-store",
+      });
 
       const data = await response.json();
       return data?.data || [];
     }
 
-    async function fetchGridByTitle(gameTitle: string) {
+    let grids: any[] = [];
+
+    if (steamAppId) {
+      grids = await fetchGrids(
+        `https://www.steamgriddb.com/api/v2/grids/steam/${steamAppId}?dimensions=920x430,460x215,600x900&types=static&nsfw=false&humor=false&epilepsy=false&limit=50`
+      );
+    }
+
+    if (grids.length === 0 && title) {
       const searchResponse = await fetch(
-        `https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(
-          gameTitle
-        )}`,
+        `https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(title)}`,
         {
           headers: {
             Authorization: `Bearer ${process.env.STEAMGRIDDB_API_KEY}`,
@@ -36,45 +39,41 @@ export async function GET(request: Request) {
       const searchData = await searchResponse.json();
       const gameId = searchData?.data?.[0]?.id;
 
-      if (!gameId) return [];
-
-      const gridResponse = await fetch(
-        `https://www.steamgriddb.com/api/v2/grids/game/${gameId}?dimensions=920x430,460x215&types=static&nsfw=false&humor=false&epilepsy=false&limit=50`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.STEAMGRIDDB_API_KEY}`,
-          },
-          cache: "no-store",
-        }
-      );
-
-      const gridData = await gridResponse.json();
-      return gridData?.data || [];
+      if (gameId) {
+        grids = await fetchGrids(
+          `https://www.steamgriddb.com/api/v2/grids/game/${gameId}?dimensions=920x430,460x215,600x900&types=static&nsfw=false&humor=false&epilepsy=false&limit=50`
+        );
+      }
     }
 
-    let grids: any[] = [];
+    const wideCoverOptions = grids
+      .filter(
+        (image: any) =>
+          (image?.width === 920 && image?.height === 430) ||
+          (image?.width === 460 && image?.height === 215)
+      )
+      .slice(0, 5)
+      .map((image: any) => image.url);
 
-    if (steamAppId) {
-      grids = await fetchGridBySteamAppId(steamAppId);
-    }
+    const steamVerticalCoverOptions = grids
+      .filter((image: any) => image?.width === 600 && image?.height === 900)
+      .slice(0, 5)
+      .map((image: any) => image.url);
 
-    if (grids.length === 0 && title) {
-      grids = await fetchGridByTitle(title);
-    }
-
-    const bestGrid =
-      grids.find((image: any) => image?.width === 920 && image?.height === 430) ||
-      grids.find((image: any) => image?.width === 460 && image?.height === 215) ||
-      grids[0];
-
-    return Response.json({
-      wideCoverUrl: bestGrid?.url || null,
+        return Response.json({
+      wideCoverUrl: wideCoverOptions[0] || null,
+      steamVerticalCover: steamVerticalCoverOptions[0] || null,
+      wideCoverOptions,
+      steamVerticalCoverOptions,
     });
   } catch (error) {
-    console.error("SteamGridDB grid search error:", error);
+    console.error("SteamGridDB search failed:", error);
 
     return Response.json({
       wideCoverUrl: null,
+      steamVerticalCover: null,
+      wideCoverOptions: [],
+      steamVerticalCoverOptions: [],
     });
   }
 }

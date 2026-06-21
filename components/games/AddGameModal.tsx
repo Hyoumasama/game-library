@@ -45,6 +45,9 @@ const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
   const [coverUrl, setCoverUrl] = useState("");
 const [heroUrl, setHeroUrl] = useState("");
 const [wideCoverUrl, setWideCoverUrl] = useState("");
+const [steamVerticalCover, setSteamVerticalCover] = useState("");
+const [wideCoverOptions, setWideCoverOptions] = useState<string[]>([]);
+const [steamVerticalCoverOptions, setSteamVerticalCoverOptions] = useState<string[]>([]);
 const [summary, setSummary] = useState("");
 const [genre, setGenre] = useState("");
 const [developer, setDeveloper] = useState("");
@@ -99,44 +102,33 @@ console.log("Selected Steam game:", game);
 
   setCoverUrl(game.coverUrl || "");
   setHeroUrl(game.heroUrl || "");
-  let steamWideCover = "";
-
-if (game.source === "steam" && game.steamAppId) {
-  steamWideCover = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.steamAppId}/header.jpg`;
-}
-
-setWideCoverUrl(steamWideCover);
-
-if (!steamWideCover) {
   try {
-    const steamResponse = await fetch(
-      `/api/admin/steam-search?q=${encodeURIComponent(game.title)}`
-    );
+  const params = new URLSearchParams();
 
-    const steamData = await steamResponse.json();
-    const steamGame = steamData?.results?.[0];
-
-    if (steamGame?.steamAppId) {
-      const steamHeaderUrl = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${steamGame.steamAppId}/header.jpg`;
-      setWideCoverUrl(steamHeaderUrl);
-    } else {
-      const params = new URLSearchParams();
-
-      if (game.title) {
-        params.set("title", game.title);
-      }
-
-      const wideResponse = await fetch(
-        `/api/admin/steamgriddb-search?${params.toString()}`
-      );
-
-      const wideData = await wideResponse.json();
-      setWideCoverUrl(wideData.wideCoverUrl || "");
-    }
-  } catch (error) {
-    console.error("Failed to fetch wide cover:", error);
-    setWideCoverUrl("");
+  if (game.title) {
+    params.set("title", game.title);
   }
+
+  if (game.steamAppId) {
+    params.set("steamAppId", String(game.steamAppId));
+  }
+
+  const steamGridResponse = await fetch(
+    `/api/admin/steamgriddb-search?${params.toString()}`
+  );
+
+  const steamGridData = await steamGridResponse.json();
+
+  setWideCoverUrl(steamGridData.wideCoverUrl || "");
+  setSteamVerticalCover(steamGridData.steamVerticalCover || "");
+  setWideCoverOptions(steamGridData.wideCoverOptions || []);
+setSteamVerticalCoverOptions(steamGridData.steamVerticalCoverOptions || []);
+} catch (error) {
+  console.error("Failed to fetch SteamGridDB covers:", error);
+  setWideCoverUrl("");
+  setSteamVerticalCover("");
+  setWideCoverOptions([]);
+setSteamVerticalCoverOptions([]);
 }
   setSummary(game.summary || "");
   setGenre(game.genre || "");
@@ -177,6 +169,7 @@ setSteamAppId(game.steamAppId || null);
 coverUrl,
 heroUrl,
 wideCoverUrl,
+steamVerticalCover,
 summary,
 genre,
 developer,
@@ -228,6 +221,9 @@ screenshots,
     setCoverUrl("");
     setHeroUrl("");
     setWideCoverUrl("");
+setSteamVerticalCover("");
+setWideCoverOptions([]);
+setSteamVerticalCoverOptions([]);
     setSummary("");
     setGenre("");
     setDeveloper("");
@@ -397,34 +393,49 @@ screenshots,
 />
 
 <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-  <p className="mb-3 text-sm font-bold text-zinc-300">Cover Preview</p>
+ <p className="mb-3 text-sm font-bold text-zinc-300">
+  Steam Vertical Cover Preview
+</p>
 
-  {coverUrl ? (
-    <img
-      src={coverUrl}
-      alt="Cover preview"
-      className="h-56 w-40 rounded-xl object-cover"
-    />
-  ) : (
+{steamVerticalCover ? (
+  <img
+    src={steamVerticalCover}
+    alt="Steam vertical cover preview"
+    className="h-56 w-40 rounded-xl object-cover"
+  />
+) : (
     <div className="flex h-56 w-40 items-center justify-center rounded-xl bg-zinc-800 text-4xl">
       🎮
     </div>
   )}
-
+{steamVerticalCoverOptions.length > 0 && (
+  <div className="mt-4 grid grid-cols-5 gap-2">
+    {steamVerticalCoverOptions.map((url) => (
+      <button
+        key={url}
+        type="button"
+        onClick={() => setSteamVerticalCover(url)}
+        className={`overflow-hidden rounded-lg border ${
+          steamVerticalCover === url ? "border-white" : "border-zinc-700"
+        }`}
+      >
+        <img
+          src={url}
+          alt="Vertical option"
+          className="aspect-[2/3] w-full object-cover"
+        />
+      </button>
+    ))}
+  </div>
+)}
   <input
-    value={coverUrl}
-    onChange={(e) => setCoverUrl(e.target.value)}
-    placeholder="Cover URL"
+    value={steamVerticalCover}
+onChange={(e) => setSteamVerticalCover(e.target.value)}
+placeholder="Steam Vertical Cover URL"
     className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
   />
 </div>
 
-<input
-  value={heroUrl}
-  onChange={(e) => setHeroUrl(e.target.value)}
-  placeholder="Hero URL"
-  className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2"
-/>
 
 <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
   <p className="mb-3 text-sm font-bold text-zinc-300">
@@ -442,7 +453,26 @@ screenshots,
       🎮
     </div>
   )}
-
+{wideCoverOptions.length > 0 && (
+  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+    {wideCoverOptions.map((url) => (
+      <button
+        key={url}
+        type="button"
+        onClick={() => setWideCoverUrl(url)}
+        className={`overflow-hidden rounded-lg border ${
+          wideCoverUrl === url ? "border-white" : "border-zinc-700"
+        }`}
+      >
+        <img
+          src={url}
+          alt="Wide option"
+          className="aspect-[92/43] w-full object-cover"
+        />
+      </button>
+    ))}
+  </div>
+)}
   <input
     value={wideCoverUrl}
     onChange={(e) => setWideCoverUrl(e.target.value)}

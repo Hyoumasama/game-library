@@ -38,6 +38,7 @@ steam_appid: body.steamAppId || null,
 cover_url: body.coverUrl || null,
 hero_url: body.heroUrl || null,
 wide_cover_url: body.wideCoverUrl || null,
+steam_vertical_cover: body.steamVerticalCover || null,
 
 summary: body.summary || null,
 genre: body.genre || null,

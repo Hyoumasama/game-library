@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameById, getGames } from "@/lib/games";
 import Link from "next/link";
@@ -192,6 +193,7 @@ function getHardwareLogo(hardware: string) {
   return null;
 }
 const coverImage = game.cover_url;
+const steamVerticalCover = game.steam_vertical_cover;
 const heroImage = game.hero_url;
 const wideCoverImage = game.wide_cover_url;
 
@@ -275,9 +277,9 @@ const daysToComplete = getDaysBetween(
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
-            {coverImage ? (
+            {steamVerticalCover || coverImage ? (
   <img
-    src={coverImage}
+    src={steamVerticalCover || coverImage}
     alt={game.Title}
     className="aspect-[2/3] w-full object-cover"
   />
@@ -467,9 +469,7 @@ const daysToComplete = getDaysBetween(
       </div>
       <div className="relative z-10 mx-auto block px-4 pb-10 -mt-76 md:hidden">
   <div className="mb-4 flex items-center justify-between gap-3">
-    <Link href="/" className="text-sm font-bold text-white">
-      ← Library
-    </Link>
+    <BackButton />
 
     <GameAdminActions game={game} />
   </div>

@@ -19,6 +19,7 @@ export type Game = {
     cover_url: string;
 hero_url: string;
 wide_cover_url: string;
+steam_vertical_cover: string;
 summary: string;
   genre: string;
   developer: string;
@@ -54,6 +55,7 @@ function mapGame(game: any): Game {
     cover_url: game.cover_url || "",
 hero_url: game.hero_url || "",
 wide_cover_url: game.wide_cover_url || "",
+steam_vertical_cover: game.steam_vertical_cover || "",
 summary: game.summary || "",
 genre: game.genre || "",
 developer: game.developer || "",
