@@ -242,6 +242,9 @@ const recentlyCompletedGames = useMemo(() => {
                 Stats
               </Link>
 
+<Link href="/monthly-log" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
+  Monthly Log
+</Link>
               <Link href="/assets" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
                 Assets
               </Link>
@@ -291,6 +294,10 @@ const recentlyCompletedGames = useMemo(() => {
                   <Link href="/stats" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
                     Stats
                   </Link>
+
+                  <Link href="/monthly-log" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
+  Monthly Log
+</Link>
 
                   <Link href="/assets" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
                     Assets
