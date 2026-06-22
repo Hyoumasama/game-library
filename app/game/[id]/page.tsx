@@ -1,3 +1,4 @@
+import GamePageMobileMenu from "@/components/GamePageMobileMenu";
 import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
@@ -471,7 +472,7 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
       <div className="relative z-10 mx-auto block px-4 pb-10 -mt-76 md:hidden">
   <div className="mb-4 flex items-center justify-between">
   <BackButton />
-  <GameAdminActions game={game} />
+  <GamePageMobileMenu game={game} />
 </div>
 
 <div className="mb-4">

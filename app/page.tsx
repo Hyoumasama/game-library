@@ -268,47 +268,60 @@ const recentlyCompletedGames = useMemo(() => {
           </div>
 
           {isMenuOpen && (
-            <div className="fixed inset-0 z-50 sm:hidden">
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="absolute inset-0 bg-black/70"
-              />
+  <div className="fixed inset-0 z-50 bg-black/70 p-4 sm:hidden">
+    <div className="rounded-2xl border border-zinc-700 bg-zinc-950 p-4">
+      <div className="mb-5 flex items-center justify-between">
+        <p className="text-lg font-bold text-white">Menu</p>
 
-              <div className="absolute right-0 top-0 h-full w-72 border-l border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-lg font-bold">Menu</h2>
+        <button
+          type="button"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xl font-bold text-white"
+        >
+          ×
+        </button>
+      </div>
 
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/all-games"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+        >
+          All Games
+        </Link>
 
-                <div className="flex flex-col gap-3">
-                  <Link href="/all-games" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                    All Games
-                  </Link>
+        <Link
+          href="/stats"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+        >
+          Stats
+        </Link>
 
-                  <Link href="/stats" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                    Stats
-                  </Link>
+        <Link
+          href="/monthly-log"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+        >
+          Monthly Log
+        </Link>
 
-                  <Link href="/monthly-log" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-  Monthly Log
-</Link>
+        <Link
+          href="/assets"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
+        >
+          Assets
+        </Link>
 
-                  <Link href="/assets" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                    Assets
-                  </Link>
+        {isAdmin && <AddGameModal />}
 
-                  {isAdmin && <AddGameModal />}
-                  <AuthButton />
-                </div>
-              </div>
-            </div>
-          )}
+        <AuthButton />
+      </div>
+    </div>
+  </div>
+)}
         </div>
 
         <section className="mb-8">
@@ -371,6 +384,19 @@ function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
             </h3>
 
             <div className="mt-2 flex items-center gap-2">
+              {Number(game.Score || 0) > 0 && (
+    <span
+      className={`flex h-5 w-5 items-center justify-center rounded-sm text-[10px] font-black text-black ${
+        Number(game.Score) >= 76
+          ? "bg-green-400"
+          : Number(game.Score) >= 60
+            ? "bg-yellow-400"
+            : "bg-red-400"
+      }`}
+    >
+      {game.Score}
+    </span>
+  )}
               {getPlatformLogo(game.Platform) && (
                 <img
                   src={getPlatformLogo(game.Platform)!}
@@ -386,13 +412,15 @@ function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
                   style={{ width: "20px", height: "20px", objectFit: "contain" }}
                 />
               )}
-            </div>
+</div>
 
-            {game.Price && (
-              <p className="mt-2 text-sm font-bold text-zinc-400">
-                {game.Price}
-              </p>
-            )}
+            {game.Price &&
+  !isNaN(Number(game.Price)) &&
+  Number(game.Price) > 0 && (
+    <p className="mt-2 text-sm font-bold text-cyan-300">
+      {Number(game.Price).toFixed(2)} SAR
+    </p>
+)}
           </Link>
         ))}
       </div>
@@ -448,6 +476,19 @@ function GameSection({
             </h3>
 
             <div className="mt-2 flex items-center gap-2">
+              {Number(game.Score || 0) > 0 && (
+    <span
+      className={`flex h-5 w-5 items-center justify-center rounded-sm text-[10px] font-black text-black ${
+        Number(game.Score) >= 76
+          ? "bg-green-400"
+          : Number(game.Score) >= 60
+            ? "bg-yellow-400"
+            : "bg-red-400"
+      }`}
+    >
+      {game.Score}
+    </span>
+  )}
   {getPlatformLogo(game.Platform) && (
     <img
       src={getPlatformLogo(game.Platform)!}
@@ -464,6 +505,14 @@ function GameSection({
     />
   )}
 </div>
+
+            {game.Price &&
+  !isNaN(Number(game.Price)) &&
+  Number(game.Price) > 0 && (
+    <p className="mt-2 text-sm font-bold text-cyan-300">
+      {Number(game.Price).toFixed(2)} SAR
+    </p>
+)}
 
           </Link>
         ))}

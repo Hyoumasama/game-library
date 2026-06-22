@@ -366,9 +366,17 @@ if (isLoading) {
 </Link>
 <Link
   href="/stats"
+  onClick={() => setIsMobileMenuOpen(false)}
   className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white hover:border-zinc-500"
 >
   Stats
+</Link>
+<Link
+  href="/monthly-log"
+  onClick={() => setIsMobileMenuOpen(false)}
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white hover:border-zinc-500"
+>
+  Monthly Log
 </Link>
         <Link
           href="/assets"
@@ -396,7 +404,7 @@ if (isLoading) {
           <StatCard label="Search Results" value={filteredGames.length} />
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-5">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
@@ -449,25 +457,22 @@ if (isLoading) {
   ))}
 </select>
 
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search games..."
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
-          />
-        </div>
-
+          <div className="col-span-2 md:col-span-1">
+  <input
+    value={search}
+    onChange={(event) => setSearch(event.target.value)}
+    placeholder="Search games..."
+    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none focus:border-white"
+  />
+</div>
+</div>
         <section>
-          <h2 className="mb-4 text-2xl font-bold">
-            {statusFilter === "All" ? "All Games" : statusFilter}
-          </h2>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {visibleGames.map((game, index) => (
               <Link
                 key={`${game.Title}-${index}`}
                 href={`/game/${game.id}`}
-                className="group flex overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 transition hover:-translate-y-1 hover:border-zinc-500"
+                className="group flex overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 transition hover:-translate-y-1 hover:border-zinc-500"
               >
                 <div
                   style={{
@@ -492,7 +497,7 @@ if (isLoading) {
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col justify-center p-4">
-                  <h3 className="line-clamp-2 text-sm font-bold leading-5">
+                  <h3 className="line-clamp-2 text-base font-black leading-5 text-white">
                     {game.Title}
                   </h3>
 
@@ -512,13 +517,32 @@ if (isLoading) {
                       />
                     )}
 
-                    <span>{game.Platform || "-"}</span>
+                    <span className="font-bold">
+  {game.Platform || "-"}
+</span>
                   </div>
 
-                  <p className="mt-1 text-sm text-zinc-500">
-                    Score: {game.Score || "-"} | Hours:{" "}
-                    {formatHours(game["Hours Played"])}
-                  </p>
+                  <div className="mt-2 flex items-center gap-3">
+  <span
+    className={`flex h-6 w-6 items-center justify-center rounded text-[14px] font-bold text-black ${
+      Number(game.Score) >= 76
+        ? "bg-green-400"
+        : Number(game.Score) >= 60
+          ? "bg-yellow-400"
+          : Number(game.Score) > 0
+            ? "bg-red-400"
+            : "bg-zinc-700 text-zinc-300"
+    }`}
+  >
+    {game.Score || "-"}
+  </span>
+
+  {Number(game["Hours Played"] || 0) > 0 && (
+  <span className="text-sm font-bold text-cyan-300">
+    {formatHours(game["Hours Played"])}h
+  </span>
+)}
+</div>
                 </div>
               </Link>
             ))}
@@ -553,9 +577,12 @@ if (isLoading) {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-      <p className="text-sm text-zinc-400">{label}</p>
-      <p className="mt-2 text-3xl font-bold">{value}</p>
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+      <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+        {label}
+      </p>
+
+      <p className="mt-2 text-3xl font-black text-cyan-300">{value}</p>
     </div>
   );
 }

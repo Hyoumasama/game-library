@@ -10,10 +10,24 @@ type MonthlyLog = {
   month: number;
   year: number;
   created_at: string;
-  games: {
-    steam_vertical_cover: string | null;
-  } | null;
+  games:
+    | {
+        steam_vertical_cover: string | null;
+      }
+    | {
+        steam_vertical_cover: string | null;
+      }[]
+    | null;
 };
+function getSteamVerticalCover(log: MonthlyLog) {
+  if (!log.games) return null;
+
+  if (Array.isArray(log.games)) {
+    return log.games[0]?.steam_vertical_cover || null;
+  }
+
+  return log.games.steam_vertical_cover;
+}
 const monthNames = [
   "",
   "Jan",
@@ -68,7 +82,7 @@ export default async function MonthlyLogPage({
   if (error) {
     throw error;
   }
-const logs = (rawLogs || []) as MonthlyLog[];
+const logs = (rawLogs || []) as unknown as MonthlyLog[];
   const logsByMonth = (logs || []).reduce<Record<number, typeof logs>>(
     (groups, log) => {
       if (!groups[log.month]) {
@@ -215,9 +229,9 @@ const bestMonth = months
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
-                        {log.games?.steam_vertical_cover && (
+                        {getSteamVerticalCover(log) && (
                           <img
-                            src={log.games.steam_vertical_cover}
+                            src={getSteamVerticalCover(log) || ""}
                             alt={log.title}
                             className="h-14 w-10 shrink-0 rounded-md object-cover"
                           />
@@ -260,9 +274,9 @@ const bestMonth = months
                       href={`/game/${log.game_id}`}
                       className="flex min-w-0 items-center gap-3 font-bold text-white hover:text-cyan-300"
                     >
-                      {log.games?.steam_vertical_cover && (
+                      {getSteamVerticalCover(log) && (
                         <img
-                          src={log.games.steam_vertical_cover}
+                          src={getSteamVerticalCover(log) || ""}
                           alt={log.title}
                           className="h-12 w-9 shrink-0 rounded-md object-cover"
                         />
