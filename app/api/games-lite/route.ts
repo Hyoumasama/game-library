@@ -9,24 +9,24 @@ export async function GET() {
     const { data, error } = await supabase
       .from("games")
       .select(`
-  id,
-  title,
-  slug,
-  release,
-  date_of_purchase,
-  completion_last_played,
-  score,
-  price,
-  hours_played,
-  status,
-  store,
-  platform,
-  hardware,
-  genre,
-  cover_url,
-  steam_vertical_cover,
-  wide_cover_url
-`)
+        id,
+        title,
+        slug,
+        release,
+        date_of_purchase,
+        completion_last_played,
+        score,
+        price,
+        hours_played,
+        status,
+        store,
+        platform,
+        hardware,
+        genre,
+        cover_url,
+        steam_vertical_cover,
+        wide_cover_url
+      `)
       .order("id", { ascending: false })
       .range(from, from + pageSize - 1);
 

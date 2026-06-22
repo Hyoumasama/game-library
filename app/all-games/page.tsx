@@ -132,7 +132,7 @@ function AllGamesContent() {
         "Date of Purchase": game.date_of_purchase,
         "Completion Last Played": game.completion_last_played,
         "Completion / Last Played": game.completion_last_played,
-        Cover: game.cover_url,
+        Cover: game.steam_vertical_cover || game.cover_url,
               }));
 
       setGames(formattedGames);

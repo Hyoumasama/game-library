@@ -2,7 +2,18 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
-
+type MonthlyLog = {
+  log_id: number;
+  game_id: number;
+  title: string;
+  hours: number;
+  month: number;
+  year: number;
+  created_at: string;
+  games: {
+    steam_vertical_cover: string | null;
+  } | null;
+};
 const monthNames = [
   "",
   "Jan",
@@ -45,7 +56,7 @@ export default async function MonthlyLogPage({
 
   const selectedYear = Number(params.year || availableYears[0]);
 
-  const { data: logs, error } = await supabase
+  const { data: rawLogs, error } = await supabase
     .from("monthly_play_logs")
     .select(
       "log_id, game_id, title, hours, month, year, created_at, games(steam_vertical_cover)"
@@ -57,7 +68,7 @@ export default async function MonthlyLogPage({
   if (error) {
     throw error;
   }
-
+const logs = (rawLogs || []) as MonthlyLog[];
   const logsByMonth = (logs || []).reduce<Record<number, typeof logs>>(
     (groups, log) => {
       if (!groups[log.month]) {
@@ -79,6 +90,26 @@ export default async function MonthlyLogPage({
     0
   );
 
+const uniqueGamesCount = new Set((logs || []).map((log) => log.game_id)).size;
+
+const mostPlayedLog = [...(logs || [])].sort(
+  (a, b) => Number(b.hours || 0) - Number(a.hours || 0)
+)[0];
+
+const bestMonth = months
+  .map((month) => {
+    const total = logsByMonth[month].reduce(
+      (sum, log) => sum + Number(log.hours || 0),
+      0
+    );
+
+    return {
+      month,
+      total,
+    };
+  })
+
+  .sort((a, b) => b.total - a.total)[0];
   return (
     <main className="min-h-screen bg-black p-4 text-white sm:p-6">
       <div className="mx-auto max-w-6xl">
@@ -109,6 +140,40 @@ export default async function MonthlyLogPage({
             <MonthlyLogAddModal />
           </div>
         </div>
+
+<div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+  <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+    <p className="text-xs font-bold uppercase text-zinc-500">Total Hours</p>
+    <p className="mt-2 text-2xl font-black text-cyan-300">
+      {selectedYearTotalHours.toFixed(2)}
+    </p>
+  </div>
+
+  <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+    <p className="text-xs font-bold uppercase text-zinc-500">Games Played</p>
+    <p className="mt-2 text-2xl font-black">{uniqueGamesCount}</p>
+  </div>
+
+  <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+    <p className="text-xs font-bold uppercase text-zinc-500">Most Played</p>
+    <p className="mt-2 line-clamp-2 text-lg font-black leading-tight">
+      {mostPlayedLog?.title || "-"}
+    </p>
+    <p className="mt-1 text-sm font-bold text-cyan-300">
+      {mostPlayedLog ? `${Number(mostPlayedLog.hours).toFixed(2)}h` : ""}
+    </p>
+  </div>
+
+  <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+    <p className="text-xs font-bold uppercase text-zinc-500">Best Month</p>
+    <p className="mt-2 text-lg font-black">
+      {bestMonth ? monthNames[bestMonth.month] : "-"}
+    </p>
+    <p className="mt-1 text-sm font-bold text-cyan-300">
+      {bestMonth ? `${bestMonth.total.toFixed(2)}h` : ""}
+    </p>
+  </div>
+</div>
 
         {months.length === 0 && (
           <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-center text-zinc-400">
@@ -150,16 +215,16 @@ export default async function MonthlyLogPage({
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
-                        {log.games?.[0]?.steam_vertical_cover && (
+                        {log.games?.steam_vertical_cover && (
                           <img
-                            src={log.games[0].steam_vertical_cover}
+                            src={log.games.steam_vertical_cover}
                             alt={log.title}
                             className="h-14 w-10 shrink-0 rounded-md object-cover"
                           />
                         )}
 
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-black text-white">
+                          <div className="line-clamp-2 text-sm font-black leading-tight text-white">
                             {log.title}
                           </div>
 
@@ -180,7 +245,7 @@ export default async function MonthlyLogPage({
               </div>
 
               <div className="hidden overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 md:block">
-                <div className="grid grid-cols-[1fr_120px_120px] border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300">
+                <div className="grid grid-cols-[1fr_160px_140px] border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300">
                   <div>Game</div>
                   <div>Hours</div>
                   <div>Month</div>
@@ -189,15 +254,15 @@ export default async function MonthlyLogPage({
                 {monthLogs.map((log) => (
                   <div
                     key={log.log_id}
-                    className="grid grid-cols-[1fr_120px_120px] border-b border-zinc-900 px-4 py-3 text-sm last:border-b-0"
+                   className="grid grid-cols-[1fr_160px_140px] items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0"
                   >
                     <Link
                       href={`/game/${log.game_id}`}
                       className="flex min-w-0 items-center gap-3 font-bold text-white hover:text-cyan-300"
                     >
-                      {log.games?.[0]?.steam_vertical_cover && (
+                      {log.games?.steam_vertical_cover && (
                         <img
-                          src={log.games[0].steam_vertical_cover}
+                          src={log.games.steam_vertical_cover}
                           alt={log.title}
                           className="h-12 w-9 shrink-0 rounded-md object-cover"
                         />
@@ -206,11 +271,11 @@ export default async function MonthlyLogPage({
                       <span className="truncate">{log.title}</span>
                     </Link>
 
-                    <div className="text-cyan-300">
+                    <div className="font-black text-cyan-300">
                       {Number(log.hours).toFixed(2)}
                     </div>
 
-                    <div>{monthNames[log.month] || log.month}</div>
+                    <div className="font-black text-white">{monthNames[log.month] || log.month}</div>
                   </div>
                 ))}
               </div>

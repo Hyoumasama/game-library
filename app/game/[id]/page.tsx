@@ -75,8 +75,6 @@ export default async function GamePage({
 }) {
   const { id } = await params;
  const game = await getGameById(Number(id));
-console.log("GAME DATA:");
-console.log(game);
 const games = await getGames();
 
 if (!game) {
