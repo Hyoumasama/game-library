@@ -1,5 +1,6 @@
 "use client";
 
+import HomeGameSearch from "@/components/HomeGameSearch";
 import AddGameModal from "@/components/games/AddGameModal";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -222,116 +223,102 @@ const recentlyCompletedGames = useMemo(() => {
     </main>
   );
 }
-  return (
+    return (
     <main className="min-h-screen bg-black p-8 text-white">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="mb-2 text-4xl font-bold">
-            Nawaf&apos;s Game Library
-            </h1>
-
-          </div>
-
-          <div className="hidden items-center gap-3 sm:flex">
-            <Link
-  href="/all-games"
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
->
-  All Games
-</Link>
-<Link
-  href="/stats"
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
->
-  Stats
-</Link>
-  <Link
-    href="/assets"
-    className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
-  >
-    Assets
-  </Link>
-
-  <AuthButton />
-
-  {isAdmin && <AddGameModal />}
+        <div className="mb-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            
+            <div className="hidden flex-1 lg:flex">
+  <HomeGameSearch />
 </div>
 
-<button
-  onClick={() => setIsMenuOpen(true)}
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-2xl font-bold text-white sm:hidden"
->
-  ☰
-</button>
+            <div className="hidden h-full items-center gap-3 sm:flex">
+              <Link href="/all-games" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
+                All Games
+              </Link>
 
-{isMenuOpen && (
-  <div className="fixed inset-0 z-50 sm:hidden">
-    <button
-      onClick={() => setIsMenuOpen(false)}
-      className="absolute inset-0 bg-black/70"
-    />
+              <Link href="/stats" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
+                Stats
+              </Link>
 
-    <div className="absolute right-0 top-0 h-full w-72 border-l border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-bold">Menu</h2>
+              <Link href="/assets" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
+                Assets
+              </Link>
 
-        <button
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-bold"
-        >
-          ✕
-        </button>
-      </div>
+              <AuthButton />
+              {isAdmin && <AddGameModal />}
+            </div>
 
-      <div className="flex flex-col gap-3">
-        <Link
-  href="/all-games"
-  onClick={() => setIsMenuOpen(false)}
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
->
-  All Games
-</Link>
-<Link
-  href="/stats"
-  onClick={() => setIsMenuOpen(false)}
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
->
-  Stats
-</Link>
-<Link
-  href="/assets"
-  onClick={() => setIsMenuOpen(false)}
-  className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
->
-  Assets
-</Link>
-
-{isAdmin && <AddGameModal />}
-
-<AuthButton />
-      </div>
-    </div>
+            <div className="flex w-full items-center gap-3 sm:hidden">
+  <div className="flex-1">
+    <HomeGameSearch />
   </div>
-)}
+
+  <button
+    onClick={() => setIsMenuOpen(true)}
+    className="flex h-[52px] w-[52px] items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 text-2xl font-bold text-white"
+  >
+    ☰
+  </button>
+</div>
+          </div>
+
+          {isMenuOpen && (
+            <div className="fixed inset-0 z-50 sm:hidden">
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="absolute inset-0 bg-black/70"
+              />
+
+              <div className="absolute right-0 top-0 h-full w-72 border-l border-zinc-800 bg-zinc-950 p-5 shadow-2xl">
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Menu</h2>
+
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <Link href="/all-games" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
+                    All Games
+                  </Link>
+
+                  <Link href="/stats" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
+                    Stats
+                  </Link>
+
+                  <Link href="/assets" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
+                    Assets
+                  </Link>
+
+                  {isAdmin && <AddGameModal />}
+                  <AuthButton />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <section className="mb-8">
           <CurrentlyPlayingGrid games={currentlyPlayingGames} />
         </section>
 
-      
-<GameSection
-  title="Recently Added"
-  games={recentlyAddedGames}
-  href="/all-games?sort=recently-added"
-/>
+        <GameSection
+          title="Recently Added"
+          games={recentlyAddedGames}
+          href="/all-games?sort=recently-added"
+        />
 
-<GameSection
-  title="Recently Completed"
-  games={recentlyCompletedGames}
-  href="/all-games?status=Completed&sort=completion-newest"
-/>
+        <GameSection
+          title="Recently Completed"
+          games={recentlyCompletedGames}
+          href="/all-games?status=Completed&sort=completion-newest"
+        />
       </div>
     </main>
   );

@@ -96,6 +96,57 @@ export default function EditGameModal({ game }: { game: any }) {
     platforms: [] as string[],
     hardware: [] as string[],
   });
+    function resetFormToSavedGame() {
+    setQuery("");
+    setResults([]);
+    setSelectedGame(null);
+    setMessage("");
+
+    setTitle(game.Title || game.title || "");
+    setRelease(toDateInput(game.Release || game.release || ""));
+    setStatus(game.Status || game.status || "Unplayed");
+    setScore(game.Score || game.score || "");
+    setHoursPlayed(game["Hours Played"] || game.hours_played || "");
+    setPrice(game.Price || game.price || "");
+    setStore(game.Store || game.store || "");
+    setPlatform(game.Platform || game.platform || "");
+    setHardware(game["Hardware (1)"] || game.hardware || "");
+
+    setCoverUrl(game.Cover || game.cover_url || game.coverUrl || "");
+    setHeroUrl(game.hero_url || game.heroUrl || "");
+    setWideCoverUrl(game.wide_cover_url || game.wideCoverUrl || "");
+    setSteamVerticalCover(
+      game.steam_vertical_cover || game.steamVerticalCover || ""
+    );
+
+    setWideCoverOptions([]);
+    setSteamVerticalCoverOptions([]);
+
+    setSummary(game.summary || "");
+    setGenre(game.genre || "");
+    setDeveloper(game.developer || "");
+    setPublisher(game.publisher || "");
+    setScreenshots(game.screenshots || "");
+
+    setIgdbId(game.igdb_id || game.igdbId || null);
+    setSteamAppId(
+      game.steam_appid || game.steam_app_id || game.steamAppId || null
+    );
+
+    setDateOfPurchase(
+      toDateInput(game["Date of Purchase"] || game.date_of_purchase || "")
+    );
+    setCompletionLastPlayed(
+      toDateInput(
+        game["Completion Last Played"] || game.completion_last_played || ""
+      )
+    );
+  }
+
+  function handleClose() {
+    resetFormToSavedGame();
+    setOpen(false);
+  }
 
   useEffect(() => {
     fetch("/api/admin/game-options")
@@ -229,19 +280,19 @@ export default function EditGameModal({ game }: { game: any }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6">
-          <div className="h-[95dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 sm:w-[calc(100vw-24px)] sm:rounded-3xl sm:p-8">
+  <div
+    className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6"
+    onClick={handleClose}
+  >
+    <div
+      className="h-[95dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 sm:w-[calc(100vw-24px)] sm:rounded-3xl sm:p-8"
+      onClick={(event) => event.stopPropagation()}
+    >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-2xl font-bold">Edit Game</h2>
 
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  setQuery("");
-                  setResults([]);
-                  setSelectedGame(null);
-                  setMessage("");
-                }}
+                            <button
+                onClick={handleClose}
                 className="text-zinc-400 hover:text-white"
               >
                 ✕
@@ -275,7 +326,7 @@ export default function EditGameModal({ game }: { game: any }) {
                 <button
                   onClick={searchGames}
                   type="button"
-                  className="rounded-xl bg-white px-5 py-3 font-bold text-black"
+                  className="rounded-xl bg-white px-2 py-3 font-bold text-black"
                 >
                   Search
                 </button>

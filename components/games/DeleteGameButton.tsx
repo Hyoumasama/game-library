@@ -26,7 +26,7 @@ export default function DeleteGameButton({ gameId }: { gameId: number }) {
   return (
     <button
       onClick={deleteGame}
-      className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500"
+      className="rounded-xl bg-red-600 px-2 py-3 text-sm font-bold text-white hover:bg-red-500"
     >
       Delete Game
     </button>

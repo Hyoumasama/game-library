@@ -1,3 +1,4 @@
+import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameById, getGames } from "@/lib/games";
@@ -254,7 +255,7 @@ const daysToComplete = getDaysBetween(
       <div className="pointer-events-none relative h-80 overflow-hidden">
         {heroImage && (
   <img
-    src={heroImage}
+    src={wideCoverImage || heroImage}
             alt=""
             className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
           />
@@ -267,7 +268,13 @@ const daysToComplete = getDaysBetween(
        <div className="mb-6 flex items-center justify-between">
   <BackButton />
 
-  <GameAdminActions game={game} />
+  <div className="flex items-center gap-3">
+    <div className="w-[300px]">
+      <HomeGameSearch />
+    </div>
+
+    <GameAdminActions game={game} />
+  </div>
 </div>
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
@@ -455,7 +462,8 @@ const daysToComplete = getDaysBetween(
             key={url}
             src={url}
             alt={`${game.Title} screenshot`}
-            className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
+loading="lazy"
+className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
           />
         ))}
     </div>
@@ -463,11 +471,14 @@ const daysToComplete = getDaysBetween(
 ) : null}
       </div>
       <div className="relative z-10 mx-auto block px-4 pb-10 -mt-76 md:hidden">
-  <div className="mb-4 flex items-center justify-between gap-3">
-    <BackButton />
+  <div className="mb-4 flex items-center justify-between">
+  <BackButton />
+  <GameAdminActions game={game} />
+</div>
 
-    <GameAdminActions game={game} />
-  </div>
+<div className="mb-4">
+  <HomeGameSearch />
+</div>
 
   <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
@@ -478,10 +489,10 @@ const daysToComplete = getDaysBetween(
   />
 ) : heroImage ? (
   <img
-    src={heroImage}
-    alt={game.Title}
-    className="aspect-video w-full object-cover"
-  />
+  src={wideCoverImage || heroImage}
+  alt=""
+  className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
+/>
 ) : coverImage ? (
   <img
     src={coverImage}

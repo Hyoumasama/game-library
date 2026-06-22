@@ -198,8 +198,14 @@ screenshots,
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6">
-          <div className="h-[95dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 sm:w-[calc(100vw-24px)] sm:rounded-3xl sm:p-8">
+  <div
+    className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6"
+    onClick={() => setOpen(false)}
+  >
+    <div
+      className="h-[95dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 sm:w-[calc(100vw-24px)] sm:rounded-3xl sm:p-8"
+      onClick={(event) => event.stopPropagation()}
+    >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-2xl font-bold">Add Game</h2>
 
