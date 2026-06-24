@@ -241,29 +241,21 @@ const daysToComplete = getDaysBetween(
 );
 
   const statusStyle =
-    status === "Completed"
-      ? { backgroundColor: "#14532d", color: "#86efac" }
+  status === "Completed"
+    ? { backgroundColor: "rgba(34, 211, 238, 0.15)", color: "#67e8f9" }
+    : status === "Playing"
+      ? { backgroundColor: "rgba(59, 130, 246, 0.15)", color: "#93c5fd" }
       : status === "Dropped"
-      ? { backgroundColor: "#7f1d1d", color: "#fca5a5" }
-      : status === "Playing"
-      ? { backgroundColor: "#1e3a8a", color: "#93c5fd" }
-      : { backgroundColor: "#27272a", color: "#e4e4e7" };
+        ? { backgroundColor: "rgba(248, 113, 113, 0.15)", color: "#fca5a5" }
+        : status === "Unplayed"
+          ? { backgroundColor: "rgba(250, 204, 21, 0.15)", color: "#fde047" }
+          : { backgroundColor: "#27272a", color: "#e4e4e7" };
 
   return (
-    <main className="min-h-screen bg-[#0b0f14] text-white">
-      <div className="pointer-events-none relative h-80 overflow-hidden">
-        {heroImage && (
-  <img
-    src={wideCoverImage || heroImage}
-            alt=""
-            className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
-          />
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-[#0b0f14]/70 to-[#0b0f14]" />
-      </div>
-
-      <div className="relative z-10 mx-auto hidden max-w-6xl px-6 pb-12 -mt-56 md:block">
+    <main className="min-h-screen bg-[#070a0f] text-white">
+  <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
+  
+      <div className="mx-auto hidden max-w-6xl px-6 py-12 lg:block">
        <div className="mb-6 flex items-center justify-between">
   <BackButton />
 
@@ -277,19 +269,39 @@ const daysToComplete = getDaysBetween(
 </div>
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
-          <div className="h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
-            {steamVerticalCover || coverImage ? (
-  <img
-    src={steamVerticalCover || coverImage}
-    alt={game.Title}
-    className="aspect-[2/3] w-full object-cover"
-  />
-) : (
-  <div className="flex aspect-[2/3] items-center justify-center text-7xl">
-    🎮
-  </div>
-)}
-          </div>
+          <div className="relative h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+  {steamVerticalCover || coverImage ? (
+    <img
+      src={steamVerticalCover || coverImage}
+      alt={game.Title}
+      className="aspect-[2/3] w-full object-cover"
+    />
+  ) : (
+    <div className="flex aspect-[2/3] items-center justify-center text-7xl">
+      🎮
+    </div>
+  )}
+
+  {Number(game.Score || 0) > 0 && (
+    <span
+      className={`absolute left-3 top-3 flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-black ${
+        Number(game.Score) >= 76
+          ? "bg-emerald-400 text-black"
+          : Number(game.Score) >= 60
+            ? "bg-yellow-400 text-black"
+            : "bg-red-400 text-black"
+      }`}
+    >
+      {game.Score}
+    </span>
+  )}
+
+  {Number(game["Hours Played"] || 0) > 0 && (
+    <span className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
+      {formatHours(game["Hours Played"])}h
+    </span>
+  )}
+</div>
 
           <div>
             <div className="mb-1">
@@ -303,6 +315,7 @@ const daysToComplete = getDaysBetween(
               >
                 {status}
 {completedRank ? ` • ${completedRank}` : ""}
+{scoreRank ? ` • Score ${scoreRank}` : ""}
               </span>
             </div>
 
@@ -347,31 +360,10 @@ const daysToComplete = getDaysBetween(
   </div>
 ) : null}
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              <Stat label="Score" value={game.Score || "-"} rank={scoreRank} />
-              <Stat
-  label="Playtime"
-  value={`${formatHours(game["Hours Played"])} Hours`}
-  rank={playtimeRank}
-/>
-              <Stat
-  label="Price"
-  value={game.Price || "-"}
-  rank={
-    Number(game.Price) > 0 &&
-    Number(game["Hours Played"]) > 0
-      ? `${(
-          Number(game.Price) /
-          Number(game["Hours Played"])
-        ).toFixed(2)} SAR / Hour`
-      : undefined
-  }
-/>
-            </div>
           </div>
         </div>
 
-        <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6">
+        <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
           <h2 className="mb-5 text-2xl font-bold">Library Details</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -382,73 +374,40 @@ const daysToComplete = getDaysBetween(
     value={formatDisplayDate(game["Completion Last Played"])}
   />
 
-  <Info label="Status" value={game.Status} />
+  <Info label="Price" value={game.Price} />
   <Info label="Days to Purchase" value={daysToPurchase} />
   <Info label="Days to Complete" value={daysToComplete} />
 
-  <div className="rounded-xl border border-zinc-800 bg-black/60 p-4">
-    <p className="text-sm text-zinc-500">Hardware</p>
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
+    <p className="text-sm border-zinc-800">Hardware</p>
 
     <div className="mt-2 flex items-center gap-2 font-semibold">
-      {getHardwareLogo(game["Hardware (1)"]) && (
-        <img
-          src={getHardwareLogo(game["Hardware (1)"])!}
-          alt={game["Hardware (1)"]}
-          style={{
-            width: "24px",
-            height: "24px",
-            objectFit: "contain",
-          }}
-        />
-      )}
-
+   
       <span>{game["Hardware (1)"] || "-"}</span>
     </div>
   </div>
 
-  <div className="rounded-xl border border-zinc-800 bg-black/60 p-4">
-    <p className="text-sm text-zinc-500">Store</p>
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
+    <p className="text-sm border-zinc-800">Store</p>
 
     <div className="mt-2 flex items-center gap-2 font-semibold">
-      {getLogo(game.Store) && (
-        <img
-          src={getLogo(game.Store)!}
-          alt={game.Store}
-          style={{
-            width: "22px",
-            height: "22px",
-            objectFit: "contain",
-          }}
-        />
-      )}
-
+     
       <span>{game.Store || "-"}</span>
     </div>
   </div>
 
-  <div className="rounded-xl border border-zinc-800 bg-black/60 p-4">
-    <p className="text-sm text-zinc-500">Platform</p>
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
+    <p className="text-sm border-zinc-800">Platform</p>
 
     <div className="mt-2 flex items-center gap-2 font-semibold">
-      {getLogo(game.Platform) && (
-        <img
-          src={getLogo(game.Platform)!}
-          alt={game.Platform}
-          style={{
-            width: "22px",
-            height: "22px",
-            objectFit: "contain",
-          }}
-        />
-      )}
-
+      
       <span>{game.Platform || "-"}</span>
     </div>
   </div>
 </div>
         </section>
         {game.screenshots ? (
-  <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6">
+  <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
     <h2 className="mb-5 text-2xl font-bold">Screenshots</h2>
 
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -469,17 +428,17 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
   </section>
 ) : null}
       </div>
-      <div className="relative z-10 mx-auto block px-4 pb-10 -mt-76 md:hidden">
-  <div className="mb-4 flex items-center justify-between">
+      <div className="mx-auto max-w-[430px] px-4 pb-10 pt-3 lg:hidden">
+  <div className="mb-3 flex items-center justify-between">
   <BackButton />
   <GamePageMobileMenu game={game} />
 </div>
 
-<div className="mb-4">
+<div className="mb-3">
   <HomeGameSearch />
 </div>
 
-  <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+  <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
   <img
     src={wideCoverImage}
@@ -514,7 +473,28 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
         }}
       >
         {status}
+{completedRank ? ` • ${completedRank}` : ""}
+{scoreRank ? ` • Score ${scoreRank}` : ""}
       </span>
+      {Number(game.Score || 0) > 0 && (
+  <span
+    className={`absolute left-3 top-3 flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-black ${
+      Number(game.Score) >= 76
+        ? "bg-emerald-400 text-black"
+        : Number(game.Score) >= 60
+          ? "bg-yellow-400 text-black"
+          : "bg-red-400 text-black"
+    }`}
+  >
+    {game.Score}
+  </span>
+)}
+
+{Number(game["Hours Played"] || 0) > 0 && (
+  <span className="absolute right-3 top-[calc(56.25vw-50px)] rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
+    {formatHours(game["Hours Played"])}h
+  </span>
+)}
 
       <h1 className="mt-3 text-3xl font-black leading-tight">
         {game.Title}
@@ -569,18 +549,7 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
     </div>
   </div>
 
-  <div className="mt-4 grid grid-cols-2 gap-3">
-  <Stat label="Score" value={game.Score || "-"} rank={scoreRank} />
-
-  <Stat
-    label="Playtime"
-    value={`${formatHours(game["Hours Played"])} Hours`}
-    rank={playtimeRank}
-  />
-
-</div>
-
-  <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4">
+  <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4">
     <h2 className="mb-4 text-xl font-bold">Library Details</h2>
 
     <div className="space-y-3 text-sm">
@@ -602,6 +571,11 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
   <div className="flex justify-between border-b border-zinc-800 pb-2">
     <span className="text-zinc-400">Days to Purchase</span>
     <span>{daysToPurchase}</span>
+  </div>
+
+  <div className="flex justify-between border-b border-zinc-800 pb-2">
+    <span className="text-zinc-400">Price</span>
+    <span>{game.Price && !isNaN(Number(game.Price)) ? `${game.Price} SAR` : game.Price || "-"}</span>
   </div>
 
   <div className="flex justify-between border-b border-zinc-800 pb-2">
@@ -637,7 +611,7 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
   </section>
 
   {game.screenshots ? (
-    <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4">
+    <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4">
       <h2 className="mb-4 text-xl font-bold">Screenshots</h2>
 
       <div className="flex gap-3 overflow-x-auto pb-2">
@@ -672,25 +646,45 @@ function Stat({
   value: string;
   rank?: string;
 }) {
+  const score =
+    label === "Score" ? Number(value || 0) : null;
+
+  const scoreClass =
+    score === null
+      ? ""
+      : score >= 76
+        ? "bg-emerald-400 text-black"
+        : score >= 60
+          ? "bg-yellow-400 text-black"
+          : "bg-red-400 text-black";
+
   return (
-    <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-2">
-      <p className="text-sm text-zinc-400">{label}</p>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
+      
+            {label === "Score" ? (
+<span
+className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-2 text-lg font-black ${scoreClass}`}
 
-      <p className="mt-1 text-2xl font-bold">{value}</p>
-
-      {rank && (
-        <p className="mt-1 text-sm text-zinc-500">
-          {rank}
-        </p>
-      )}
+>
+{value}
+  </span>
+) : label === "Playtime" ? (
+  <p className="text-2xl font-bold text-cyan-300">
+    {value}
+  </p>
+) : (
+  <p className="text-2xl font-bold">
+    {value}
+  </p>
+)}
     </div>
   );
 }
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-black/60 p-4">
-      <p className="text-sm text-zinc-500">{label}</p>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
+      <p className="text-sm border-zinc-800">{label}</p>
       <p className="mt-1 font-semibold">{value || "-"}</p>
     </div>
   );

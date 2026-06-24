@@ -1,0 +1,79 @@
+import csv
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+INPUT_FILE = "games.json"
+OUTPUT_FILE = "achievements_import.csv"
+
+base_dir = Path(__file__).resolve().parent
+input_path = base_dir / INPUT_FILE
+output_path = base_dir / OUTPUT_FILE
+
+with open(input_path, "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+games = data.get("games", [])
+rows = []
+
+for game in games:
+    meta = game.get("meta") or {}
+
+    title = meta.get("title", "")
+
+    platforms = meta.get("platforms") or []
+    platform_names = [
+        platform.get("name", "")
+        for platform in platforms
+        if isinstance(platform, dict)
+    ]
+
+    last_played = ""
+    ts = game.get("lastplayed_utc")
+    if ts:
+        last_played = datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%d")
+
+    playtime_units = game.get("playtimeUnits") or {}
+    playtime_hours = playtime_units.get("hours", 0) or 0
+    playtime_minutes = playtime_units.get("minutes", 0) or 0
+
+    rows.append({
+        "title": title,
+        "platform": ", ".join(platform_names),
+        "source": meta.get("environment_slug", ""),
+        "earned": game.get("earned_awards", 0) or 0,
+        "total": game.get("total_awards", 0) or 0,
+        "percent": game.get("percent", 0) or 0,
+        "platinum": game.get("earned_platinum", 0) or 0,
+        "gold": game.get("earned_gold", 0) or 0,
+        "silver": game.get("earned_silver", 0) or 0,
+        "bronze": game.get("earned_bronze", 0) or 0,
+        "gamerscore": game.get("earned_points", 0) or 0,
+        "playtime": game.get("playtime", ""),
+        "playtime_hours": playtime_hours,
+        "playtime_minutes": playtime_minutes,
+        "last_played": last_played,
+    })
+
+with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
+    writer = csv.DictWriter(f, fieldnames=[
+        "title",
+        "platform",
+        "source",
+        "earned",
+        "total",
+        "percent",
+        "platinum",
+        "gold",
+        "silver",
+        "bronze",
+        "gamerscore",
+        "playtime",
+        "playtime_hours",
+        "playtime_minutes",
+        "last_played",
+    ])
+    writer.writeheader()
+    writer.writerows(rows)
+
+print(f"Done. Exported {len(rows)} games to {output_path}")

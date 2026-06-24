@@ -55,53 +55,44 @@ function formatHours(hours?: string | number) {
   return value.toFixed(1).replace(".0", "");
 }
 
-function getPlatformLogo(platform?: string) {
-  const value = platform?.toLowerCase() || "";
+function getIcon(value?: string) {
+  const text = value?.trim().toLowerCase();
 
-  if (value.includes("steam")) return "/platforms/steam.png";
-  if (value.includes("epic")) return "/platforms/epicgames.png";
-  if (value.includes("psn")) return "/platforms/psn.png";
-  if (value.includes("playstation")) return "/platforms/psn.png";
-  if (value.includes("xbox")) return "/platforms/xbox.png";
-  if (value.includes("switch")) return "/platforms/switch.png";
-  if (value.includes("ea desktop")) return "/platforms/eadesktop.ico";
+  const icons: Record<string, string> = {
+    psn: "/platforms/psn.png",
+    steam: "/platforms/steam.png",
+    epic: "/platforms/epicgames.png",
+    "ubisoft connect": "/platforms/ubisoftconnect.jpeg",
+    piracy: "/platforms/piracy.png",
+    xbox: "/platforms/xbox.png",
+    "ea desktop": "/platforms/eadesktop.ico",
+    gog: "/platforms/gog.jpeg",
+    nintendo: "/platforms/switch.png",
+    switch: "/platforms/switch.png",
+    legacy: "/platforms/legacy.jpg",
 
-  if (value.includes("pcsx2")) return "/platforms/pcsx2.png";
-  if (value.includes("duckstation")) return "/platforms/duckstation.png";
-  if (value.includes("rpcs3")) return "/platforms/rpcs3.png";
-  if (value.includes("xenia")) return "/platforms/xenia.png";
-  if (value.includes("citra")) return "/platforms/citra.png";
-  if (value.includes("yuzu")) return "/platforms/yuzu.png";
-  if (value.includes("ryujinx")) return "/platforms/ryujinx.png";
-  if (value.includes("cemu")) return "/platforms/cemu.png";
-  if (value.includes("retroarch")) return "/platforms/retroarch.png";
+    yuzu: "/platforms/yuzu.png",
+    citra: "/platforms/citra.png",
+    cemu: "/platforms/cemu.png",
+    dolphin: "/platforms/dolphin.png",
+    retroarch: "/platforms/retroarch.png",
+    ryujinx: "/platforms/ryujinx.png",
+    rpcs3: "/platforms/rpcs3.png",
+    duckstation: "/platforms/duckstation.png",
+    pcsx2: "/platforms/pcsx2.png",
+    melonds: "/platforms/melonDS.png",
+    xemu: "/platforms/xenia.png",
 
-  if (value.includes("gog")) return "/platforms/gog.jpeg";
-  if (value.includes("piracy")) return "/platforms/piracy.png";
+    pc: "/hardware/pc.png",
+    steamdeck: "/hardware/steamdeck.png",
+    ps3: "/hardware/playstation3.png",
+    ps4: "/hardware/playstation4.png",
+    ps5: "/hardware/playstation5.png",
+  };
 
-  return null;
-}
+  if (!text) return null;
 
-function getHardwareLogo(hardware?: string) {
-  const value = hardware?.toLowerCase().replace(/\s+/g, "") || "";
-
-  if (value === "pc") return "/hardware/pc.png";
-  if (value.includes("steamdeck")) return "/hardware/steamdeck.png";
-  if (value.includes("xbox")) return "/hardware/xbox.png";
-
-  if (value.includes("playstation4") || value.includes("ps4"))
-    return "/hardware/playstation4.png";
-
-  if (value.includes("playstation3") || value.includes("ps3"))
-    return "/hardware/playstation3.png";
-
-  if (value.includes("playstation2") || value.includes("ps2"))
-    return "/hardware/playstation2.png";
-
-  if (value.includes("playstation") || value.includes("ps5"))
-    return "/hardware/playstation.png";
-
-  return null;
+  return icons[text] || null;
 }
 
 export default function Home() {
@@ -218,14 +209,14 @@ const recentlyCompletedGames = useMemo(() => {
 
   if (isLoading) {
   return (
-    <main className="min-h-screen bg-black p-8 text-white">
+    <main className="min-h-screen bg-[#070a0f] p-4 text-white md:p-8">
       Loading Game Library...
     </main>
   );
 }
     return (
-    <main className="min-h-screen bg-black p-8 text-white">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[#070a0f] p-4 text-white md:p-8">
+      <div className="relative mx-auto max-w-7xl">
         <div className="mb-5 flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             
@@ -345,86 +336,11 @@ const recentlyCompletedGames = useMemo(() => {
 }
 function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
   return (
-    <section className="mb-12">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Currently Playing</h2>
-
-        <Link
-          href="/all-games?status=Playing"
-          className="text-sm font-bold text-zinc-400 hover:text-white"
-        >
-          All Games →
-        </Link>
-      </div>
-
-      <div className="flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-5 md:gap-4 md:overflow-visible lg:grid-cols-7">
-        {games.map((game, index) => (
-          <Link
-            key={`currently-playing-${game.id || game.Title}-${index}`}
-            href={`/game/${game.id}`}
-            className="group w-[150px] shrink-0 md:w-auto"
-          >
-            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
-              {game.Cover ? (
-                <img
-                  src={game.Cover}
-                  alt={game.Title}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl">
-                  🎮
-                </div>
-              )}
-            </div>
-
-            <h3 className="mt-3 line-clamp-2 text-sm font-bold leading-5">
-              {game.Title}
-            </h3>
-
-            <div className="mt-2 flex items-center gap-2">
-              {Number(game.Score || 0) > 0 && (
-    <span
-      className={`flex h-5 w-5 items-center justify-center rounded-sm text-[10px] font-black text-black ${
-        Number(game.Score) >= 76
-          ? "bg-green-400"
-          : Number(game.Score) >= 60
-            ? "bg-yellow-400"
-            : "bg-red-400"
-      }`}
-    >
-      {game.Score}
-    </span>
-  )}
-              {getPlatformLogo(game.Platform) && (
-                <img
-                  src={getPlatformLogo(game.Platform)!}
-                  alt=""
-                  style={{ width: "20px", height: "20px", objectFit: "contain" }}
-                />
-              )}
-
-              {getHardwareLogo(game.Hardware) && (
-                <img
-                  src={getHardwareLogo(game.Hardware)!}
-                  alt=""
-                  style={{ width: "20px", height: "20px", objectFit: "contain" }}
-                />
-              )}
-</div>
-
-            {game.Price &&
-  !isNaN(Number(game.Price)) &&
-  Number(game.Price) > 0 && (
-    <p className="mt-2 text-sm font-bold text-cyan-300">
-      {Number(game.Price).toFixed(2)} SAR
-    </p>
-)}
-          </Link>
-        ))}
-      </div>
-    </section>
+    <GameSection
+      title="Currently Playing"
+      games={games}
+      href="/all-games?status=Playing"
+    />
   );
 }
 function GameSection({
@@ -439,81 +355,85 @@ function GameSection({
   return (
     <section className="mb-12">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-xl font-black text-white md:text-2xl">{title}</h2>
 
-        <Link
-  href={href}
-          className="text-sm font-bold text-zinc-400 hover:text-white"
-        >
+        <Link href={href} className="text-xs font-black text-cyan-300 hover:text-white md:text-sm">
           All Games →
         </Link>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-5 md:overflow-visible lg:grid-cols-7">
+      <div className="flex gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-5 md:overflow-visible lg:grid-cols-7">
         {games.map((game, index) => (
           <Link
             key={`${title}-${game.id || game.Title}-${index}`}
             href={`/game/${game.id}`}
-            className="group w-[150px] shrink-0 md:w-auto"
+            className="group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border border-zinc-800 bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 hover:border-cyan-400/70 md:w-auto"
           >
-            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900">
+            <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
               {game.Cover ? (
                 <img
                   src={game.Cover}
                   alt={game.Title}
                   loading="lazy"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-4xl">
                   🎮
                 </div>
               )}
+
+              {Number(game.Score || 0) > 0 && (
+                <span
+                  className={`absolute left-3 top-3 flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-black ${
+                    Number(game.Score) >= 76
+                      ? "bg-emerald-400 text-black"
+                      : Number(game.Score) >= 60
+                        ? "bg-yellow-400 text-black"
+                        : "bg-red-400 text-black"
+                  }`}
+                >
+                  {game.Score}
+                </span>
+              )}
+
+              {Number(game["Hours Played"] || 0) > 0 && (
+                <span className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
+                  {formatHours(game["Hours Played"])}h
+                </span>
+              )}
             </div>
 
-            <h3 className="mt-3 line-clamp-2 text-sm font-bold leading-5">
-              {game.Title}
-            </h3>
+            <div className="p-3">
+              <h3 className="line-clamp-2 h-10 text-sm font-black leading-5 text-white">
+                {game.Title}
+              </h3>
 
-            <div className="mt-2 flex items-center gap-2">
-              {Number(game.Score || 0) > 0 && (
-    <span
-      className={`flex h-5 w-5 items-center justify-center rounded-sm text-[10px] font-black text-black ${
-        Number(game.Score) >= 76
-          ? "bg-green-400"
-          : Number(game.Score) >= 60
-            ? "bg-yellow-400"
-            : "bg-red-400"
-      }`}
-    >
-      {game.Score}
-    </span>
-  )}
-  {getPlatformLogo(game.Platform) && (
-    <img
-      src={getPlatformLogo(game.Platform)!}
-      alt=""
-      style={{ width: "20px", height: "20px", objectFit: "contain" }}
-    />
-  )}
+              <div className="mt-2 flex h-5 items-center gap-2">
+                {Array.from(
+                  new Map(
+                    [game.Store, game.Platform, game.Hardware]
+  .filter((value): value is string => Boolean(value))
+  .map((value): [string, string] | null => {
+    const icon = getIcon(value);
 
-  {getHardwareLogo(game.Hardware) && (
-    <img
-      src={getHardwareLogo(game.Hardware)!}
-      alt=""
-      style={{ width: "20px", height: "20px", objectFit: "contain" }}
-    />
-  )}
-</div>
+    if (!icon) return null;
 
-            {game.Price &&
-  !isNaN(Number(game.Price)) &&
-  Number(game.Price) > 0 && (
-    <p className="mt-2 text-sm font-bold text-cyan-300">
-      {Number(game.Price).toFixed(2)} SAR
-    </p>
-)}
-
+    return [icon, value];
+  })
+  .filter((item): item is [string, string] => item !== null)
+                  )
+                ).map(([icon, value]) => (
+                  <img
+                    key={icon}
+                    src={icon as string}
+                    alt=""
+                    className="h-5 w-5 object-contain"
+                    title={value as string}
+                  />
+                ))}
+              </div>
+            </div>
           </Link>
         ))}
       </div>

@@ -1,0 +1,540 @@
+﻿appid,title,platform,source,earned,total,percent,playtime_hours,playtime_minutes
+10,Counter-Strike,Steam,steam,0,0,0,0.0,0
+20,Team Fortress Classic,Steam,steam,0,0,0,0.0,0
+30,Day of Defeat,Steam,steam,0,0,0,0.0,0
+40,Deathmatch Classic,Steam,steam,0,0,0,0.0,0
+50,Half-Life: Opposing Force,Steam,steam,0,0,0,0.0,0
+60,Ricochet,Steam,steam,0,0,0,0.0,0
+70,Half-Life,Steam,steam,0,0,0,16.13,968
+80,Counter-Strike: Condition Zero,Steam,steam,0,0,0,0.0,0
+100,Counter-Strike: Condition Zero Deleted Scenes,Steam,steam,0,0,0,0.0,0
+130,Half-Life: Blue Shift,Steam,steam,0,0,0,5.92,355
+220,Half-Life 2,Steam,steam,19,69,27.54,13.55,813
+240,Counter-Strike: Source,Steam,steam,0,147,0.0,0.0,0
+280,Half-Life: Source,Steam,steam,0,0,0,0.0,0
+300,Day of Defeat: Source,Steam,steam,0,54,0.0,0.0,0
+320,Half-Life 2: Deathmatch,Steam,steam,0,0,0,0.0,0
+360,Half-Life Deathmatch: Source,Steam,steam,0,0,0,0.0,0
+400,Portal,Steam,steam,12,15,80.0,9.97,598
+500,Left 4 Dead,Steam,steam,0,73,0.0,0.0,0
+550,Left 4 Dead 2,Steam,steam,0,101,0.0,0.07,4
+620,Portal 2,Steam,steam,0,51,0.0,0.0,0
+730,Counter-Strike 2,Steam,steam,0,1,0.0,0.77,46
+2100,Dark Messiah of Might & Magic Single Player,Steam,steam,0,0,0,0.0,0
+2130,Dark Messiah of Might & Magic Multi-Player,Steam,steam,0,0,0,0.0,0
+2280,DOOM + DOOM II,Steam,steam,0,33,0.0,1.1,66
+2290,Final DOOM,Steam,steam,0,0,0,0.0,0
+2300,DOOM II,Steam,steam,0,0,0,1.22,73
+2360,Hexen: Beyond Heretic,Steam,steam,0,0,0,0.0,0
+2370,Hexen: Deathkings of the Dark Citadel,Steam,steam,0,0,0,0.0,0
+2390,Heretic: Shadow of the Serpent Riders,Steam,steam,0,0,0,0.0,0
+2600,Vampire: The Masquerade - Bloodlines,Steam,steam,0,0,0,0.0,0
+3270,Painkiller Overdose,Steam,steam,0,0,0,0.0,0
+4500,S.T.A.L.K.E.R.: Shadow of Chernobyl,Steam,steam,0,0,0,7.42,445
+4720,Condemned: Criminal Origins,Steam,steam,0,0,0,0.0,0
+6120,Shank,Steam,steam,0,12,0.0,0.0,0
+6910,Deus Ex: Game of the Year Edition,Steam,steam,0,0,0,30.7,1842
+6920,Deus Ex: Invisible War,Steam,steam,0,0,0,0.0,0
+7670,BioShock,Steam,steam,0,0,0,0.0,0
+8850,BioShock 2,Steam,steam,0,68,0.0,0.0,0
+8870,BioShock Infinite,Steam,steam,0,80,0.0,0.0,0
+9050,DOOM 3,Steam,steam,0,0,0,0.0,0
+9060,HeXen II,Steam,steam,0,0,0,0.0,0
+9070,DOOM 3: Resurrection of Evil,Steam,steam,0,0,0,0.0,0
+9160,Master Levels for DOOM II,Steam,steam,0,0,0,0.0,0
+12130,Manhunt,Steam,steam,0,0,0,0.0,0
+12140,Max Payne,Steam,steam,0,0,0,0.0,0
+12150,Max Payne 2: The Fall of Max Payne,Steam,steam,0,0,0,0.0,0
+12200,Bully: Scholarship Edition,Steam,steam,0,0,0,0.0,0
+15100,Assassin's Creed,Steam,steam,0,0,0,11.55,693
+16450,F.E.A.R. 2: Project Origin,Steam,steam,0,0,0,0.0,0
+20510,S.T.A.L.K.E.R.: Clear Sky,Steam,steam,0,0,0,0.0,0
+20920,The Witcher 2: Assassins of Kings Enhanced Edition,Steam,steam,0,52,0.0,0.0,0
+21090,F.E.A.R.,Steam,steam,0,0,0,15.12,907
+21100,F.E.A.R. 3,Steam,steam,0,50,0.0,0.0,0
+21110,F.E.A.R.: Extraction Point,Steam,steam,0,0,0,4.87,292
+21120,F.E.A.R.: Perseus Mandate,Steam,steam,0,0,0,0.2,12
+29900,Dark Sector,Steam,steam,0,0,0,0.0,0
+33230,Assassin's Creed II,Steam,steam,0,0,0,24.72,1483
+35140,Batman: Arkham Asylum GOTY Edition,Steam,steam,0,47,0.0,0.0,0
+39210,FINAL FANTASY XIV Online,Steam,steam,0,0,0,30.02,1801
+39530,Painkiller: Black Edition,Steam,steam,0,0,0,0.0,0
+39560,Painkiller: Resurrection,Steam,steam,0,0,0,0.0,0
+40700,Machinarium,Steam,steam,0,12,0.0,0.0,0
+40930,The Misadventures of P.B. Winterbottom,Steam,steam,0,12,0.0,0.0,0
+40990,Mafia,Steam,steam,0,0,0,0.0,0
+41700,S.T.A.L.K.E.R.: Call of Pripyat,Steam,steam,0,0,0,0.0,0
+42670,Singularity,Steam,steam,0,0,0,10.55,633
+44350,GRID 2,Steam,steam,0,60,0.0,0.0,0
+45760,Ultra Street Fighter IV,Steam,steam,0,67,0.0,0.0,0
+48190,Assassin's Creed Brotherhood,Steam,steam,0,0,0,27.38,1643
+49520,Borderlands 2,Steam,steam,0,75,0.0,0.0,0
+50300,Spec Ops: The Line,Steam,steam,34,50,68.0,7.05,423
+65560,Painkiller: Redemption,Steam,steam,0,0,0,0.0,0
+67370,The Darkness II,Steam,steam,0,50,0.0,0.0,0
+98400,Hard Reset,Steam,steam,0,115,0.0,0.0,0
+102840,Shank 2,Steam,steam,0,20,0.0,0.0,0
+105600,Terraria,Steam,steam,0,137,0.0,0.0,0
+107100,Bastion,Steam,steam,0,24,0.0,0.0,0
+108700,Death Rally,Steam,steam,0,87,0.0,0.0,0
+108710,Alan Wake,Steam,steam,0,67,0.0,0.0,0
+200260,Batman: Arkham City GOTY,Steam,steam,0,64,0.0,0.0,0
+200510,XCOM: Enemy Unknown,Steam,steam,54,85,63.53,41.35,2481
+201870,Assassin's Creed Revelations,Steam,steam,0,48,0.0,15.4,924
+202750,Alan Wake's American Nightmare,Steam,steam,0,12,0.0,0.03,2
+204100,Max Payne 3,Steam,steam,0,67,0.0,0.17,10
+204450,Call of Juarez Gunslinger,Steam,steam,18,26,69.23,8.4,504
+206760,Painkiller: Recurring Evil,Steam,steam,0,0,0,0.0,0
+208200,DOOM 3: BFG Edition,Steam,steam,0,65,0.0,0.0,0
+208650,Batman™: Arkham Knight,Steam,steam,0,113,0.0,0.0,0
+209000,Batman™: Arkham Origins,Steam,steam,0,60,0.0,0.0,0
+214490,Alien: Isolation,Steam,steam,0,50,0.0,0.0,0
+214870,Painkiller Hell & Damnation,Steam,steam,0,107,0.0,0.0,0
+219150,Hotline Miami,Steam,steam,2,35,5.71,0.4,24
+220700,RPG Maker VX Ace,Steam,steam,0,0,0,0.0,0
+221040,Resident Evil 6,Steam,steam,7,70,10.0,4.95,297
+226620,Desktop Dungeons,Steam,steam,0,35,0.0,0.0,0
+230230,Divinity: Original Sin (Classic),Steam,steam,0,63,0.0,0.0,0
+233130,Shadow Warrior,Steam,steam,42,92,45.65,12.37,742
+234080,Castlevania: Lords of Shadow - Ultimate Edition,Steam,steam,0,47,0.0,0.0,0
+234140,Mad Max,Steam,steam,0,49,0.0,0.0,0
+235460,METAL GEAR RISING: REVENGEANCE,Steam,steam,0,60,0.0,0.0,0
+236090,Dust: An Elysian Tail,Steam,steam,0,30,0.0,0.0,0
+238010,Deus Ex: Human Revolution - Director's Cut,Steam,steam,0,59,0.0,0.0,0
+238210,System Shock® 2 (1999),Steam,steam,0,0,0,0.0,0
+239250,Castlevania: Lords of Shadow 2,Steam,steam,0,56,0.0,0.0,0
+241260,Sherlock Holmes: Crimes and Punishments,Steam,steam,0,25,0.0,0.0,0
+241930,Middle-earth™: Shadow of Mordor™,Steam,steam,1,74,1.35,0.97,58
+242050,Assassin's Creed IV Black Flag,Steam,steam,0,60,0.0,27.92,1675
+245280,ENSLAVED™: Odyssey to the West™ Premium Edition,Steam,steam,0,58,0.0,0.0,0
+247080,Crypt of the NecroDancer,Steam,steam,0,61,0.0,0.0,0
+249050,Dungeon of the ENDLESS™,Steam,steam,0,33,0.0,0.0,0
+250760,Shovel Knight: Treasure Trove,Steam,steam,0,138,0.0,0.17,10
+252410,SteamWorld Dig,Steam,steam,0,24,0.0,0.0,0
+253330,Neverending Nightmares,Steam,steam,0,4,0.0,0.0,0
+255520,Viscera Cleanup Detail: Shadow Warrior,Steam,steam,0,2,0.0,0.0,0
+257510,The Talos Principle,Steam,steam,0,40,0.0,0.0,0
+261570,Ori and the Blind Forest,Steam,steam,0,50,0.0,0.0,0
+268500,XCOM 2,Steam,steam,49,88,55.68,58.93,3536
+268910,Cuphead,Steam,steam,24,42,57.14,18.28,1097
+274170,Hotline Miami 2: Wrong Number,Steam,steam,0,29,0.0,0.0,0
+282530,Castlevania: Lords of Shadow – Mirror of Fate HD,Steam,steam,0,23,0.0,0.0,0
+282800,100% Orange Juice,Steam,steam,0,359,0.0,0.02,1
+286690,Metro 2033 Redux,Steam,steam,0,49,0.0,0.0,0
+289070,Sid Meier's Civilization VI,Steam,steam,25,320,7.81,53.43,3206
+289130,ENDLESS Legend™,Steam,steam,0,139,0.0,0.0,0
+289650,Assassin's Creed Unity,Steam,steam,0,57,0.0,31.37,1882
+292030,The Witcher 3: Wild Hunt,Steam,steam,0,78,0.0,0.0,0
+297130,Titan Souls,Steam,steam,0,27,0.0,0.0,0
+302190,Amerzone: The Explorer’s Legacy (1999),Steam,steam,0,0,0,0.0,0
+302510,Ryse: Son of Rome,Steam,steam,27,73,36.99,6.17,370
+304240,Resident Evil,Steam,steam,6,44,13.64,3.68,221
+305050,Outland,Steam,steam,0,12,0.0,0.0,0
+307950,Caliber,Steam,steam,2,87,2.3,0.75,45
+310950,Street Fighter V,Steam,steam,0,45,0.0,0.0,0
+311560,Assassin's Creed Rogue,Steam,steam,0,46,0.0,4.23,254
+321270,UNLOVED,Steam,steam,0,95,0.0,0.0,0
+322190,SteamWorld Heist,Steam,steam,0,47,0.0,0.0,0
+322330,Don't Starve Together,Steam,steam,0,0,0,0.58,35
+324800,Shadow Warrior 2,Steam,steam,30,64,46.88,17.88,1073
+329050,Devil May Cry 4 Special Edition,Steam,steam,11,42,26.19,15.6,936
+329440,Sonic Lost World,Steam,steam,0,100,0.0,0.0,0
+332200,Axiom Verge,Steam,steam,0,29,0.0,0.0,0
+332950,Dark Deception,Steam,steam,2,40,5.0,3.57,214
+335300,DARK SOULS™ II: Scholar of the First Sin,Steam,steam,15,38,39.47,28.48,1709
+337000,Deus Ex: Mankind Divided™,Steam,steam,0,81,0.0,0.0,0
+339340,Resident Evil 0,Steam,steam,0,47,0.0,0.17,10
+339800,HuniePop,Steam,steam,0,20,0.0,0.0,0
+346110,ARK: Survival Evolved,Steam,steam,0,32,0.0,0.0,0
+350640,Sherlock Holmes: The Devil's Daughter,Steam,steam,0,25,0.0,0.0,0
+356190,Middle-earth™: Shadow of War™,Steam,steam,0,72,0.0,0.1,6
+356650,Death's Gambit: Afterlife,Steam,steam,0,43,0.0,0.3,18
+360740,Downwell,Steam,steam,0,20,0.0,0.0,0
+362680,Fran Bow,Steam,steam,0,18,0.0,0.0,0
+362890,Black Mesa,Steam,steam,0,50,0.0,0.0,0
+367450,Poly Bridge,Steam,steam,0,22,0.0,0.0,0
+367500,Dragon's Dogma: Dark Arisen,Steam,steam,39,59,66.1,48.67,2920
+367520,Hollow Knight,Steam,steam,63,63,100.0,74.2,4452
+368430,Through the Woods,Steam,steam,0,27,0.0,0.0,0
+368500,Assassin's Creed Syndicate,Steam,steam,0,56,0.0,19.57,1174
+369070,Slain: Back from Hell,Steam,steam,0,30,0.0,0.0,0
+373420,Divinity: Original Sin Enhanced Edition,Steam,steam,0,54,0.0,1.38,83
+373600,Weapon of Choice,Steam,steam,0,14,0.0,0.0,0
+374320,DARK SOULS™ III,Steam,steam,24,43,55.81,44.47,2668
+377160,Fallout 4,Steam,steam,0,84,0.0,0.0,0
+378540,The Surge,Steam,steam,67,67,100.0,28.77,1726
+379430,Kingdom Come: Deliverance,Steam,steam,82,82,100.0,174.2,10452
+379720,DOOM,Steam,steam,54,54,100.0,17.68,1061
+381210,Dead by Daylight,Steam,steam,8,300,2.67,10.63,638
+383180,Dead Island Riptide Definitive Edition,Steam,steam,0,35,0.0,0.0,0
+383870,Firewatch,Steam,steam,0,10,0.0,0.0,0
+384310,Dead In Bermuda,Steam,steam,0,36,0.0,0.0,0
+387290,Ori and the Blind Forest: Definitive Edition,Steam,steam,0,57,0.0,0.0,0
+390290,Bulb Boy,Steam,steam,0,12,0.0,0.0,0
+405640,Pony Island,Steam,steam,0,20,0.0,0.0,0
+405820,Turok,Steam,steam,0,10,0.0,0.0,0
+405830,Turok 2: Seeds of Evil,Steam,steam,0,14,0.0,0.0,0
+407530,ARK: Survival Of The Fittest,Steam,steam,0,0,0,0.0,0
+407810,Hard Reset Redux,Steam,steam,0,115,0.0,0.0,0
+409710,BioShock Remastered,Steam,steam,0,65,0.0,0.0,0
+409720,BioShock 2 Remastered,Steam,steam,0,53,0.0,0.0,0
+410110,12 is Better Than 6,Steam,steam,0,46,0.0,0.0,0
+410700,System Shock: Classic,Steam,steam,0,0,0,0.0,0
+410710,System Shock: Enhanced Edition,Steam,steam,0,6,0.0,0.0,0
+412020,Metro Exodus,Steam,steam,36,68,52.94,30.97,1858
+413150,Stardew Valley,Steam,steam,0,49,0.0,0.02,1
+418370,Resident Evil 7 Biohazard,Steam,steam,0,58,0.0,0.0,0
+418670,Pankapu,Steam,steam,0,56,0.0,0.0,0
+420740,The Deed,Steam,steam,0,17,0.0,0.0,0
+421120,Samorost 3,Steam,steam,0,30,0.0,0.08,5
+423230,Furi,Steam,steam,0,33,0.0,0.0,0
+424840,Little Nightmares,Steam,steam,1,22,4.55,1.07,64
+431960,Wallpaper Engine,Steam,steam,4,17,23.53,4.52,271
+435150,Divinity: Original Sin 2,Steam,steam,0,97,0.0,0.0,0
+438490,GOD EATER 2 Rage Burst,Steam,steam,0,47,0.0,0.0,0
+457140,Oxygen Not Included,Steam,steam,0,51,0.0,0.0,0
+460790,Bayonetta,Steam,steam,0,50,0.0,0.0,0
+460810,Vanquish,Steam,steam,0,50,0.0,0.0,0
+460870,GOD EATER RESURRECTION,Steam,steam,0,33,0.0,0.0,0
+460950,Katana ZERO,Steam,steam,22,22,100.0,10.25,615
+462770,Pyre,Steam,steam,0,51,0.0,0.0,0
+462960,Caveman World: Mountains of Unga Boonga,Steam,steam,0,14,0.0,0.0,0
+466240,Deceit,Steam,steam,1,14,7.14,0.58,35
+473950,Manifold Garden,Steam,steam,0,25,0.0,0.0,0
+474960,Quantum Break,Steam,steam,0,42,0.0,0.0,0
+480490,Prey,Steam,steam,20,58,34.48,29.58,1775
+481870,Mini Thief,Steam,steam,0,20,0.0,0.0,0
+489630,"Warhammer 40,000: Gladius - Relics of War",Steam,steam,0,166,0.0,0.0,0
+489830,The Elder Scrolls V: Skyrim Special Edition,Steam,steam,0,75,0.0,0.0,0
+493540,Figment,Steam,steam,0,23,0.0,0.0,0
+501590,Bulletstorm: Full Clip Edition,Steam,steam,0,60,0.0,0.0,0
+502500,ACE COMBAT™7: SKIES UNKNOWN,Steam,steam,0,49,0.0,0.12,7
+503560,911 Operator,Steam,steam,0,18,0.0,0.0,0
+504230,Celeste,Steam,steam,0,32,0.0,0.0,0
+504390,Along the Edge,Steam,steam,0,28,0.0,0.0,0
+517630,Just Cause 4,Steam,steam,0,61,0.0,0.0,0
+527710,Crown Champion: Legends of the Arena,Steam,steam,0,18,0.0,0.0,0
+534550,Guacamelee! 2,Steam,steam,23,49,46.94,10.48,629
+535480,Sundered: Eldritch Edition,Steam,steam,0,20,0.0,0.0,0
+541200,GTTOD,Steam,steam,0,28,0.0,0.85,51
+544610,Battlestar Galactica Deadlock,Steam,steam,0,26,0.0,0.0,0
+552500,Warhammer: Vermintide 2,Steam,steam,0,26,0.0,0.0,0
+553850,HELLDIVERS™ 2,Steam,steam,38,38,100.0,43.0,2580
+557600,Gorogoa,Steam,steam,0,11,0.0,0.0,0
+558990,Opus Magnum,Steam,steam,0,6,0.0,0.0,0
+569610,Distant Space,Steam,steam,0,44,0.0,0.0,0
+570940,DARK SOULS™: REMASTERED,Steam,steam,19,41,46.34,24.23,1454
+571310,SteamWorld Dig 2,Steam,steam,0,34,0.0,0.0,0
+578080,PUBG: BATTLEGROUNDS,Steam,steam,0,37,0.0,0.35,21
+582010,Monster Hunter: World,Steam,steam,8,100,8.0,4.48,269
+582160,Assassin's Creed Origins,Steam,steam,43,67,64.18,79.87,4792
+582500,We Were Here,Steam,steam,9,26,34.62,1.83,110
+582660,Black Desert,Steam,steam,0,0,0,0.0,0
+585690,Minimalism,Steam,steam,0,165,0.0,0.0,0
+586200,Street Fighter 30th Anniversary Collection,Steam,steam,0,17,0.0,0.0,0
+588650,Dead Cells,Steam,steam,0,121,0.0,4.2,252
+589360,Ni no Kuni™ II: Revenant Kingdom,Steam,steam,0,63,0.0,0.0,0
+597180,Old World,Steam,steam,0,408,0.0,0.0,0
+597760,Yuppie Psycho,Steam,steam,0,48,0.0,0.0,0
+599140,Graveyard Keeper,Steam,steam,0,125,0.0,0.0,0
+600130,Valfaris,Steam,steam,0,35,0.0,0.0,0
+601150,Devil May Cry 5,Steam,steam,19,55,34.55,18.33,1100
+601840,Griftlands,Steam,steam,0,13,0.0,0.0,0
+606150,Moonlighter,Steam,steam,0,67,0.0,0.0,0
+610570,Paradox Soul,Steam,steam,0,0,0,0.0,0
+612880,Wolfenstein II: The New Colossus,Steam,steam,22,80,27.5,13.63,818
+613100,House Flipper,Steam,steam,0,96,0.0,0.0,0
+613190,Unworthy,Steam,steam,2,29,6.9,0.32,19
+613830,CHRONO TRIGGER,Steam,steam,0,13,0.0,0.0,0
+617290,Remnant: From the Ashes,Steam,steam,32,50,64.0,22.27,1336
+618140,Barro,Steam,steam,0,109,0.0,0.0,0
+618740,Beat Hazard 2,Steam,steam,5,62,8.06,0.23,14
+619820,Heroes of Hammerwatch II,Steam,steam,0,37,0.0,0.0,0
+624690,NEXT JUMP: Shmup Tactics,Steam,steam,0,51,0.0,0.0,0
+626660,Flipping Death,Steam,steam,0,12,0.0,0.0,0
+628670,Hellpoint,Steam,steam,19,42,45.24,16.68,1001
+629760,MORDHAU,Steam,steam,1,38,2.63,0.83,50
+631510,Devil May Cry HD Collection,Steam,steam,36,99,36.36,21.37,1282
+632360,Risk of Rain 2,Steam,steam,4,171,2.34,2.42,145
+632470,Disco Elysium,Steam,steam,0,45,0.0,0.0,0
+633360,Remothered: Tormented Fathers,Steam,steam,0,10,0.0,0.0,0
+638970,Yakuza 0,Steam,steam,6,55,10.91,16.82,1009
+644830,The Surge 2,Steam,steam,57,57,100.0,30.38,1823
+646570,Slay the Spire,Steam,steam,24,46,52.17,44.27,2656
+668550,8Doors: Arum's Afterlife Adventure,Steam,steam,0,44,0.0,0.0,0
+671860,BattleBit Remastered,Steam,steam,0,0,0,2.97,178
+674930,Boyfriend Dungeon,Steam,steam,0,45,0.0,0.0,0
+677620,Splitgate,Steam,steam,16,30,53.33,8.63,518
+692850,Bloodstained: Ritual of the Night,Steam,steam,2,57,3.51,2.48,149
+692890,Roboquest,Steam,steam,0,86,0.0,0.55,33
+699170,Fell Seal: Arbiter's Mark,Steam,steam,0,53,0.0,0.0,0
+699920,Despotism 3k,Steam,steam,0,30,0.0,0.0,0
+706220,Black Desert SA (Retired),Steam,steam,0,0,0,0.0,0
+718590,Dark Devotion,Steam,steam,0,45,0.0,0.0,0
+720560,Vigil: The Longest Night,Steam,steam,0,47,0.0,0.0,0
+727850,ELDERBORN,Steam,steam,0,27,0.0,0.0,0
+728880,Overcooked! 2,Steam,steam,3,54,5.56,0.72,43
+729460,Distant Space 2,Steam,steam,0,150,0.0,0.0,0
+730390,Raji: An Ancient Epic,Steam,steam,0,21,0.0,0.0,0
+731040,The Invincible,Steam,steam,0,29,0.0,0.0,0
+731490,Crash Bandicoot™ N. Sane Trilogy,Steam,steam,10,74,13.51,5.62,337
+739630,Phasmophobia,Steam,steam,0,54,0.0,7.88,473
+740240,Snake Eyes Dungeon,Steam,steam,0,9,0.0,0.0,0
+740410,Puzzle Chambers,Steam,steam,0,10,0.0,0.0,0
+741820,Prey: Typhon Hunter,Steam,steam,0,10,0.0,0.0,0
+750290,Slice of Sea,Steam,steam,0,18,0.0,0.0,0
+753640,Outer Wilds,Steam,steam,4,31,12.9,30.22,1813
+753660,AtmaSphere,Steam,steam,0,107,0.0,0.0,0
+758330,Shenmue I & II,Steam,steam,0,55,0.0,0.0,0
+760160,Vampire: The Masquerade - Bloodhunt,Steam,steam,9,35,25.71,4.63,278
+774361,Blasphemous,Steam,steam,45,45,100.0,22.27,1336
+779290,Stygian: Reign of the Old Ones,Steam,steam,0,98,0.0,0.0,0
+782330,DOOM Eternal,Steam,steam,32,50,64.0,37.08,2225
+787480,Phoenix Wright: Ace Attorney Trilogy,Steam,steam,0,30,0.0,0.0,0
+794540,Neo Cab,Steam,steam,0,18,0.0,0.0,0
+798460,Ni no Kuni Wrath of the White Witch™ Remastered,Steam,steam,0,33,0.0,0.0,0
+804010,SteamWorld Quest: Hand of Gilgamech,Steam,steam,0,44,0.0,0.0,0
+812140,Assassin's Creed Odyssey,Steam,steam,93,93,100.0,173.92,10435
+813630,Supraland,Steam,steam,0,98,0.0,0.0,0
+814680,Unbound: Worlds Apart,Steam,steam,0,36,0.0,0.0,0
+826940,Maid of Sker,Steam,steam,7,30,23.33,7.02,421
+834530,Yakuza Kiwami (Legacy),Steam,steam,0,55,0.0,0.0,0
+844870,KurtzPel,Steam,steam,3,85,3.53,0.8,48
+847360,Super Lucky's Tale,Steam,steam,0,58,0.0,0.0,0
+858710,Gravity Circuit,Steam,steam,0,53,0.0,0.0,0
+860510,Little Nightmares II,Steam,steam,0,35,0.0,0.0,0
+860950,Mark of the Ninja: Remastered,Steam,steam,0,38,0.0,0.0,0
+862740,OneShift,Steam,steam,0,126,0.0,0.0,0
+865360,We Were Here Together,Steam,steam,12,22,54.55,10.0,600
+868270,The Cycle: Frontier,Steam,steam,0,0,0,0.55,33
+870780,Control Ultimate Edition,Steam,steam,0,67,0.0,0.0,0
+880940,Pummel Party,Steam,steam,0,31,0.0,0.0,0
+881100,Noita,Steam,steam,0,14,0.0,0.0,0
+882100,XCOM: Chimera Squad,Steam,steam,1,40,2.5,2.23,134
+883710,Resident Evil 2,Steam,steam,0,44,0.0,3.62,217
+892970,Valheim,Steam,steam,0,0,0,8.7,522
+893180,Catherine Classic,Steam,steam,0,50,0.0,0.0,0
+894020,Death's Door,Steam,steam,0,24,0.0,0.0,0
+897630,Death Fungeon,Steam,steam,0,0,0,0.0,0
+911400,Assassin's Creed III Remastered,Steam,steam,0,84,0.0,21.05,1263
+927380,Yakuza Kiwami 2 (Legacy),Steam,steam,0,59,0.0,0.0,0
+945360,Among Us,Steam,steam,0,33,0.0,6.8,408
+953490,CARRION,Steam,steam,6,21,28.57,0.58,35
+955050,Bright Memory,Steam,steam,12,12,100.0,1.88,113
+956030,Creaks,Steam,steam,15,28,53.57,10.1,606
+957960,Inkulinati,Steam,steam,0,26,0.0,0.0,0
+964800,Prodeus,Steam,steam,0,30,0.0,7.98,479
+990080,Hogwarts Legacy,Steam,steam,0,45,0.0,0.0,0
+993090,Lossless Scaling,Steam,steam,0,0,0,30.5,1830
+994280,Gujian3(古剑奇谭三),Steam,steam,0,105,0.0,0.0,0
+996580,Spyro™ Reignited Trilogy,Steam,steam,5,105,4.76,2.05,123
+1000410,WRATH: Aeon of Ruin,Steam,steam,0,50,0.0,0.0,0
+1025440,Fantasy General II,Steam,steam,0,77,0.0,0.0,0
+1030300,Hollow Knight: Silksong,Steam,steam,52,52,100.0,98.45,5907
+1035510,Ultimate Zombie Defense,Steam,steam,0,12,0.0,0.0,0
+1037020,ScourgeBringer,Steam,steam,0,42,0.0,0.0,0
+1038300,New Super Lucky's Tale,Steam,steam,0,54,0.0,0.0,0
+1049280,Pilgrims,Steam,steam,0,45,0.0,0.0,0
+1049410,Superliminal,Steam,steam,0,27,0.0,0.0,0
+1049890,Little Witch Nobeta,Steam,steam,10,42,23.81,4.65,279
+1057090,Ori and the Will of the Wisps,Steam,steam,7,37,18.92,16.6,996
+1062160,Poly Bridge 2,Steam,steam,1,22,4.55,0.57,34
+1065310,Evil West,Steam,steam,0,30,0.0,0.0,0
+1071870,Biped,Steam,steam,0,15,0.0,0.0,0
+1082430,Before Your Eyes,Steam,steam,0,11,0.0,0.0,0
+1084160,Jagged Alliance 3,Steam,steam,0,50,0.0,0.0,0
+1084600,My Time at Sandrock,Steam,steam,0,60,0.0,0.0,0
+1085660,Destiny 2,Steam,steam,23,23,100.0,823.07,49384
+1086940,Baldur's Gate 3,Steam,steam,0,54,0.0,0.0,0
+1091500,Cyberpunk 2077,Steam,steam,57,57,100.0,128.78,7727
+1097150,Fall Guys,Steam,steam,7,34,20.59,2.4,144
+1099640,Jack Move,Steam,steam,0,10,0.0,0.0,0
+1113000,Persona 4 Golden,Steam,steam,0,50,0.0,0.0,0
+1123050,GRIME,Steam,steam,4,47,8.51,0.72,43
+1134700,Wild Terra 2: New Lands,Steam,steam,0,56,0.0,0.0,0
+1137460,ALTF4,Steam,steam,0,22,0.0,0.0,0
+1140890,Morbid: The Seven Acolytes,Steam,steam,0,25,0.0,0.0,0
+1148590,DOOM 64,Steam,steam,0,10,0.0,0.02,1
+1150440,Aliens: Dark Descent,Steam,steam,0,45,0.0,0.0,0
+1150530,Wizard with a Gun,Steam,steam,0,46,0.0,0.0,0
+1153640,Chorus,Steam,steam,0,42,0.0,0.0,0
+1164940,Trepang2,Steam,steam,0,49,0.0,0.0,0
+1166290,Death and Taxes,Steam,steam,0,60,0.0,0.0,0
+1167450,DAEMON X MACHINA,Steam,steam,0,61,0.0,0.0,0
+1167750,The Lamplighters League,Steam,steam,0,41,0.0,0.0,0
+1172470,Apex Legends,Steam,steam,0,12,0.0,0.63,38
+1172620,Sea of Thieves,Steam,steam,19,293,6.48,6.22,373
+1172650,INDUSTRIA,Steam,steam,0,23,0.0,0.0,0
+1176710,Space Crew: Legendary Edition,Steam,steam,0,30,0.0,0.0,0
+1178830,Bright Memory: Infinite,Steam,steam,0,30,0.0,0.02,1
+1179080,FAITH,Steam,steam,0,32,0.0,0.0,0
+1180660,Tell Me Why,Steam,steam,0,30,0.0,0.0,0
+1186640,Pumpkin Jack,Steam,steam,0,30,0.0,0.0,0
+1190460,DEATH STRANDING,Steam,steam,2,63,3.17,1.53,92
+1196590,Resident Evil Village,Steam,steam,29,56,51.79,22.62,1357
+1200580,One Gun Guy,Steam,steam,0,19,0.0,0.0,0
+1206060,Happy Game,Steam,steam,0,11,0.0,0.0,0
+1220150,Blue Fire,Steam,steam,0,22,0.0,0.0,0
+1222370,Necromunda: Hired Gun,Steam,steam,0,48,0.0,0.0,0
+1225560,Unravel,Steam,steam,0,26,0.0,0.0,0
+1225570,Unravel Two,Steam,steam,0,28,0.0,0.07,4
+1230530,Atlas Fallen,Steam,steam,0,38,0.0,0.0,0
+1236300,Resident Evil Re:Verse,Steam,steam,0,12,0.0,0.0,0
+1240440,Halo Infinite,Steam,steam,21,144,14.58,13.37,802
+1240590,Sir Whoopass™: Immortal Death,Steam,steam,0,83,0.0,0.0,0
+1245620,ELDEN RING,Steam,steam,42,42,100.0,174.78,10487
+1269500,Crowalt: Traces of the Lost Colony,Steam,steam,0,9,0.0,0.0,0
+1271400,Adios,Steam,steam,0,25,0.0,0.0,0
+1272320,Diplomacy is Not an Option,Steam,steam,0,60,0.0,0.0,0
+1272840,Dordogne,Steam,steam,0,31,0.0,0.0,0
+1282100,Remnant II,Steam,steam,0,65,0.0,0.0,0
+1282730,Loop Hero,Steam,steam,2,50,4.0,0.3,18
+1284410,GWENT: The Witcher Card Game,Steam,steam,0,46,0.0,0.38,23
+1285670,Post Void,Steam,steam,2,7,28.57,0.52,31
+1286350,BPM: BULLETS PER MINUTE,Steam,steam,1,28,3.57,4.43,266
+1291010,Warpips,Steam,steam,0,21,0.0,0.0,0
+1293830,Forza Horizon 4,Steam,steam,4,178,2.25,2.18,131
+1307580,TOEM,Steam,steam,0,48,0.0,0.0,0
+1313140,Cult of the Lamb,Steam,steam,0,57,0.0,0.0,0
+1315610,Source of Madness,Steam,steam,0,24,0.0,0.0,0
+1321440,Cassette Beasts,Steam,steam,0,123,0.0,0.0,0
+1328350,Turbo Overkill,Steam,steam,0,67,0.0,0.0,0
+1334730,Dread Templar,Steam,steam,0,30,0.0,0.0,0
+1336490,Against the Storm,Steam,steam,0,80,0.0,0.0,0
+1338580,McPixel 3,Steam,steam,0,93,0.0,0.0,0
+1353230,Bomb Rush Cyberfunk,Steam,steam,0,23,0.0,0.0,0
+1356810,Hexarchy,Steam,steam,0,67,0.0,0.0,0
+1361210,"Warhammer 40,000: Darktide",Steam,steam,2,36,5.56,3.28,197
+1368870,Field of Glory II: Medieval,Steam,steam,0,20,0.0,0.0,0
+1369630,ENDER LILIES: Quietus of the Knights,Steam,steam,7,38,18.42,3.72,223
+1371690,GRAVEN,Steam,steam,0,37,0.0,0.0,0
+1382330,Persona 5 Strikers,Steam,steam,0,47,0.0,0.0,0
+1386900,Observer: System Redux,Steam,steam,0,23,0.0,0.0,0
+1388770,Cruelty Squad,Steam,steam,0,38,0.0,0.0,0
+1406780,Viscerafest,Steam,steam,0,70,0.0,0.0,0
+1416960,Everafter Falls,Steam,steam,0,38,0.0,0.0,0
+1432100,The Bookwalker,Steam,steam,0,37,0.0,0.0,0
+1436920,Tandem: a tale of shadows,Steam,steam,0,24,0.0,0.0,0
+1449560,Metro Exodus Enhanced Edition,Steam,steam,0,68,0.0,0.0,0
+1455840,Dorfromantik,Steam,steam,5,85,5.88,3.23,194
+1458140,Pacific Drive,Steam,steam,0,49,0.0,0.0,0
+1466060,Tainted Grail: The Fall of Avalon,Steam,steam,65,65,100.0,61.07,3664
+1484720,Dead Estate,Steam,steam,3,200,1.5,0.27,16
+1486630,Intravenous,Steam,steam,0,45,0.0,0.0,0
+1491670,Venba,Steam,steam,0,15,0.0,0.0,0
+1492070,Sker Ritual,Steam,steam,0,52,0.0,0.0,0
+1493640,Banishers: Ghosts of New Eden,Steam,steam,43,43,100.0,78.98,4739
+1496590,Tchia,Steam,steam,0,21,0.0,0.0,0
+1501610,Nova Lands,Steam,steam,0,24,0.0,0.0,0
+1507190,Machinika Museum,Steam,steam,0,0,0,0.0,0
+1510580,Toy Tinker Simulator,Steam,steam,0,24,0.0,0.0,0
+1515950,Capcom Arcade Stadium,Steam,steam,0,20,0.0,0.0,0
+1521070,The Pegasus Expedition,Steam,steam,0,29,0.0,0.0,0
+1531540,Distant Worlds 2,Steam,steam,0,0,0,0.0,0
+1533420,Neon White,Steam,steam,63,63,100.0,26.25,1575
+1545560,Shadow Gambit: The Cursed Crew,Steam,steam,0,26,0.0,0.0,0
+1562430,DREDGE,Steam,steam,0,60,0.0,0.0,0
+1586800,Lil Gator Game,Steam,steam,0,41,0.0,0.0,0
+1590910,Forgive Me Father,Steam,steam,0,20,0.0,0.0,0
+1599330,Wildmender,Steam,steam,0,108,0.0,0.0,0
+1601740,Corpse Keeper,Steam,steam,0,42,0.0,0.0,0
+1604030,V Rising,Steam,steam,0,49,0.0,0.0,0
+1608450,Hellslave,Steam,steam,0,43,0.0,0.0,0
+1634080,Nocturnal,Steam,steam,0,11,0.0,0.0,0
+1637320,Dome Keeper,Steam,steam,0,47,0.0,0.0,0
+1651560,Fabledom,Steam,steam,0,22,0.0,0.0,0
+1652250,Tales And Tactics,Steam,steam,0,68,0.0,0.0,0
+1658150,Moonstone Island,Steam,steam,0,59,0.0,0.0,0
+1658280,Eiyuden Chronicle: Hundred Heroes,Steam,steam,0,56,0.0,0.0,0
+1661630,KarmaZoo,Steam,steam,0,22,0.0,0.0,0
+1665190,Monster Prom 3: Monster Roadtrip,Steam,steam,0,75,0.0,0.0,0
+1675830,1000xRESIST,Steam,steam,0,32,0.0,0.0,0
+1676130,Deadlink,Steam,steam,0,74,0.0,0.0,0
+1678430,PowerSlave Exhumed,Steam,steam,0,20,0.0,0.0,0
+1681430,RoboCop: Rogue City,Steam,steam,27,27,100.0,19.75,1185
+1684350,The Thaumaturge,Steam,steam,0,57,0.0,0.0,0
+1687950,Persona 5 Royal,Steam,steam,0,53,0.0,0.0,0
+1691190,Rogue Waters,Steam,steam,0,18,0.0,0.0,0
+1703340,The Stanley Parable: Ultra Deluxe,Steam,steam,0,11,0.0,0.0,0
+1712840,Tiny Tina's Assault on Dragon Keep: A Wonderlands One-shot Adventure,Steam,steam,0,30,0.0,0.0,0
+1740720,Have a Nice Death,Steam,steam,0,37,0.0,0.0,0
+1755910,Capcom Arcade 2nd Stadium,Steam,steam,0,19,0.0,0.0,0
+1792250,Serious Sam: Siberian Mayhem,Steam,steam,0,51,0.0,0.0,0
+1793170,Racine,Steam,steam,0,47,0.0,0.0,0
+1793350,Blue Fire: Void Maker,Steam,steam,0,0,0,0.0,0
+1803400,Beneath Oresa,Steam,steam,0,66,0.0,0.0,0
+1808500,ARC Raiders,Steam,steam,50,50,100.0,74.67,4480
+1840080,Homeworld 3,Steam,steam,0,35,0.0,0.0,0
+1850570,DEATH STRANDING DIRECTOR'S CUT,Steam,steam,48,63,76.19,83.97,5038
+1875830,Shin Megami Tensei V: Vengeance,Steam,steam,0,48,0.0,0.0,0
+1877140,Achilles: Legends Untold Playtest,Steam,steam,0,0,0,0.02,1
+1888160,ARMORED CORE™ VI FIRES OF RUBICON™,Steam,steam,30,30,100.0,24.35,1461
+1905910,Steel Hunters Beta Playtest,Steam,steam,0,0,0,0.58,35
+1911390,Knightfall: A Daring Journey,Steam,steam,0,0,0,0.0,0
+1915380,Garden Life: A Cozy Simulator,Steam,steam,0,37,0.0,0.0,0
+1916310,Remnant Records,Steam,steam,0,29,0.0,0.0,0
+1927720,Monument Valley,Steam,steam,0,19,0.0,0.0,0
+1929870,Nomad Survival,Steam,steam,0,116,0.0,0.0,0
+1931730,Fort Solis,Steam,steam,0,20,0.0,0.0,0
+1937500,Let's School,Steam,steam,0,44,0.0,0.0,0
+1937780,Total War: PHARAOH,Steam,steam,0,76,0.0,0.0,0
+1939970,Nobody Wants to Die,Steam,steam,0,26,0.0,0.0,0
+1944430,Amnesia: The Bunker,Steam,steam,0,44,0.0,0.0,0
+1977170,Jusant,Steam,steam,0,21,0.0,0.0,0
+1982340,Blanc,Steam,steam,0,13,0.0,0.0,0
+1983260,Dungeons of Hinterberg,Steam,steam,0,50,0.0,0.0,0
+2005010,"Warhammer 40,000: Boltgun",Steam,steam,0,21,0.0,0.0,0
+2005160,Naheulbeuk's Dungeon Master,Steam,steam,0,30,0.0,0.0,0
+2019810,Boxes,Steam,steam,0,12,0.0,0.0,0
+2020710,Havendock,Steam,steam,0,18,0.0,0.0,0
+2059660,Cavern of Dreams,Steam,steam,0,2,0.0,0.0,0
+2072450,Like a Dragon: Infinite Wealth,Steam,steam,0,74,0.0,0.57,34
+2074920,The First Descendant,Steam,steam,18,24,75.0,32.0,1920
+2076040,THE FINALS PLAYTEST,Steam,steam,0,0,0,0.82,49
+2096610,Crysis 3 Remastered,Steam,steam,0,37,0.0,0.0,0
+2114740,Blasphemous 2,Steam,steam,0,60,0.0,0.0,0
+2149010,Little Nightmares Enhanced Edition,Steam,steam,0,22,0.0,0.0,0
+2183900,"Warhammer 40,000: Space Marine 2",Steam,steam,50,50,100.0,66.37,3982
+2186680,"Warhammer 40,000: Rogue Trader",Steam,steam,0,133,0.0,0.0,0
+2238040,Tiny Terry's Turbo Trip,Steam,steam,0,31,0.0,0.0,0
+2246340,Monster Hunter Wilds,Steam,steam,50,50,100.0,205.97,12358
+2272250,Forgive Me Father 2,Steam,steam,0,32,0.0,0.0,0
+2272400,Station to Station,Steam,steam,0,81,0.0,0.0,0
+2305840,Cat Quest III,Steam,steam,0,30,0.0,0.0,0
+2328750,My Little Universe,Steam,steam,0,76,0.0,0.0,0
+2386310,Ultros,Steam,steam,0,31,0.0,0.0,0
+2419090,STAR WARS™: Bounty Hunter™,Steam,steam,0,37,0.0,0.0,0
+2427410,S.T.A.L.K.E.R.: Shadow of Chornobyl - Enhanced Edition,Steam,steam,0,44,0.0,0.0,0
+2427420,S.T.A.L.K.E.R.: Clear Sky - Enhanced Edition,Steam,steam,0,43,0.0,0.0,0
+2427430,S.T.A.L.K.E.R.: Call of Prypiat - Enhanced Edition,Steam,steam,0,47,0.0,0.0,0
+2427520,ARC Raiders Playtest,Steam,steam,0,0,0,0.0,0
+2452280,Mecha BREAK,Steam,steam,61,61,100.0,71.83,4310
+2478970,Tomb Raider I-III Remastered Starring Lara Croft,Steam,steam,0,284,0.0,0.0,0
+2521380,Legacy of Kain™ Soul Reaver 1&2 Remastered,Steam,steam,0,83,0.0,0.0,0
+2521630,Mini Settlers,Steam,steam,0,67,0.0,0.0,0
+2542120,NINJA GAIDEN: Ragebound,Steam,steam,36,36,100.0,18.27,1096
+2622380,ELDEN RING NIGHTREIGN,Steam,steam,37,37,100.0,97.72,5863
+2623090,Battle Simulator: Counter Stickman,Steam,steam,0,0,0,0.0,0
+2752710,WHAT THE PAK?!,Steam,steam,0,56,0.0,0.0,0
+2767030,Marvel Rivals,Steam,steam,4,49,8.16,8.63,518
+2868840,Slay the Spire 2,Steam,steam,0,0,0,29.15,1749
+2881650,Content Warning,Steam,steam,0,48,0.0,0.0,0
+2933080,Crime Boss: Rockay City,Steam,steam,0,45,0.0,0.0,0
+2943730,FragPunk Playtest,Steam,steam,0,0,0,0.0,0
+2947440,SILENT HILL f,Steam,steam,56,56,100.0,28.18,1691
+2951630,Total War: PHARAOH DYNASTIES,Steam,steam,0,105,0.0,0.0,0
+2955840,Kitchen Wars,Steam,steam,0,29,0.0,0.0,0
+2967990,Train Sim World® 5,Steam,steam,0,84,0.0,0.0,0
+3017580,Paragnosia,Steam,steam,0,6,0.0,0.0,0
+3028310,Nordhold,Steam,steam,0,32,0.0,0.0,0
+3028500,Cakey's Twisted Bakery,Steam,steam,0,21,0.0,0.0,0
+3062930,Unplagued,Steam,steam,0,0,0,0.0,0
+3065170,Monster Hunter Wilds Beta test,Steam,steam,0,0,0,0.45,27
+3081410,Battlefield™ 6 Open Beta,Steam,steam,0,0,0,7.5,450
+3286930,Heretic + Hexen,Steam,steam,0,44,0.0,0.0,0
+3321460,Crimson Desert,Steam,steam,34,34,100.0,239.08,14345
+3321660,Mistfall Hunter Playtest,Steam,steam,0,0,0,0.0,0
+3357650,PRAGMATA,Steam,steam,35,35,100.0,30.0,1800
+3400000,Cubic Odyssey,Steam,steam,0,37,0.0,0.0,0
+3404800,Chrono Odyssey Playtest,Steam,steam,0,0,0,1.77,106
+3717340,Yakuza Kiwami 2,Steam,steam,0,59,0.0,0.0,0
