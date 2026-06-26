@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { slugify } from "./gameHelpers";
 
 export type Game = {
   id: number;
@@ -28,68 +29,25 @@ summary: string;
   screenshots: string;
 };
 
-export function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function mapGame(game: any): Game {
+function mapGame(game: any) {
   return {
-    id: game.id,
-    slug: game.slug,
-
-    Title: game.title || "",
-    Release: game.release || "",
-    "Date of Purchase": game.date_of_purchase || "",
-    "Completion Last Played": game.completion_last_played || "",
-    Score: game.score?.toString() || "",
-    Price: game.price || "",
-    Hours: game.hours_played?.toString() || "",
-    "Hours Played": game.hours_played?.toString() || "",
-    Status: game.status || "",
-    Store: game.store || "",
-    Platform: game.platform || "",
-    "Hardware (1)": game.hardware || "",
-    cover_url: game.cover_url || "",
-hero_url: game.hero_url || "",
-wide_cover_url: game.wide_cover_url || "",
-steam_vertical_cover: game.steam_vertical_cover || "",
-summary: game.summary || "",
-genre: game.genre || "",
-developer: game.developer || "",
-publisher: game.publisher || "",
-igdb_id: game.igdb_id || null,
-screenshots: game.screenshots || "",
+    ...game,
+    Title: game.title,
+    Store: game.store,
+    Platform: game.platform,
+    Hardware: game.hardware,
+    "Hardware (1)": game.hardware,
+    Genre: game.genre,
+    Score: game.score,
+    Status: game.status,
+    Price: game.price,
+    "Hours Played": game.hours_played,
+    Release: game.release,
+    "Date of Purchase": game.date_of_purchase,
+    "Completion Last Played": game.completion_last_played,
+    "Completion / Last Played": game.completion_last_played,
+    Cover: game.steam_vertical_cover || game.cover_url,
   };
-}
-
-export async function getGames(): Promise<Game[]> {
-  const { data, error } = await supabase
-    .from("games")
-    .select("*");
-
-  if (error) {
-    throw error;
-  }
-
-  return data.map(mapGame);
-}
-
-export async function getGameBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from("games")
-    .select("*")
-    .eq("slug", slug)
-    .limit(1)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return mapGame(data);
 }
 export async function getGameById(id: number) {
   const { data, error } = await supabase
@@ -104,18 +62,4 @@ export async function getGameById(id: number) {
   }
 
   return mapGame(data);
-}
-export async function getGamesForRanking() {
-  const { data } = await supabase
-    .from("games")
-    .select(`
-      id,
-      release,
-      completion_last_played,
-      score,
-      hours_played,
-      status
-    `);
-
-  return (data || []).map(mapGame);
 }

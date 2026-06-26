@@ -3,24 +3,14 @@ import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameById } from "@/lib/games";
-import { supabase } from "@/lib/supabase";
-import { formatHours, getIcon, getYearFromDate } from "@/lib/gameHelpers";
-
-
-function formatDisplayDate(value: string | null | undefined) {
-  if (!value) return "-";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  const formatted = date.toLocaleDateString("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-return formatted.replace(/ (\d{4})$/, ", $1");
-}
+import {
+  formatDisplayDate,
+  formatHours,
+  getDaysBetween,
+  getIcon,
+  getYearFromDate,
+} from "@/lib/gameHelpers";
+import { getRankFromDatabase } from "@/lib/server/gameRanking";
 
 export default async function GamePage({
   params,
@@ -35,53 +25,6 @@ if (!game) {
       Game not found
     </main>
   );
-}
-
-function getDaysBetween(start?: string, end?: string) {
-  if (!start || !end) return "-";
-
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-
-  const diff =
-    Math.abs(endDate.getTime() - startDate.getTime()) /
-    (1000 * 60 * 60 * 24);
-
-  return `${Math.round(diff)} Days`;
-}
-
-async function getRankFromDatabase({
-  column,
-  currentValue,
-  yearColumn,
-  currentYear,
-  status,
-}: {
-  column: "score" | "hours_played";
-  currentValue: number;
-  yearColumn: "release" | "completion_last_played";
-  currentYear: string;
-  status?: string;
-}) {
-  if (!currentValue || !currentYear) return undefined;
-
-  const startDate = `${currentYear}-01-01`;
-  const endDate = `${currentYear}-12-31`;
-
-  let query = supabase
-    .from("games")
-    .select("id", { count: "exact", head: true })
-    .gte(yearColumn, startDate)
-    .lte(yearColumn, endDate)
-    .gt(column, currentValue);
-
-  if (status) {
-    query = query.eq("status", status);
-  }
-
-  const { count } = await query;
-
-  return `Ranked #${(count || 0) + 1} (${currentYear})`;
 }
 
 const coverImage = game.cover_url;

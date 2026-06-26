@@ -83,12 +83,12 @@ const [dashboardStats, setDashboardStats] = useState({
     const completion = searchParams.get("completion");
 const page = searchParams.get("page");
 
-    if (searchValue) setSearch(searchValue);
-    if (status) setStatusFilter(status);
-    if (store) setStoreFilter(store);
-    if (release) setYearFilter(release);
-    if (completion) setCompletionYearFilter(completion);
-if (page) setCurrentPage(Number(page));
+    setSearch(searchValue ?? "");
+setStatusFilter(status ?? "All");
+setStoreFilter(store ?? "All");
+setYearFilter(release ?? "All");
+setCompletionYearFilter(completion ?? "All");
+setCurrentPage(page ? Number(page) : 1);
 
     setHasLoadedFilters(true);
   }, [searchParams]);
@@ -123,6 +123,8 @@ if (currentPage > 1) params.set("page", String(currentPage));
 
   useEffect(() => {
     async function loadGames() {
+      if (!hasLoadedFilters) return;
+
       try {
         const params = new URLSearchParams();
 
@@ -180,7 +182,8 @@ const data = await response.json();
     
 
     loadGames();
-    }, [
+        }, [
+    hasLoadedFilters,
     currentPage,
     search,
     statusFilter,

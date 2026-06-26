@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/games";
+import { slugify } from "@/lib/gameHelpers";
 
 function toNumber(value: string) {
   const number = Number(value);

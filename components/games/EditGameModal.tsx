@@ -182,6 +182,14 @@ export default function EditGameModal({ game }: { game: any }) {
 
     setCoverUrl(game.coverUrl || "");
     setHeroUrl(game.heroUrl || "");
+        setSummary(game.summary || "");
+    setGenre(game.genre || "");
+    setDeveloper(game.developer || "");
+    setPublisher(game.publisher || "");
+    setScreenshots(game.screenshots || "");
+    setIgdbId(game.igdbId || null);
+    setSteamAppId(game.steamAppId || null);
+    setResults([]);
 
     try {
       const params = new URLSearchParams();
@@ -211,16 +219,6 @@ export default function EditGameModal({ game }: { game: any }) {
       setWideCoverOptions([]);
       setSteamVerticalCoverOptions([]);
     }
-
-    setSummary(game.summary || "");
-    setGenre(game.genre || "");
-    setDeveloper(game.developer || "");
-    setPublisher(game.publisher || "");
-    setScreenshots(game.screenshots || "");
-    setIgdbId(game.igdbId || null);
-    setSteamAppId(game.steamAppId || null);
-
-    setResults([]);
   }
 
   async function updateGame(event: React.FormEvent) {

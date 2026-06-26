@@ -13,7 +13,7 @@ export function getIcon(value?: string) {
     nintendo: "/platforms/switch.png",
     switch: "/platforms/switch.png",
     legacy: "/platforms/legacy.png",
-    "humble bundle": "/platforms/humblebundle.png",
+    "humble bundle": "/platforms/humble.png",
 
     yuzu: "/platforms/yuzu.png",
     citra: "/platforms/citra.png",

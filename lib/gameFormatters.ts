@@ -17,3 +17,30 @@ export function getYearFromDate(value?: string) {
   const match = value?.match(/\b(19|20)\d{2}\b/);
   return match ? match[0] : "";
 }
+export function formatDisplayDate(value: string | null | undefined) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const formatted = date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  return formatted.replace(/ (\d{4})$/, ", $1");
+}
+
+export function getDaysBetween(start?: string, end?: string) {
+  if (!start || !end) return "-";
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  const diff =
+    Math.abs(endDate.getTime() - startDate.getTime()) /
+    (1000 * 60 * 60 * 24);
+
+  return `${Math.round(diff)} Days`;
+}

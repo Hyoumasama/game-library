@@ -5,6 +5,8 @@ export {
   getCompletionDate,
   getReleaseYear,
   getYearFromDate,
+  formatDisplayDate,
+  getDaysBetween,
 } from "./gameFormatters";
 
 export { getScoreClass } from "./gameRanking";
