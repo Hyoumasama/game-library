@@ -2,57 +2,10 @@ import GamePageMobileMenu from "@/components/GamePageMobileMenu";
 import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
-import { getGameById, getGamesForRanking } from "@/lib/games";
-import Link from "next/link";
+import { getGameById } from "@/lib/games";
+import { supabase } from "@/lib/supabase";
+import { formatHours, getIcon, getYearFromDate } from "@/lib/gameHelpers";
 
-function getPlatformLogo(platform?: string) {
-  const value = platform?.toLowerCase() || "";
-
-  if (value.includes("steam")) return "/platforms/steam.png";
-  if (value.includes("epic")) return "/platforms/epicgames.png";
-  if (value.includes("psn")) return "/platforms/psn.png";
-  if (value.includes("playstation")) return "/platforms/psn.png";
-  if (value.includes("xbox")) return "/platforms/xbox.png";
-  if (value.includes("switch")) return "/platforms/switch.png";
-  if (value.includes("ea desktop")) return "/platforms/eadesktop.ico";
-
-  if (value.includes("pcsx2")) return "/platforms/pcsx2.png";
-  if (value.includes("duckstation")) return "/platforms/duckstation.png";
-  if (value.includes("rpcs3")) return "/platforms/rpcs3.png";
-  if (value.includes("xenia")) return "/platforms/xenia.png";
-  if (value.includes("citra")) return "/platforms/citra.png";
-  if (value.includes("yuzu")) return "/platforms/yuzu.png";
-  if (value.includes("ryujinx")) return "/platforms/ryujinx.png";
-  if (value.includes("cemu")) return "/platforms/cemu.png";
-  if (value.includes("retroarch")) return "/platforms/retroarch.png";
-
-  if (value.includes("gog")) return "/platforms/gog.jpeg";
-  if (value.includes("piracy")) return "/platforms/piracy.png";
-
-  return null;
-}
-
-function getHardwareLogo(hardware?: string) {
-  const value = hardware?.toLowerCase().replace(/\s+/g, "") || "";
-
-  if (value === "pc") return "/hardware/pc.png";
-  if (value.includes("steamdeck")) return "/hardware/steamdeck.png";
-  if (value.includes("xbox")) return "/hardware/xbox.png";
-
-  if (value.includes("playstation4") || value.includes("ps4"))
-    return "/hardware/playstation4.png";
-
-  if (value.includes("playstation3") || value.includes("ps3"))
-    return "/hardware/playstation3.png";
-
-  if (value.includes("playstation2") || value.includes("ps2"))
-    return "/hardware/playstation2.png";
-
-  if (value.includes("playstation") || value.includes("ps5"))
-    return "/hardware/playstation.png";
-
-  return null;
-}
 
 function formatDisplayDate(value: string | null | undefined) {
   if (!value) return "-";
@@ -76,52 +29,12 @@ export default async function GamePage({
 }) {
   const { id } = await params;
  const game = await getGameById(Number(id));
-const games = await getGamesForRanking();
-
 if (!game) {
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       Game not found
     </main>
   );
-}
-
-  function formatHours(hours: string) {
-  const value = Number(hours || 0);
-  if (!value) return "0";
-  return value.toFixed(1).replace(".0", "");
-}
-
-function getLogo(value: string) {
-  const text = value?.toLowerCase() || "";
-
-  // Stores
-  if (text.includes("steam")) return "/platforms/steam.png";
-  if (text.includes("epic")) return "/platforms/epicgames.png";
-  if (text.includes("psn")) return "/platforms/psn.png";
-  if (text.includes("playstation")) return "/platforms/psn.png";
-  if (text.includes("xbox")) return "/platforms/xbox.png";
-  if (text.includes("switch")) return "/platforms/switch.png";
-  if (text.includes("ea desktop")) return "/platforms/eadesktop.ico";
-  if (text.includes("gog")) return "/platforms/gog.jpeg";
-  if (text.includes("piracy")) return "/platforms/piracy.png";
-
-  // Emulators
-  if (text.includes("pcsx2")) return "/platforms/pcsx2.png";
-  if (text.includes("duckstation")) return "/platforms/duckstation.png";
-  if (text.includes("rpcs3")) return "/platforms/rpcs3.png";
-  if (text.includes("xenia")) return "/platforms/xenia.png";
-  if (text.includes("citra")) return "/platforms/citra.png";
-  if (text.includes("yuzu")) return "/platforms/yuzu.png";
-  if (text.includes("ryujinx")) return "/platforms/ryujinx.png";
-  if (text.includes("cemu")) return "/platforms/cemu.png";
-  if (text.includes("retroarch")) return "/platforms/retroarch.png";
-
-  return null;
-}
-function getYear(value?: string) {
-  const match = value?.match(/\b(19|20)\d{2}\b/);
-  return match ? match[0] : "";
 }
 
 function getDaysBetween(start?: string, end?: string) {
@@ -137,96 +50,73 @@ function getDaysBetween(start?: string, end?: string) {
   return `${Math.round(diff)} Days`;
 }
 
-function getRankText({
-  games,
+async function getRankFromDatabase({
+  column,
   currentValue,
+  yearColumn,
   currentYear,
-  getValue,
-  getYearValue,
+  status,
 }: {
-  games: any[];
+  column: "score" | "hours_played";
   currentValue: number;
+  yearColumn: "release" | "completion_last_played";
   currentYear: string;
-  getValue: (game: any) => number;
-  getYearValue: (game: any) => string;
+  status?: string;
 }) {
   if (!currentValue || !currentYear) return undefined;
 
-  const sameYearGames = games.filter((game) => {
-    return getYearValue(game) === currentYear && getValue(game) > 0;
-  });
+  const startDate = `${currentYear}-01-01`;
+  const endDate = `${currentYear}-12-31`;
 
-  const betterCount = sameYearGames.filter((game) => {
-    return getValue(game) > currentValue;
-  }).length;
+  let query = supabase
+    .from("games")
+    .select("id", { count: "exact", head: true })
+    .gte(yearColumn, startDate)
+    .lte(yearColumn, endDate)
+    .gt(column, currentValue);
 
-  return `Ranked #${betterCount + 1} (${currentYear})`;
+  if (status) {
+    query = query.eq("status", status);
+  }
+
+  const { count } = await query;
+
+  return `Ranked #${(count || 0) + 1} (${currentYear})`;
 }
 
-function getHardwareLogo(hardware: string) {
-  const value = hardware?.toLowerCase() || "";
-
-  if (value.includes("pc")) return "/hardware/pc.png";
-  if (value.includes("steamdeck") || value.includes("steam deck"))
-    return "/hardware/steamdeck.png";
-  if (value.includes("steamdeck png") || value.includes("deck icon"))
-    return "/hardware/steamdeck.png";
-
-  if (value.includes("playstation 1") || value.includes("ps1"))
-    return "/hardware/playstation.png";
-  if (value.includes("playstation 2") || value.includes("ps2"))
-    return "/hardware/playstation.png";
-  if (value.includes("playstation 3") || value.includes("ps3"))
-    return "/hardware/playstation.png";
-  if (value.includes("playstation 4") || value.includes("ps4"))
-    return "/hardware/playstation.png";
-  if (value.includes("playstation 5") || value.includes("ps5"))
-    return "/hardware/playstation.png";
-
-  if (value.includes("psp") || value.includes("playstation portable"))
-    return "/hardware/playstationportable.svg";
-  if (value.includes("vita") || value.includes("playstation vita"))
-    return "/hardware/playstationvita.svg";
-
-  if (value.includes("xbox")) return "/hardware/xbox.png";
-
-  return null;
-}
 const coverImage = game.cover_url;
 const steamVerticalCover = game.steam_vertical_cover;
 const heroImage = game.hero_url;
 const wideCoverImage = game.wide_cover_url;
 
- const releaseYear = getYear(game.Release);
+const releaseYear = getYearFromDate(game.Release);
 
-const scoreRank = getRankText({
-  games,
+const scoreRank = await getRankFromDatabase({
+  column: "score",
   currentValue: Number(game.Score || 0),
+  yearColumn: "release",
   currentYear: releaseYear,
-  getValue: (game) => Number(game.Score || 0),
-  getYearValue: (game) => getYear(game.Release),
 });
 
-const playtimeRank = getRankText({
-  games,
+const playtimeRank = await getRankFromDatabase({
+  column: "hours_played",
   currentValue: Number(game["Hours Played"] || 0),
+  yearColumn: "release",
   currentYear: releaseYear,
-  getValue: (game) => Number(game["Hours Played"] || 0),
-  getYearValue: (game) => getYear(game.Release),
 });
 
-const completedYear = getYear(game["Completion Last Played"]);
+const completedYear = getYearFromDate(game["Completion Last Played"]);
 
 const status = game.Status?.trim();
 
 const completedRank =
   status === "Completed"
-    ? getRankText({
-        games: games.filter((game) => game.Status?.trim() === "Completed"),
+    ? await getRankFromDatabase({
+        column: "hours_played",
         currentValue: Number(game["Hours Played"] || 0),
+        yearColumn: "completion_last_played",
         currentYear: completedYear,
-        getValue: (game) => Number(game["Hours Played"] || 0),
-        getYearValue: (game) => getYear(game["Completion Last Played"]),
+        status: "Completed",
       })
     : undefined;
   
@@ -526,20 +416,20 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
             : game.Price || "-"}
         </span>
 
-        {getPlatformLogo(game.Platform) && (
-          <span className="rounded-md bg-zinc-800 px-2 py-1">
+{getIcon(game.Platform) && (
+            <span className="rounded-md bg-zinc-800 px-2 py-1">
             <img
-              src={getPlatformLogo(game.Platform)!}
+              src={getIcon(game.Platform)!}
               alt=""
               className="h-4 w-4 object-contain"
             />
           </span>
         )}
 
-        {getHardwareLogo(game["Hardware (1)"]) && (
+        {getIcon(game["Hardware (1)"]) && (
           <span className="rounded-md bg-zinc-800 px-2 py-1">
             <img
-              src={getHardwareLogo(game["Hardware (1)"])!}
+              src={getIcon(game["Hardware (1)"])!}
               alt=""
               className="h-4 w-4 object-contain"
             />

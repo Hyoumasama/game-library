@@ -2,10 +2,20 @@
 
 import AddGameModal from "@/components/games/AddGameModal";
 import AuthButton from "@/components/admin/AuthButton";
+import {
+  formatHours,
+  getCompletionDate,
+  getIcon,
+  getYearFromDate,
+} from "@/lib/gameHelpers";
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+type FilterOptions = {
+  stores: string[];
+  years: string[];
+  completionYears: string[];
+};
 type Game = {
   id?: number | string;
   Title: string;
@@ -24,66 +34,6 @@ type Game = {
   Cover?: string;
 };
 
-function getCompletionDate(game: Game) {
-  return game["Completion Last Played"] || game["Completion / Last Played"] || "";
-}
-
-function getYearFromDate(value: string) {
-  const match = value?.match(/\b(19|20)\d{2}\b/);
-  return match ? match[0] : "";
-}
-
-function formatHours(hours?: string | number) {
-  const value = Number(hours || 0);
-  if (!value) return "0";
-  return value.toFixed(1).replace(".0", "");
-}
-
-function getIcon(value?: string) {
-  const text = value?.trim().toLowerCase();
-
-  const icons: Record<string, string> = {
-    psn: "/platforms/psn.png",
-    steam: "/platforms/steam.png",
-    epic: "/platforms/epicgames.png",
-    "ubisoft connect": "/platforms/ubisoftconnect.jpeg",
-    piracy: "/platforms/piracy.png",
-    xbox: "/platforms/xbox.png",
-    "ea desktop": "/platforms/eadesktop.ico",
-    gog: "/platforms/gog.jpeg",
-    nintendo: "/platforms/switch.png",
-    switch: "/platforms/switch.png",
-
-    yuzu: "/platforms/yuzu.png",
-    citra: "/platforms/citra.png",
-    cemu: "/platforms/cemu.png",
-    dolphin: "/platforms/dolphin.png",
-    retroarch: "/platforms/retroarch2.png",
-    ryujinx: "/platforms/ryujinx.png",
-    rpcs3: "/platforms/rpcs3.png",
-    duckstation: "/platforms/duckstation.png",
-    pcsx2: "/platforms/pcsx2.png",
-    primehack: "/platforms/primehack.png",
-    melonds: "/platforms/melonDS.png",
-    xemu: "/platforms/xenia.png",
-    ppsspp: "/platforms/ppsspp.png",
-    vita3k: "/platforms/vita3k.svg",
-    prime: "/platforms/prime.png",
-    legacy: "/platforms/legacy.png",
-    "humble bundle": "/platforms/humble.png",
-
-    pc: "/hardware/pc.png",
-    steamdeck: "/hardware/steamdeck2.png",
-    ps3: "/hardware/playstation3.png",
-    ps4: "/hardware/playstation4.png",
-    ps5: "/hardware/playstation5.png",
-  };
-
-  if (!text) return null;
-
-  return icons[text] || null;
-}
-
 function scoreClass(score?: string | number) {
   const value = Number(score || 0);
 
@@ -101,6 +51,20 @@ function AllGamesContent() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalGames, setTotalGames] = useState(0);
+const [totalPages, setTotalPages] = useState(1);
+
+const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+  stores: [],
+  years: [],
+  completionYears: [],
+});
+const [dashboardStats, setDashboardStats] = useState({
+  total_games: 0,
+  completed_games: 0,
+  total_hours: 0,
+  avg_score: 0,
+});
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -117,12 +81,14 @@ function AllGamesContent() {
     const store = searchParams.get("store");
     const release = searchParams.get("release");
     const completion = searchParams.get("completion");
+const page = searchParams.get("page");
 
     if (searchValue) setSearch(searchValue);
     if (status) setStatusFilter(status);
     if (store) setStoreFilter(store);
     if (release) setYearFilter(release);
     if (completion) setCompletionYearFilter(completion);
+if (page) setCurrentPage(Number(page));
 
     setHasLoadedFilters(true);
   }, [searchParams]);
@@ -137,6 +103,7 @@ function AllGamesContent() {
     if (storeFilter !== "All") params.set("store", storeFilter);
     if (yearFilter !== "All") params.set("release", yearFilter);
     if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+if (currentPage > 1) params.set("page", String(currentPage));
 
     const query = params.toString();
 
@@ -148,19 +115,31 @@ function AllGamesContent() {
     statusFilter,
     storeFilter,
     yearFilter,
-    completionYearFilter,
-    hasLoadedFilters,
-    router,
-  ]);
+      completionYearFilter,
+  currentPage,
+  hasLoadedFilters,
+  router,
+]);
 
   useEffect(() => {
     async function loadGames() {
       try {
-        const response = await fetch("/api/games-lite");
-        const data = await response.json();
+        const params = new URLSearchParams();
+
+params.set("page", String(currentPage));
+params.set("pageSize", "24");
+
+if (search) params.set("search", search);
+if (statusFilter !== "All") params.set("status", statusFilter);
+if (storeFilter !== "All") params.set("store", storeFilter);
+if (yearFilter !== "All") params.set("release", yearFilter);
+if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+
+const response = await fetch(`/api/games-lite?${params.toString()}`);
+const data = await response.json();
         
 
-        const formattedGames = data.map((game: any) => ({
+        const formattedGames = (data.games || []).map((game: any) => ({
           ...game,
           Title: game.title,
           Store: game.store,
@@ -178,14 +157,37 @@ function AllGamesContent() {
           Cover: game.steam_vertical_cover || game.cover_url,
         }));
 
-        setGames(formattedGames);
+                setGames(formattedGames);
+        setTotalGames(data.total || 0);
+        setTotalPages(data.totalPages || 1);
+        setFilterOptions(data.filters || {
+          stores: [],
+          years: [],
+          completionYears: [],
+        });
+        setDashboardStats(
+  data.stats || {
+    total_games: 0,
+    completed_games: 0,
+    total_hours: 0,
+    avg_score: 0,
+  }
+);
       } finally {
         setIsLoading(false);
       }
     }
+    
 
     loadGames();
-  }, []);
+    }, [
+    currentPage,
+    search,
+    statusFilter,
+    storeFilter,
+    yearFilter,
+    completionYearFilter,
+  ]);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -195,68 +197,20 @@ function AllGamesContent() {
     }
 
     checkAdmin();
-  }, []);
+    }, []);
 
-  const dashboard = useMemo(() => {
-    const completed = games.filter((g) => g.Status?.trim() === "Completed").length;
-    const playing = games.filter((g) => g.Status?.trim() === "Playing").length;
-    const dropped = games.filter((g) => g.Status?.trim() === "Dropped").length;
+  const dashboard = {
+  total: dashboardStats.total_games,
+  completed: dashboardStats.completed_games,
+  totalHours: Number(dashboardStats.total_hours || 0),
+  averageScore: dashboardStats.avg_score,
+};
 
-    const totalHours = games.reduce((sum, game) => {
-      return sum + Number(game["Hours Played"] || 0);
-    }, 0);
+  const stores = filterOptions.stores;
 
-    const averageScoreGames = games.filter((game) => Number(game.Score || 0) > 0);
-    const averageScore =
-      averageScoreGames.length > 0
-        ? Math.round(
-            averageScoreGames.reduce((sum, game) => sum + Number(game.Score || 0), 0) /
-              averageScoreGames.length
-          )
-        : 0;
+const years = filterOptions.years;
 
-    return {
-      total: games.length,
-      completed,
-      playing,
-      dropped,
-      totalHours,
-      averageScore,
-    };
-  }, [games]);
-
-  const stores = useMemo(() => {
-    const uniqueStores = new Set<string>();
-
-    games.forEach((game) => {
-      const store = game.Store?.trim();
-      if (store) uniqueStores.add(store);
-    });
-
-    return Array.from(uniqueStores).sort();
-  }, [games]);
-
-  const years = useMemo(() => {
-    const uniqueYears = new Set<string>();
-
-    games.forEach((game) => {
-      const year = getYearFromDate(game.Release || "");
-      if (year) uniqueYears.add(year);
-    });
-
-    return Array.from(uniqueYears).sort((a, b) => Number(b) - Number(a));
-  }, [games]);
-
-  const completionYears = useMemo(() => {
-    const uniqueYears = new Set<string>();
-
-    games.forEach((game) => {
-      const year = getYearFromDate(getCompletionDate(game));
-      if (year) uniqueYears.add(year);
-    });
-
-    return Array.from(uniqueYears).sort((a, b) => Number(b) - Number(a));
-  }, [games]);
+const completionYears = filterOptions.completionYears;
 
   const filteredGames = useMemo(() => {
     let filtered = games.filter((game) => {
@@ -299,13 +253,7 @@ function AllGamesContent() {
     setCurrentPage(1);
   }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter]);
 
-  const gamesPerPage = 24;
-  const totalPages = Math.max(1, Math.ceil(filteredGames.length / gamesPerPage));
-
-  const visibleGames = filteredGames.slice(
-    (currentPage - 1) * gamesPerPage,
-    currentPage * gamesPerPage
-  );
+  const visibleGames = games;
 
   if (isLoading) {
     return (
@@ -425,7 +373,7 @@ function AllGamesContent() {
                 Results
               </p>
               <p className="mt-1 text-4xl font-black text-cyan-300">
-                {filteredGames.length}
+                {totalGames}
               </p>
             </div>
           </div>

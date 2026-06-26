@@ -3,8 +3,16 @@
 import HomeGameSearch from "@/components/HomeGameSearch";
 import AddGameModal from "@/components/games/AddGameModal";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AuthButton from "@/components/admin/AuthButton";
+import {
+  formatHours,
+  getCompletionDate,
+  getIcon,
+  getReleaseYear,
+  getYearFromDate,
+  slugify,
+} from "@/lib/gameHelpers";
 
 type Game = {
   id?: number | string;
@@ -28,104 +36,28 @@ type Game = {
   Publisher?: string;
   };
 
-function slugify(title?: string) {
-  return (title || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function getCompletionDate(game: Game) {
-  return game["Completion Last Played"] || game["Completion / Last Played"] || "";
-}
-
-function getReleaseYear(game: Game) {
-  const match = game.Release?.match(/\b(19|20)\d{2}\b/);
-  return match ? match[0] : "";
-}
-
-function getYearFromDate(value: string) {
-  const match = value?.match(/\b(19|20)\d{2}\b/);
-  return match ? match[0] : "";
-}
-
-function formatHours(hours?: string | number) {
-  const value = Number(hours || 0);
-  if (!value) return "0";
-  return value.toFixed(1).replace(".0", "");
-}
-
-function getIcon(value?: string) {
-  const text = value?.trim().toLowerCase();
-
-  const icons: Record<string, string> = {
-    psn: "/platforms/psn.png",
-    steam: "/platforms/steam.png",
-    epic: "/platforms/epicgames.png",
-    "ubisoft connect": "/platforms/ubisoftconnect.jpeg",
-    piracy: "/platforms/piracy.png",
-    xbox: "/platforms/xbox.png",
-    "ea desktop": "/platforms/eadesktop.ico",
-    gog: "/platforms/gog.jpeg",
-    nintendo: "/platforms/switch.png",
-    switch: "/platforms/switch.png",
-    legacy: "/platforms/legacy.jpg",
-
-    yuzu: "/platforms/yuzu.png",
-    citra: "/platforms/citra.png",
-    cemu: "/platforms/cemu.png",
-    dolphin: "/platforms/dolphin.png",
-    retroarch: "/platforms/retroarch.png",
-    ryujinx: "/platforms/ryujinx.png",
-    rpcs3: "/platforms/rpcs3.png",
-    duckstation: "/platforms/duckstation.png",
-    pcsx2: "/platforms/pcsx2.png",
-    melonds: "/platforms/melonDS.png",
-    xemu: "/platforms/xenia.png",
-
-    pc: "/hardware/pc.png",
-    steamdeck: "/hardware/steamdeck.png",
-    ps3: "/hardware/playstation3.png",
-    ps4: "/hardware/playstation4.png",
-    ps5: "/hardware/playstation5.png",
-  };
-
-  if (!text) return null;
-
-  return icons[text] || null;
-}
-
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [games, setGames] = useState<Game[]>([]);
+const [currentlyPlayingGames, setCurrentlyPlayingGames] = useState<Game[]>([]);
+const [recentlyAddedGames, setRecentlyAddedGames] = useState<Game[]>([]);
+const [recentlyCompletedGames, setRecentlyCompletedGames] = useState<Game[]>([]);
 const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
   async function loadGames() {
     try {
       const response = await fetch("/api/home-games");
-      const data = await response.json();
+const data = await response.json();
 
-      const formattedGames = data.map((game: any) => ({
-          ...game,
-          Title: game.title,
-          Store: game.store,
-          Platform: game.platform,
-          Hardware: game.hardware,
-          Genre: game.genre,
-          Score: game.score,
-          Status: game.status,
-          Price: game.price,
-          "Hours Played": game.hours_played,
-          Release: game.release,
-          "Date of Purchase": game.date_of_purchase,
-          "Completion Last Played": game.completion_last_played,
-          "Completion / Last Played": game.completion_last_played,
-          Cover: game.steam_vertical_cover || game.cover_url,
-        }));
+if (!response.ok) {
+  console.error("HOME GAMES API ERROR:", data);
+  return;
+}
 
-      setGames(formattedGames);
+setCurrentlyPlayingGames(data.currentlyPlaying || []);
+setRecentlyAddedGames(data.recentlyAdded || []);
+setRecentlyCompletedGames(data.recentlyCompleted || []);
     } finally {
       setIsLoading(false);
     }
@@ -146,66 +78,6 @@ useEffect(() => {
 
   checkAdmin();
 }, []);
-
-  const dashboard = useMemo(() => {
-    const completed = games.filter((g) => g.Status?.trim() === "Completed").length;
-    const playing = games.filter((g) => g.Status?.trim() === "Playing").length;
-    const dropped = games.filter((g) => g.Status?.trim() === "Dropped").length;
-    const unplayed = games.filter((g) => g.Status?.trim() === "Unplayed").length;
-    const wishlist = games.filter((g) => g.Status?.trim() === "Wishlist").length;
-
-    const totalHours = games.reduce((sum, game) => {
-      return sum + Number(game["Hours Played"] || 0);
-    }, 0);
-
-    return {
-      total: games.length,
-      completed,
-      playing,
-      dropped,
-      unplayed,
-      wishlist,
-      totalHours,
-    };
-  }, [games]);
-
-  const currentlyPlayingGames = useMemo(() => {
-  return games
-    .filter(
-      (game) =>
-        game.Status?.trim().toLowerCase() === "playing" ||
-game.Status?.trim().toLowerCase() === "currently playing"
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a["Date of Purchase"] || "").getTime();
-const dateB = new Date(b["Date of Purchase"] || "").getTime();
-
-      return dateB - dateA;
-    });
-}, [games]);
-
-  const recentlyAddedGames = useMemo(() => {
-  return games
-    .filter((game) => game["Date of Purchase"])
-    .sort((a, b) => {
-      const dateA = new Date(a["Date of Purchase"] || "").getTime();
-      const dateB = new Date(b["Date of Purchase"] || "").getTime();
-      return dateB - dateA;
-    })
-    .slice(0, 7);
-}, [games]);
-
-const recentlyCompletedGames = useMemo(() => {
-  return games
-    .filter((game) => game.Status?.trim() === "Completed")
-    .filter((game) => getCompletionDate(game))
-    .sort((a, b) => {
-      const dateA = new Date(getCompletionDate(a)).getTime();
-      const dateB = new Date(getCompletionDate(b)).getTime();
-      return dateB - dateA;
-    })
-    .slice(0, 7);
-}, [games]);
 
   if (isLoading) {
   return (
