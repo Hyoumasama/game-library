@@ -552,27 +552,28 @@ function AllGamesContent() {
                   
                  <div className="mt-1 flex h-5 items-center gap-2 md:mt-3 md:h-6">
   {Array.from(
-  new Map(
+  new Set(
     [game.Store, game.Platform, game.Hardware]
       .filter((value): value is string => Boolean(value))
-      .map((value): [string, string] | null => {
+      .map((value) => {
         const icon = getIcon(value);
-
-        if (!icon) return null;
-
-        return [icon, value];
+        return icon ? `${icon}|||${value}` : null;
       })
-      .filter((item): item is [string, string] => item !== null)
+      .filter((item): item is string => Boolean(item))
   )
-).map(([icon, value]) => (
-  <img
-    key={icon}
-    src={icon}
-    alt=""
-    className="h-5 w-5 object-contain"
-    title={value}
-  />
-))}
+).map((item) => {
+  const [icon, value] = item.split("|||");
+
+  return (
+    <img
+      key={icon}
+      src={icon}
+      alt=""
+      className="h-5 w-5 object-contain"
+      title={value}
+    />
+  );
+})}
 </div>           
                 </div>
 

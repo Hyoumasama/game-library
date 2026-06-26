@@ -108,22 +108,22 @@ const [isLoading, setIsLoading] = useState(true);
       const data = await response.json();
 
       const formattedGames = data.map((game: any) => ({
-        ...game,
-        Title: game.title,
-        Store: game.store,
-        Platform: game.platform,
-        Hardware: game.hardware,
-        Genre: game.genre,
-        Score: game.score,
-        Status: game.status,
-        Price: game.price,
-        "Hours Played": game.hours_played,
-        Release: game.release,
-        "Date of Purchase": game.date_of_purchase,
-        "Completion Last Played": game.completion_last_played,
-        "Completion / Last Played": game.completion_last_played,
-        Cover: game.cover_url,
-              }));
+          ...game,
+          Title: game.title,
+          Store: game.store,
+          Platform: game.platform,
+          Hardware: game.hardware,
+          Genre: game.genre,
+          Score: game.score,
+          Status: game.status,
+          Price: game.price,
+          "Hours Played": game.hours_played,
+          Release: game.release,
+          "Date of Purchase": game.date_of_purchase,
+          "Completion Last Played": game.completion_last_played,
+          "Completion / Last Played": game.completion_last_played,
+          Cover: game.steam_vertical_cover || game.cover_url,
+        }));
 
       setGames(formattedGames);
     } finally {
@@ -411,27 +411,28 @@ function GameSection({
 
               <div className="mt-2 flex h-5 items-center gap-2">
                 {Array.from(
-                  new Map(
-                    [game.Store, game.Platform, game.Hardware]
-  .filter((value): value is string => Boolean(value))
-  .map((value): [string, string] | null => {
-    const icon = getIcon(value);
+  new Set(
+    [game.Store, game.Platform, game.Hardware]
+      .filter((value): value is string => Boolean(value))
+      .map((value) => {
+        const icon = getIcon(value);
+        return icon ? `${icon}|||${value}` : null;
+      })
+      .filter((item): item is string => Boolean(item))
+  )
+).map((item) => {
+  const [icon, value] = item.split("|||");
 
-    if (!icon) return null;
-
-    return [icon, value];
-  })
-  .filter((item): item is [string, string] => item !== null)
-                  )
-                ).map(([icon, value]) => (
-                  <img
-                    key={icon}
-                    src={icon as string}
-                    alt=""
-                    className="h-5 w-5 object-contain"
-                    title={value as string}
-                  />
-                ))}
+  return (
+    <img
+      key={icon}
+      src={icon}
+      alt=""
+      className="h-5 w-5 object-contain"
+      title={value}
+    />
+  );
+})}
               </div>
             </div>
           </Link>

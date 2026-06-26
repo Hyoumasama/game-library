@@ -105,3 +105,17 @@ export async function getGameById(id: number) {
 
   return mapGame(data);
 }
+export async function getGamesForRanking() {
+  const { data } = await supabase
+    .from("games")
+    .select(`
+      id,
+      release,
+      completion_last_played,
+      score,
+      hours_played,
+      status
+    `);
+
+  return (data || []).map(mapGame);
+}

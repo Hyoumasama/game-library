@@ -14,7 +14,9 @@ const selectColumns = `
   platform,
   hardware,
   genre,
-  cover_url
+  cover_url,
+    steam_vertical_cover,
+  wide_cover_url
 `;
 
 export async function GET() {

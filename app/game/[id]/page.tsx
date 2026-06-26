@@ -2,7 +2,7 @@ import GamePageMobileMenu from "@/components/GamePageMobileMenu";
 import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
 import GameAdminActions from "@/components/games/GameAdminActions";
-import { getGameById, getGames } from "@/lib/games";
+import { getGameById, getGamesForRanking } from "@/lib/games";
 import Link from "next/link";
 
 function getPlatformLogo(platform?: string) {
@@ -76,7 +76,7 @@ export default async function GamePage({
 }) {
   const { id } = await params;
  const game = await getGameById(Number(id));
-const games = await getGames();
+const games = await getGamesForRanking();
 
 if (!game) {
   return (
