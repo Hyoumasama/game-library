@@ -66,14 +66,41 @@ if (completion && completion !== "All") {
     .lt("completion_last_played", `${Number(completion) + 1}-01-01`);
 }
 
-  if (sort === "completion-newest") {
-    query = query.order("completion_last_played", {
-      ascending: false,
-      nullsFirst: false,
-    });
-  } else {
-    query = query.order("id", { ascending: false });
+ const sortOptions: Record<
+  string,
+  {
+    column: "id" | "hours_played" | "completion_last_played";
+    ascending: boolean;
   }
+> = {
+  default: {
+    column: "id",
+    ascending: false,
+  },
+  "hours-high": {
+    column: "hours_played",
+    ascending: false,
+  },
+  "hours-low": {
+    column: "hours_played",
+    ascending: true,
+  },
+  "completion-newest": {
+    column: "completion_last_played",
+    ascending: false,
+  },
+  "completion-oldest": {
+    column: "completion_last_played",
+    ascending: true,
+  },
+};
+
+const selectedSort = sortOptions[sort] || sortOptions.default;
+
+query = query.order(selectedSort.column, {
+  ascending: selectedSort.ascending,
+  nullsFirst: false,
+});
 
   const { data, error, count } = await query.range(from, to);
   const { data: statsData } = await supabase.rpc("get_games_lite_stats", {

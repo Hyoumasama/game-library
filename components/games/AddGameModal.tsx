@@ -38,10 +38,10 @@ const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
   const [status, setStatus] = useState("Unplayed");
   const [score, setScore] = useState("");
   const [hoursPlayed, setHoursPlayed] = useState("");
-  const [price, setPrice] = useState("");
-  const [store, setStore] = useState("");
-  const [platform, setPlatform] = useState("");
-  const [hardware, setHardware] = useState("");
+  const [price, setPrice] = useState("Piracy");
+  const [store, setStore] = useState("Piracy");
+  const [platform, setPlatform] = useState("Piracy");
+  const [hardware, setHardware] = useState("PC");
   const [coverUrl, setCoverUrl] = useState("");
 const [heroUrl, setHeroUrl] = useState("");
 const [wideCoverUrl, setWideCoverUrl] = useState("");
@@ -140,6 +140,45 @@ setSteamVerticalCoverOptions([]);
 }
 }
 
+  function resetForm() {
+    setQuery("");
+    setResults([]);
+    setSelectedGame(null);
+
+    setTitle("");
+    setRelease("");
+    setDateOfPurchase("");
+    setCompletionLastPlayed("");
+
+    setStatus("Unplayed");
+    setScore("");
+    setHoursPlayed("");
+
+    setPrice("Piracy");
+    setStore("Piracy");
+    setPlatform("Piracy");
+    setHardware("PC");
+
+    setCoverUrl("");
+    setHeroUrl("");
+    setWideCoverUrl("");
+    setSteamVerticalCover("");
+
+    setWideCoverOptions([]);
+    setSteamVerticalCoverOptions([]);
+
+    setSummary("");
+    setGenre("");
+    setDeveloper("");
+    setPublisher("");
+    setScreenshots("");
+
+    setIgdbId(null);
+    setSteamAppId(null);
+
+    setMessage("");
+  }
+  
   async function addGame(event: React.FormEvent) {
     event.preventDefault();
     setMessage("Saving...");
@@ -181,16 +220,19 @@ screenshots,
       setMessage("Failed to save game");
       return;
     }
-
-    setMessage("");
+        resetForm();
     setOpen(false);
+
     router.refresh();
   }
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+  resetForm();
+  setOpen(true);
+}}
         className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-black"
       >
         + Add Game
@@ -199,7 +241,10 @@ screenshots,
       {open && (
   <div
     className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-6"
-    onClick={() => setOpen(false)}
+    onClick={() => {
+  resetForm();
+  setOpen(false);
+}}
   >
     <div
       className="h-[95dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-zinc-800 bg-zinc-950 p-5 sm:w-[calc(100vw-24px)] sm:rounded-3xl sm:p-8"
@@ -219,10 +264,10 @@ screenshots,
     setStatus("Unplayed");
     setScore("");
     setHoursPlayed("");
-    setPrice("");
-    setStore("");
-    setPlatform("");
-    setHardware("");
+    setPrice("Piracy");
+    setStore("Piracy");
+    setPlatform("Piracy");
+    setHardware("PC");
     setCoverUrl("");
     setHeroUrl("");
     setWideCoverUrl("");

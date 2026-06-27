@@ -1,6 +1,12 @@
 import { getIgdbCoverUrl } from "@/lib/igdb";
 
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
 async function getIgdbToken() {
+  if (cachedToken && Date.now() < tokenExpiresAt) {
+    return cachedToken;
+  }
+
   const clientId = process.env.IGDB_CLIENT_ID;
   const clientSecret = process.env.IGDB_CLIENT_SECRET;
 
@@ -13,7 +19,13 @@ async function getIgdbToken() {
   );
 
   const data = await response.json();
-  return data.access_token;
+
+  cachedToken = data.access_token;
+
+  tokenExpiresAt =
+    Date.now() + (Number(data.expires_in) - 60) * 1000;
+
+  return cachedToken;
 }
 
 export async function GET(request: Request) {

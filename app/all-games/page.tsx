@@ -71,6 +71,7 @@ const [dashboardStats, setDashboardStats] = useState({
   const [storeFilter, setStoreFilter] = useState("All");
   const [yearFilter, setYearFilter] = useState("All");
   const [completionYearFilter, setCompletionYearFilter] = useState("All");
+  const [sortFilter, setSortFilter] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasLoadedFilters, setHasLoadedFilters] = useState(false);
@@ -81,6 +82,7 @@ const [dashboardStats, setDashboardStats] = useState({
     const store = searchParams.get("store");
     const release = searchParams.get("release");
     const completion = searchParams.get("completion");
+    const sort = searchParams.get("sort");
 const page = searchParams.get("page");
 
     setSearch(searchValue ?? "");
@@ -88,6 +90,7 @@ setStatusFilter(status ?? "All");
 setStoreFilter(store ?? "All");
 setYearFilter(release ?? "All");
 setCompletionYearFilter(completion ?? "All");
+setSortFilter(sort ?? "default");
 setCurrentPage(page ? Number(page) : 1);
 
     setHasLoadedFilters(true);
@@ -103,6 +106,7 @@ setCurrentPage(page ? Number(page) : 1);
     if (storeFilter !== "All") params.set("store", storeFilter);
     if (yearFilter !== "All") params.set("release", yearFilter);
     if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+    if (sortFilter !== "default") params.set("sort", sortFilter);
 if (currentPage > 1) params.set("page", String(currentPage));
 
     const query = params.toString();
@@ -116,6 +120,7 @@ if (currentPage > 1) params.set("page", String(currentPage));
     storeFilter,
     yearFilter,
       completionYearFilter,
+      sortFilter,
   currentPage,
   hasLoadedFilters,
   router,
@@ -136,6 +141,7 @@ if (statusFilter !== "All") params.set("status", statusFilter);
 if (storeFilter !== "All") params.set("store", storeFilter);
 if (yearFilter !== "All") params.set("release", yearFilter);
 if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+if (sortFilter !== "default") params.set("sort", sortFilter);
 
 const response = await fetch(`/api/games-lite?${params.toString()}`);
 const data = await response.json();
@@ -179,10 +185,10 @@ const data = await response.json();
         setIsLoading(false);
       }
     }
-    
 
-    loadGames();
-        }, [
+    loadGames();    
+    
+      }, [
     hasLoadedFilters,
     currentPage,
     search,
@@ -190,6 +196,7 @@ const data = await response.json();
     storeFilter,
     yearFilter,
     completionYearFilter,
+    sortFilter,
   ]);
 
   useEffect(() => {
@@ -242,19 +249,20 @@ const completionYears = filterOptions.completionYears;
     }
 
     return filtered;
-  }, [
-    games,
+    }, [
+    hasLoadedFilters,
+    currentPage,
     search,
     statusFilter,
     storeFilter,
     yearFilter,
     completionYearFilter,
-    searchParams,
+    sortFilter,
   ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter]);
+  }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter, sortFilter]);
 
   const visibleGames = games;
 
@@ -390,7 +398,7 @@ const completionYears = filterOptions.completionYears;
         </section>
 
         <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
@@ -442,6 +450,21 @@ const completionYears = filterOptions.completionYears;
                 </option>
               ))}
             </select>
+
+<select
+  value={sortFilter}
+  onChange={(event) => {
+    setSortFilter(event.target.value);
+    setCurrentPage(1);
+  }}
+  className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
+>
+  <option value="default">Sort</option>
+  <option value="hours-high">Highest Hours</option>
+  <option value="hours-low">Lowest Hours</option>
+  <option value="completion-newest">Newest Completion</option>
+  <option value="completion-oldest">Oldest Completion</option>
+</select>
 
             <div className="col-span-2 md:col-span-1">
               <input
