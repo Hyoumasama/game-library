@@ -34,6 +34,7 @@ type Game = {
   Summary?: string;
   Developer?: string;
   Publisher?: string;
+  achievement_badge?: string | null;
   };
 
 export default function Home() {
@@ -239,8 +240,11 @@ function GameSection({
           <Link
             key={`${title}-${game.id || game.Title}-${index}`}
             href={`/game/${game.id}`}
-            className="group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border border-zinc-800 bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 hover:border-cyan-400/70 md:w-auto"
-          >
+className={`group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:w-auto ${
+  game.achievement_badge
+    ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
+    : "border-zinc-800 hover:border-cyan-400/70 hover:shadow-cyan-950/40"
+}`}          >
             <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
               {game.Cover ? (
                 <img

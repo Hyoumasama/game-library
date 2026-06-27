@@ -32,6 +32,7 @@ type Game = {
   "Completion Last Played"?: string;
   "Completion / Last Played"?: string;
   Cover?: string;
+    achievement_badge?: "100completion" | "platinum" | null;
 };
 
 function scoreClass(score?: string | number) {
@@ -163,6 +164,7 @@ const data = await response.json();
           "Completion Last Played": game.completion_last_played,
           "Completion / Last Played": game.completion_last_played,
           Cover: game.steam_vertical_cover || game.cover_url,
+achievement_badge: game.achievement_badge,
         }));
 
                 setGames(formattedGames);
@@ -478,14 +480,16 @@ const completionYears = filterOptions.completionYears;
         </section>
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-          {visibleGames.map((game, index) => (
-            <Link
-              key={`${game.Title}-${index}`}
-              href={`/game/${game.id}`}
-              className="group flex overflow-hidden rounded-[1.6rem] border border-zinc-800 bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 hover:border-cyan-400/70 hover:shadow-cyan-950/40 md:block"
-              >
-              <div className="relative h-40 w-28 shrink-0 overflow-hidden bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto">
-                {game.Cover ? (
+{visibleGames.map((game, index) => (
+  <Link
+    key={`${game.Title}-${index}`}
+    href={`/game/${game.id}`}
+className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:block ${
+  game.achievement_badge
+    ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
+    : "border-zinc-800 hover:border-cyan-400/70 hover:shadow-cyan-950/40"
+}`}  >
+    <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-t-[1.6rem] bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto">            {game.Cover ? (
                   <img
                     src={game.Cover}
                     alt={game.Title}
@@ -497,6 +501,7 @@ const completionYears = filterOptions.completionYears;
                     🎮
                   </div>
                 )}
+
 
                 {Number(game.Score || 0) > 0 && (
   <div className="absolute left-3 top-3 flex items-center gap-2">

@@ -37,7 +37,11 @@ export async function GET(request: Request) {
         genre,
         cover_url,
         steam_vertical_cover,
-        wide_cover_url
+                wide_cover_url,
+        game_achievements (
+          platinum,
+          completion_percentage
+        )
       `,
       { count: "exact" }
     );
@@ -133,8 +137,27 @@ const filters = filtersData?.[0] || {
   completion_years: [],
 };
 
+    const games = (data || []).map((game: any) => {
+    const achievement = game.game_achievements?.[0];
+
+    let achievement_badge = null;
+
+    if (Number(achievement?.completion_percentage || 0) >= 100) {
+      achievement_badge = "100completion";
+    } else if (Number(achievement?.platinum || 0) > 0) {
+      achievement_badge = "platinum";
+    }
+
+    const { game_achievements, ...cleanGame } = game;
+
+    return {
+      ...cleanGame,
+      achievement_badge,
+    };
+  });
+
   return Response.json({
-    games: data || [],
+    games,
     total: count || 0,
     page,
     pageSize,
