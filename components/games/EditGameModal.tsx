@@ -210,25 +210,47 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
       .then((data) => setOptions(data));
   }, []);
 
-  async function searchGames() {
-    if (!query.trim()) return;
+  useEffect(() => {
+  if (!open) return;
 
-    setMessage("Searching...");
+  const cleanQuery = query.trim();
 
-    const endpoint =
-      searchSource === "steam"
-        ? "/api/admin/steam-search"
-        : "/api/admin/igdb-search";
-
-    const response = await fetch(
-      `${endpoint}?query=${encodeURIComponent(query)}`
-    );
-
-    const data = await response.json();
-
-    setResults(data.results || []);
-    setMessage("");
+  if (cleanQuery.length < 3) {
+    setResults([]);
+    return;
   }
+
+  const timeout = window.setTimeout(() => {
+    searchGames(cleanQuery);
+  }, 400);
+
+  return () => window.clearTimeout(timeout);
+}, [query, searchSource, open]);
+
+  async function searchGames(searchText = query) {
+  const cleanQuery = searchText.trim();
+
+  if (cleanQuery.length < 3) {
+    setResults([]);
+    return;
+  }
+
+  setMessage("Searching...");
+
+  const endpoint =
+    searchSource === "steam"
+      ? "/api/admin/steam-search"
+      : "/api/admin/igdb-search";
+
+  const response = await fetch(
+    `${endpoint}?query=${encodeURIComponent(cleanQuery)}`
+  );
+
+  const data = await response.json();
+
+  setResults(data.results || []);
+  setMessage("");
+}
 
   async function selectGame(game: SearchResult) {
     setSelectedGame(game);
@@ -390,7 +412,7 @@ onClick={handleOpen}
                 />
 
                 <button
-                  onClick={searchGames}
+                  onClick={() => searchGames()}
                   type="button"
                   className="rounded-xl bg-white px-2 py-3 font-bold text-black"
                 >

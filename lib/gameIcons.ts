@@ -10,7 +10,7 @@ export function getIcon(value?: string) {
     xbox: "/platforms/xbox.png",
     "ea desktop": "/platforms/eadesktop.ico",
     gog: "/platforms/gog.jpeg",
-    nintendo: "/platforms/switch.png",
+    nintendo: "/platforms/nintendo.png",
     switch: "/platforms/switch.png",
     legacy: "/platforms/legacy.png",
     "humble bundle": "/platforms/humble.png",

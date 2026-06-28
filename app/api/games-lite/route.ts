@@ -138,7 +138,9 @@ const filters = filtersData?.[0] || {
 };
 
     const games = (data || []).map((game: any) => {
-    const achievement = game.game_achievements?.[0];
+    const achievement = Array.isArray(game.game_achievements)
+  ? game.game_achievements[0]
+  : game.game_achievements;
 
     let achievement_badge = null;
 

@@ -133,8 +133,16 @@ export async function PATCH(
     );
 
   if (achievementError) {
-    return Response.json({ error: achievementError.message }, { status: 500 });
-  }
+  console.error("Achievement upsert failed:", achievementError);
+
+  return Response.json(
+    {
+      error: achievementError.message,
+      details: achievementError,
+    },
+    { status: 500 }
+  );
+}
 
   return Response.json({ game: data });
 }

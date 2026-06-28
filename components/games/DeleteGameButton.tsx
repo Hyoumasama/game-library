@@ -19,8 +19,13 @@ export default function DeleteGameButton({ gameId }: { gameId: number }) {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    if (window.history.length > 1) {
+  router.back();
+} else {
+  router.push("/");
+}
+
+router.refresh();
   }
 
   return (

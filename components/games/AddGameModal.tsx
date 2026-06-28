@@ -22,6 +22,16 @@ function calculateRewardCompletion(earnedAwards: string, totalAwards: string) {
   return Math.min(100, Math.floor((earned / total) * 100));
 }
 
+type OwnedGame = {
+  id: number;
+  title: string;
+  slug: string;
+  store: string | null;
+  platform: string | null;
+  hardware: string | null;
+  status: string | null;
+};
+
 type SearchResult = {
   source?: "igdb" | "steam";
   igdbId: number | null;
@@ -51,7 +61,7 @@ export default function AddGameModal() {
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
 const [results, setResults] = useState<SearchResult[]>([]);
 const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
-
+const [ownedGames, setOwnedGames] = useState<OwnedGame[]>([]);
   const [title, setTitle] = useState("");
   const [release, setRelease] = useState("");
   const [status, setStatus] = useState("Unplayed");
@@ -106,8 +116,30 @@ useEffect(() => {
     .then((data) => setOptions(data));
 }, []);
 
-  async function searchGames() {
-  if (!query.trim()) return;
+useEffect(() => {
+  if (!open) return;
+
+  const cleanQuery = query.trim();
+
+  if (cleanQuery.length < 3) {
+    setResults([]);
+    return;
+  }
+
+  const timeout = window.setTimeout(() => {
+    searchGames(cleanQuery);
+  }, 400);
+
+  return () => window.clearTimeout(timeout);
+}, [query, searchSource, open]);
+
+  async function searchGames(searchText = query) {
+  const cleanQuery = searchText.trim();
+
+  if (cleanQuery.length < 3) {
+    setResults([]);
+      return;
+  }
 
   setMessage("Searching...");
 
@@ -117,7 +149,7 @@ useEffect(() => {
       : "/api/admin/igdb-search";
 
   const response = await fetch(
-    `${endpoint}?query=${encodeURIComponent(query)}`
+    `${endpoint}?query=${encodeURIComponent(cleanQuery)}`
   );
 
   const data = await response.json();
@@ -142,6 +174,18 @@ console.log("Selected Steam game:", game);
   setIgdbId(game.igdbId || null);
   setSteamAppId(game.steamAppId || null);
   setResults([]);
+  try {
+  const ownedResponse = await fetch(
+    `/api/admin/owned-games?title=${encodeURIComponent(game.title)}`
+  );
+
+  const ownedData = await ownedResponse.json();
+
+  setOwnedGames(ownedData.games || []);
+} catch (error) {
+  console.error("Failed to check owned games:", error);
+  setOwnedGames([]);
+}
   try {
   const params = new URLSearchParams();
 
@@ -179,6 +223,7 @@ setSteamVerticalCoverOptions([]);
     setQuery("");
     setResults([]);
     setSelectedGame(null);
+    setOwnedGames([]);
 
     setTitle("");
     setRelease("");
@@ -309,6 +354,7 @@ completionPercentage: playStationGame
     setQuery("");
     setResults([]);
     setSelectedGame(null);
+    setOwnedGames([]);
     setTitle("");
     setRelease("");
     setStatus("Unplayed");
@@ -371,7 +417,7 @@ setSteamVerticalCoverOptions([]);
   />
 
   <button
-    onClick={searchGames}
+    onClick={() => searchGames()}
     type="button"
     className="rounded-xl bg-white px-5 py-3 font-bold text-black"
   >
@@ -417,6 +463,33 @@ setSteamVerticalCoverOptions([]);
                 </div>
               )}
             </div>
+
+              {selectedGame && ownedGames.length > 0 && (
+                <div className="mt-5 rounded-2xl border border-yellow-500/40 bg-yellow-500/10 p-4">
+                  <p className="font-bold text-yellow-300">
+                    عندك هذه اللعبة أو نسخة مشابهة منها
+                  </p>
+
+                  <div className="mt-3 grid gap-2">
+                    {ownedGames.map((owned) => (
+                      <a
+                        key={owned.id}
+                        href={`/games/${owned.slug}`}
+                        className="rounded-xl border border-yellow-500/20 bg-black/40 p-3 text-sm transition hover:border-yellow-400"
+                      >
+                        <span className="font-bold text-white">
+                          {owned.title}
+                        </span>
+
+                        <span className="mt-1 block text-zinc-300">
+                          {owned.store || "-"} • {owned.platform || "-"} •{" "}
+                          {owned.hardware || "-"} • {owned.status || "-"}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             <form onSubmit={addGame} className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" required className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2" />
@@ -703,7 +776,7 @@ placeholder="Steam Vertical Cover URL"
               </button>
 
               {message && <p className="text-zinc-400 md:col-span-2">{message}</p>}
-            </form>
+                        </form>
           </div>
         </div>
       )}

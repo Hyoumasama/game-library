@@ -66,7 +66,38 @@ screenshots.image_id,
 
   const games = await response.json();
 
-  const results = games.map((game: any) => ({
+    let finalGames = games;
+
+  if (Array.isArray(games) && games.length === 0) {
+    const exactResponse = await fetch("https://api.igdb.com/v4/games", {
+      method: "POST",
+      headers: {
+        "Client-ID": clientId!,
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: `
+        fields
+          name,
+          first_release_date,
+          cover.image_id,
+          summary,
+          genres.name,
+          artworks.image_id,
+          screenshots.image_id,
+          involved_companies.company.name,
+          involved_companies.developer,
+          involved_companies.publisher;
+        where name = "${query.replaceAll('"', '\\"')}";
+        limit 15;
+      `,
+      cache: "no-store",
+    });
+
+    finalGames = await exactResponse.json();
+  }
+
+  const results = finalGames.map((game: any) => ({
     igdbId: game.id,
     title: game.name,
     year: game.first_release_date
