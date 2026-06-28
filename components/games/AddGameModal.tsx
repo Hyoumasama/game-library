@@ -3,6 +3,25 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
+
+function isPlayStationGame(store: string, platform: string) {
+  const value = `${store} ${platform}`.toUpperCase();
+
+  return PLAYSTATION_VALUES.some((item) => value.includes(item));
+}
+
+function calculateRewardCompletion(earnedAwards: string, totalAwards: string) {
+  const earned = Number(earnedAwards);
+  const total = Number(totalAwards);
+
+  if (!Number.isFinite(earned) || !Number.isFinite(total) || total <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.floor((earned / total) * 100));
+}
+
 type SearchResult = {
   source?: "igdb" | "steam";
   igdbId: number | null;
@@ -55,12 +74,25 @@ const [publisher, setPublisher] = useState("");
 const [screenshots, setScreenshots] = useState("");
 const [igdbId, setIgdbId] = useState<number | null>(null);
 const [steamAppId, setSteamAppId] = useState<number | null>(null);
+const [bronze, setBronze] = useState("");
+const [silver, setSilver] = useState("");
+const [gold, setGold] = useState("");
+const [platinum, setPlatinum] = useState(false);
+const [earnedAwards, setEarnedAwards] = useState("");
+const [totalAwards, setTotalAwards] = useState("");
+const [completionPercentage, setCompletionPercentage] = useState("");
   const [message, setMessage] = useState("");
 
   const [dateOfPurchase, setDateOfPurchase] = useState(
   new Date().toISOString().slice(0, 10)
 );
 const [completionLastPlayed, setCompletionLastPlayed] = useState("");
+
+const playStationGame = isPlayStationGame(store, platform);
+const rewardCompletionPercentage = calculateRewardCompletion(
+  earnedAwards,
+  totalAwards
+);
 
   const [options, setOptions] = useState({
   stores: [] as string[],
@@ -129,7 +161,10 @@ console.log("Selected Steam game:", game);
 
   setWideCoverUrl(steamGridData.wideCoverUrl || "");
   setSteamVerticalCover(steamGridData.steamVerticalCover || "");
-  setWideCoverOptions(steamGridData.wideCoverOptions || []);
+  setWideCoverOptions([
+  ...(steamGridData.wideCoverOptions || []),
+  ...(game.heroUrl ? [game.heroUrl] : []),
+]);
 setSteamVerticalCoverOptions(steamGridData.steamVerticalCoverOptions || []);
 } catch (error) {
   console.error("Failed to fetch SteamGridDB covers:", error);
@@ -175,7 +210,13 @@ setSteamVerticalCoverOptions([]);
 
     setIgdbId(null);
     setSteamAppId(null);
-
+    setBronze("");
+    setSilver("");
+    setGold("");
+    setPlatinum(false);
+    setEarnedAwards("");
+setTotalAwards("");
+setCompletionPercentage("");
     setMessage("");
   }
   
@@ -213,6 +254,15 @@ genre,
 developer,
 publisher,
 screenshots,
+bronze,
+silver,
+gold,
+platinum,
+earnedAwards,
+totalAwards,
+completionPercentage: playStationGame
+  ? completionPercentage
+  : rewardCompletionPercentage,
 }),
     });
 
@@ -282,6 +332,12 @@ setSteamVerticalCoverOptions([]);
     setIgdbId(null);
     setSteamAppId(null);
     setCompletionLastPlayed("");
+        setBronze("");
+    setSilver("");
+    setGold("");
+    setPlatinum(false);
+    setEarnedAwards("");
+    setCompletionPercentage("");
     setMessage("");
   }}
   className="text-zinc-400 hover:text-white"
@@ -434,6 +490,90 @@ setSteamVerticalCoverOptions([]);
     <option key={item} value={item} />
   ))}
 </datalist>
+
+
+<div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+  <p className="mb-3 text-sm font-bold text-zinc-300">Achievements</p>
+
+  {playStationGame ? (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+      <input
+        type="number"
+        min="0"
+        value={bronze}
+        onChange={(e) => setBronze(e.target.value)}
+        placeholder="Bronze"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        type="number"
+        min="0"
+        value={silver}
+        onChange={(e) => setSilver(e.target.value)}
+        placeholder="Silver"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        type="number"
+        min="0"
+        value={gold}
+        onChange={(e) => setGold(e.target.value)}
+        placeholder="Gold"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        type="number"
+        min="0"
+        max="1"
+        value={platinum ? "1" : "0"}
+        onChange={(e) => setPlatinum(e.target.value === "1")}
+        placeholder="Platinum"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        type="number"
+        min="0"
+        max="100"
+        value={completionPercentage}
+        onChange={(e) => setCompletionPercentage(e.target.value)}
+        placeholder="0%"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <input
+        type="number"
+        min="0"
+        value={earnedAwards}
+        onChange={(e) => setEarnedAwards(e.target.value)}
+        placeholder="Earned Rewards"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        type="number"
+        min="0"
+        value={totalAwards}
+        onChange={(e) => setTotalAwards(e.target.value)}
+        placeholder="Total Rewards"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+      />
+
+      <input
+        value={`${rewardCompletionPercentage}%`}
+        readOnly
+        placeholder="0%"
+        className="rounded-xl border border-zinc-700 bg-black px-4 py-3 text-zinc-400"
+      />
+    </div>
+  )}
+</div>
+
 <textarea
   value={summary}
   onChange={(e) => setSummary(e.target.value)}
