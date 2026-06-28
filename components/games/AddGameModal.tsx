@@ -467,7 +467,7 @@ setSteamVerticalCoverOptions([]);
               {selectedGame && ownedGames.length > 0 && (
                 <div className="mt-5 rounded-2xl border border-yellow-500/40 bg-yellow-500/10 p-4">
                   <p className="font-bold text-yellow-300">
-                    عندك هذه اللعبة أو نسخة مشابهة منها
+                    Similar game owned:
                   </p>
 
                   <div className="mt-3 grid gap-2">

@@ -106,7 +106,12 @@ export async function POST(request: Request) {
       { onConflict: "game_id" }
     );
 
-  if (achievementError) {
+    if (achievementError) {
+    await supabase
+      .from("games")
+      .delete()
+      .eq("id", newGame.id);
+
     return Response.json({ error: achievementError.message }, { status: 500 });
   }
 

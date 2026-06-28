@@ -72,8 +72,6 @@ useEffect(() => {
     const response = await fetch("/api/admin/me");
     const data = await response.json();
 
-    console.log("ADMIN ME:", data);
-
     setIsAdmin(data.isAdmin);
   }
 

@@ -16,7 +16,6 @@ const selectColumns = `
   genre,
   cover_url,
   steam_vertical_cover,
-    wide_cover_url,
   game_achievements (
     platinum,
     completion_percentage
@@ -59,42 +58,44 @@ function mapGame(game: any) {
 }
 
 export async function GET() {
-  const { data: currentlyPlaying, error: playingError } = await supabase
-    .from("games")
-    .select(selectColumns)
-    .in("status", ["Playing", "Currently Playing"])
-    .order("date_of_purchase", { ascending: false });
+  const [playingResult, addedResult, completedResult] = await Promise.all([
+    supabase
+      .from("games")
+      .select(selectColumns)
+      .in("status", ["Playing", "Currently Playing"])
+      .order("date_of_purchase", { ascending: false }),
 
-  if (playingError) {
-    return Response.json({ error: playingError.message }, { status: 500 });
+    supabase
+      .from("games")
+      .select(selectColumns)
+      .not("date_of_purchase", "is", null)
+      .order("date_of_purchase", { ascending: false })
+      .limit(7),
+
+    supabase
+      .from("games")
+      .select(selectColumns)
+      .eq("status", "Completed")
+      .not("completion_last_played", "is", null)
+      .order("completion_last_played", { ascending: false })
+      .limit(7),
+  ]);
+
+  if (playingResult.error) {
+    return Response.json({ error: playingResult.error.message }, { status: 500 });
   }
 
-  const { data: recentlyAdded, error: addedError } = await supabase
-    .from("games")
-    .select(selectColumns)
-    .not("date_of_purchase", "is", null)
-    .order("date_of_purchase", { ascending: false })
-    .limit(7);
-
-  if (addedError) {
-    return Response.json({ error: addedError.message }, { status: 500 });
+  if (addedResult.error) {
+    return Response.json({ error: addedResult.error.message }, { status: 500 });
   }
 
-  const { data: recentlyCompleted, error: completedError } = await supabase
-    .from("games")
-    .select(selectColumns)
-    .eq("status", "Completed")
-    .not("completion_last_played", "is", null)
-    .order("completion_last_played", { ascending: false })
-    .limit(7);
-
-  if (completedError) {
-    return Response.json({ error: completedError.message }, { status: 500 });
+  if (completedResult.error) {
+    return Response.json({ error: completedResult.error.message }, { status: 500 });
   }
 
   return Response.json({
-    currentlyPlaying: (currentlyPlaying || []).map(mapGame),
-    recentlyAdded: (recentlyAdded || []).map(mapGame),
-    recentlyCompleted: (recentlyCompleted || []).map(mapGame),
+    currentlyPlaying: (playingResult.data || []).map(mapGame),
+    recentlyAdded: (addedResult.data || []).map(mapGame),
+    recentlyCompleted: (completedResult.data || []).map(mapGame),
   });
 }

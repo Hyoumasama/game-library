@@ -105,42 +105,46 @@ query = query.order(selectedSort.column, {
   ascending: selectedSort.ascending,
   nullsFirst: false,
 });
+  const [gamesResult, statsResult, filtersResult] = await Promise.all([
+    query.range(from, to),
 
-  const { data, error, count } = await query.range(from, to);
-  const { data: statsData } = await supabase.rpc("get_games_lite_stats", {
-  p_search: search || null,
-  p_status: status && status !== "All" ? status : null,
-  p_store: store && store !== "All" ? store : null,
-  p_release_year: release && release !== "All" ? Number(release) : null,
-  p_completion_year:
-    completion && completion !== "All" ? Number(completion) : null,
-});
+    supabase.rpc("get_games_lite_stats", {
+      p_search: search || null,
+      p_status: status && status !== "All" ? status : null,
+      p_store: store && store !== "All" ? store : null,
+      p_release_year: release && release !== "All" ? Number(release) : null,
+      p_completion_year:
+        completion && completion !== "All" ? Number(completion) : null,
+    }),
 
-const stats = statsData?.[0] || {
-  total_games: 0,
-  completed_games: 0,
-  total_hours: 0,
-  avg_score: 0,
-};
+    supabase.rpc("get_games_lite_filters"),
+  ]);
+
+  const { data, error, count } = gamesResult;
+  const { data: statsData } = statsResult;
+  const { data: filtersData } = filtersResult;
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
-    const { data: filtersData } = await supabase.rpc(
-  "get_games_lite_filters"
-);
+  const stats = statsData?.[0] || {
+    total_games: 0,
+    completed_games: 0,
+    total_hours: 0,
+    avg_score: 0,
+  };
 
-const filters = filtersData?.[0] || {
-  stores: [],
-  years: [],
-  completion_years: [],
-};
+  const filters = filtersData?.[0] || {
+    stores: [],
+    years: [],
+    completion_years: [],
+  };
 
-    const games = (data || []).map((game: any) => {
+  const games = (data || []).map((game: any) => {
     const achievement = Array.isArray(game.game_achievements)
-  ? game.game_achievements[0]
-  : game.game_achievements;
+      ? game.game_achievements[0]
+      : game.game_achievements;
 
     let achievement_badge = null;
 
@@ -157,7 +161,7 @@ const filters = filtersData?.[0] || {
       achievement_badge,
     };
   });
-
+  
   return Response.json({
     games,
     total: count || 0,
