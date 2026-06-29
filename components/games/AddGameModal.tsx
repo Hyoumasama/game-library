@@ -205,10 +205,7 @@ console.log("Selected Steam game:", game);
 
   setWideCoverUrl(steamGridData.wideCoverUrl || "");
   setSteamVerticalCover(steamGridData.steamVerticalCover || "");
-  setWideCoverOptions([
-  ...(steamGridData.wideCoverOptions || []),
-  ...(game.heroUrl ? [game.heroUrl] : []),
-]);
+  setWideCoverOptions(steamGridData.wideCoverOptions || []);
 setSteamVerticalCoverOptions(steamGridData.steamVerticalCoverOptions || []);
 } catch (error) {
   console.error("Failed to fetch SteamGridDB covers:", error);

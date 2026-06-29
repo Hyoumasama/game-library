@@ -288,10 +288,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
 
       setWideCoverUrl(steamGridData.wideCoverUrl || "");
       setSteamVerticalCover(steamGridData.steamVerticalCover || "");
-      setWideCoverOptions([
-  ...(steamGridData.wideCoverOptions || []),
-  ...(game.source === "steam" && game.heroUrl ? [game.heroUrl] : []),
-]);
+      setWideCoverOptions(steamGridData.wideCoverOptions || []);
       setSteamVerticalCoverOptions(steamGridData.steamVerticalCoverOptions || []);
     } catch (error) {
       console.error("Failed to fetch SteamGridDB covers:", error);
