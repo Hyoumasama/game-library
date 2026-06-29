@@ -227,7 +227,7 @@ setSteamVerticalCoverOptions([]);
 
     setTitle("");
     setRelease("");
-    setDateOfPurchase("");
+    setDateOfPurchase(new Date().toISOString().slice(0, 10));
     setCompletionLastPlayed("");
 
     setStatus("Unplayed");
