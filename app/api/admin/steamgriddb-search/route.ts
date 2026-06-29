@@ -28,6 +28,39 @@ function uniqueImages(images: string[]) {
   return Array.from(new Set(images.filter(Boolean)));
 }
 
+async function fetchSteamHeader(title: string | null, steamAppId: string | null) {
+  try {
+    let appId = steamAppId;
+
+    if (!appId && title) {
+      const searchResponse = await fetch(
+        `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(
+          title
+        )}&l=en&cc=US`,
+        { cache: "no-store" }
+      );
+
+      const searchData = await searchResponse.json();
+      appId = searchData?.items?.[0]?.id
+        ? String(searchData.items[0].id)
+        : null;
+    }
+
+    if (!appId) return null;
+
+    const detailResponse = await fetch(
+      `https://store.steampowered.com/api/appdetails?appids=${appId}&l=en&cc=US`,
+      { cache: "no-store" }
+    );
+
+    const detailData = await detailResponse.json();
+
+    return detailData?.[appId]?.data?.header_image || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -145,10 +178,13 @@ export async function GET(request: Request) {
       ? await fetchIgdbImages(title)
       : { verticalOptions: [], wideOptions: [] };
 
-    const wideCoverOptions = uniqueImages([
-      ...steamWideCoverOptions,
-      ...igdbImages.wideOptions,
-    ]);
+    const steamHeader = await fetchSteamHeader(title, steamAppId);
+
+const wideCoverOptions = uniqueImages([
+  ...igdbImages.wideOptions,
+  ...steamWideCoverOptions,
+  ...(steamHeader ? [steamHeader] : []),
+]);
 
     const steamVerticalCoverOptionsFinal = uniqueImages([
       ...steamVerticalCoverOptions,

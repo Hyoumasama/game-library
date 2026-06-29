@@ -290,7 +290,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
       setSteamVerticalCover(steamGridData.steamVerticalCover || "");
       setWideCoverOptions([
   ...(steamGridData.wideCoverOptions || []),
-  ...(game.heroUrl ? [game.heroUrl] : []),
+  ...(game.source === "steam" && game.heroUrl ? [game.heroUrl] : []),
 ]);
       setSteamVerticalCoverOptions(steamGridData.steamVerticalCoverOptions || []);
     } catch (error) {
