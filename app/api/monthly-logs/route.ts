@@ -41,3 +41,22 @@ if (updateGameError) {
 
   return Response.json({ data });
 }
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = Number(searchParams.get("id"));
+
+  if (!id) {
+    return Response.json({ error: "Missing log id" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("monthly_play_logs")
+    .delete()
+    .eq("log_id", id);
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ success: true });
+}

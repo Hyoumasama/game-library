@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
+import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
 type MonthlyLog = {
   log_id: number;
   game_id: number;
@@ -259,16 +260,17 @@ const bestMonth = months
               </div>
 
               <div className="hidden overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 md:block">
-                <div className="grid grid-cols-[1fr_160px_140px] border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300">
-                  <div>Game</div>
-                  <div>Hours</div>
-                  <div>Month</div>
-                </div>
+  <div className="grid grid-cols-[1fr_160px_140px_40px] border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300">
+    <div>Game</div>
+    <div>Hours</div>
+    <div>Month</div>
+    <div></div>
+  </div>
 
-                {monthLogs.map((log) => (
+  {monthLogs.map((log) => (
                   <div
                     key={log.log_id}
-                   className="grid grid-cols-[1fr_160px_140px] items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0"
+                   className="grid grid-cols-[1fr_160px_140px_40px] items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0"
                   >
                     <Link
                       href={`/game/${log.game_id}`}
@@ -288,8 +290,12 @@ const bestMonth = months
                     <div className="font-black text-cyan-300">
                       {Number(log.hours).toFixed(2)}
                     </div>
-
-                    <div className="font-black text-white">{monthNames[log.month] || log.month}</div>
+<div className="font-black text-white">
+  {monthNames[log.month] || log.month}
+</div>
+                    <div className="text-right">
+  <MonthlyLogDeleteButton logId={log.log_id} />
+</div>
                   </div>
                 ))}
               </div>
