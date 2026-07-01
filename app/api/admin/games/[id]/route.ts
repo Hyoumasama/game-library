@@ -79,6 +79,7 @@ export async function PATCH(
       title: body.title,
       slug: slugify(body.title),
       release: body.release || null,
+      date_started: body.dateStarted || null,
       date_of_purchase: body.dateOfPurchase || null,
       completion_last_played: body.completionLastPlayed || null,
       status: body.status || null,

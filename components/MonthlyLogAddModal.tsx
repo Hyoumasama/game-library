@@ -5,6 +5,7 @@ import { useState } from "react";
 type SearchGame = {
   id: number;
   title: string;
+  hours_played: number | null;
 };
 
 export default function MonthlyLogAddModal() {
@@ -12,10 +13,13 @@ export default function MonthlyLogAddModal() {
   const [query, setQuery] = useState("");
   const [games, setGames] = useState<SearchGame[]>([]);
   const [selectedGame, setSelectedGame] = useState<SearchGame | null>(null);
-  const [hours, setHours] = useState("");
+  const [currentTotalHours, setCurrentTotalHours] = useState("");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [isSaving, setIsSaving] = useState(false);
+const previousTotalHours = Number(selectedGame?.hours_played || 0);
+const currentTotal = Number(currentTotalHours || 0);
+const thisMonthHours = Math.max(currentTotal - previousTotalHours, 0);
 
   async function searchGames(value: string) {
     setQuery(value);
@@ -47,7 +51,8 @@ export default function MonthlyLogAddModal() {
       body: JSON.stringify({
         game_id: selectedGame.id,
         title: selectedGame.title,
-        hours,
+       hours: thisMonthHours,
+currentTotalHours,
         month,
         year,
       }),
@@ -112,8 +117,9 @@ export default function MonthlyLogAddModal() {
                         key={game.id}
                         onClick={() => {
                           setSelectedGame(game);
-                          setQuery(game.title);
-                          setGames([]);
+setQuery(game.title);
+setCurrentTotalHours(String(game.hours_played || ""));
+setGames([]);
                         }}
                         className="block w-full px-4 py-3 text-left text-sm font-bold hover:bg-zinc-900"
                       >
@@ -124,19 +130,45 @@ export default function MonthlyLogAddModal() {
                 )}
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-zinc-400">
-                  Hours
-                </label>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+  <div>
+    <label className="mb-2 block text-sm font-bold text-zinc-400">
+      Previous Total
+    </label>
 
-                <input
-                  value={hours}
-                  onChange={(event) => setHours(event.target.value)}
-                  type="number"
-                  step="0.01"
-                  className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 text-white outline-none"
-                />
-              </div>
+    <input
+      value={previousTotalHours}
+      readOnly
+      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-400 outline-none"
+    />
+  </div>
+
+  <div>
+    <label className="mb-2 block text-sm font-bold text-zinc-400">
+      Current Total
+    </label>
+
+    <input
+      value={currentTotalHours}
+      onChange={(event) => setCurrentTotalHours(event.target.value)}
+      type="number"
+      step="0.01"
+      className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 text-white outline-none"
+    />
+  </div>
+
+  <div>
+    <label className="mb-2 block text-sm font-bold text-zinc-400">
+      This Month
+    </label>
+
+    <input
+      value={thisMonthHours}
+      readOnly
+      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-cyan-300 outline-none"
+    />
+  </div>
+</div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

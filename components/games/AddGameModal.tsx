@@ -92,7 +92,7 @@ const [earnedAwards, setEarnedAwards] = useState("");
 const [totalAwards, setTotalAwards] = useState("");
 const [completionPercentage, setCompletionPercentage] = useState("");
   const [message, setMessage] = useState("");
-
+const [dateStarted, setDateStarted] = useState("");
   const [dateOfPurchase, setDateOfPurchase] = useState(
   new Date().toISOString().slice(0, 10)
 );
@@ -274,6 +274,7 @@ setCompletionPercentage("");
       body: JSON.stringify({
   title,
   release,
+  dateStarted,
   dateOfPurchase,
   completionLastPlayed,
   status,
@@ -496,6 +497,12 @@ setSteamVerticalCoverOptions([]);
   onChange={(e) => setRelease(e.target.value)}
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
+<input
+  type="date"
+  value={dateStarted}
+  onChange={(e) => setDateStarted(e.target.value)}
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
               <input
   type="date"
   value={dateOfPurchase}
@@ -509,7 +516,16 @@ setSteamVerticalCoverOptions([]);
   placeholder=""
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
+              <select value={status}
+onChange={(e) => {
+  const newStatus = e.target.value;
+
+  setStatus(newStatus);
+
+  if (newStatus === "Playing" && !dateStarted) {
+    setDateStarted(new Date().toISOString().slice(0, 10));
+  }
+}} className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
                 <option>Completed</option>
                 <option>Playing</option>
                 <option>Unplayed</option>
@@ -554,7 +570,12 @@ setSteamVerticalCoverOptions([]);
   placeholder="Hardware"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
-
+<input
+  value={genre}
+  onChange={(e) => setGenre(e.target.value)}
+  placeholder="Genre"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
 <datalist id="game-hardware">
   {options.hardware.map((item) => (
     <option key={item} value={item} />
@@ -740,13 +761,6 @@ placeholder="Steam Vertical Cover URL"
     className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
   />
 </div>
-
-<input
-  value={genre}
-  onChange={(e) => setGenre(e.target.value)}
-  placeholder="Genre"
-  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
-/>
 
 <input
   value={developer}

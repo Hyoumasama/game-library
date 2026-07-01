@@ -50,8 +50,9 @@ export async function POST(request: Request) {
       slug: slugify(title),
 
       release: body.release || null,
-      date_of_purchase: body.dateOfPurchase || null,
-      completion_last_played: body.completionLastPlayed || null,
+date_started: body.dateStarted || null,
+date_of_purchase: body.dateOfPurchase || null,
+completion_last_played: body.completionLastPlayed || null,
 
       status: body.status || null,
       score: toNumber(body.score),

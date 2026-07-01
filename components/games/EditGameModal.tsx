@@ -113,7 +113,9 @@ const [completionPercentage, setCompletionPercentage] = useState("");
     earnedAwards,
     totalAwards
   );
-
+const [dateStarted, setDateStarted] = useState(
+  toDateInput(game.date_started || game.dateStarted || "")
+);
   const [dateOfPurchase, setDateOfPurchase] = useState(
     toDateInput(game["Date of Purchase"] || game.date_of_purchase || "")
   );
@@ -311,6 +313,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
       body: JSON.stringify({
         title,
         release,
+        dateStarted,
         dateOfPurchase,
         completionLastPlayed,
         status,
@@ -465,6 +468,12 @@ onClick={handleOpen}
                 className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
               />
               <input
+  type="date"
+  value={dateStarted}
+  onChange={(e) => setDateStarted(e.target.value)}
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
+              <input
                 type="date"
                 value={dateOfPurchase}
                 onChange={(e) => setDateOfPurchase(e.target.value)}
@@ -477,7 +486,25 @@ onClick={handleOpen}
                 placeholder=""
                 className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
               />
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
+              <select value={status}
+onChange={(e) => {
+  const newStatus = e.target.value;
+
+  setStatus(newStatus);
+
+  if (
+    newStatus === "Playing" &&
+    !dateStarted
+  ) {
+    setDateStarted(new Date().toISOString().slice(0, 10));
+  }
+  if (
+  (newStatus === "Completed" || newStatus === "Dropped") &&
+  !completionLastPlayed
+) {
+  setCompletionLastPlayed(new Date().toISOString().slice(0, 10));
+}
+}} className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
                 <option>Completed</option>
                 <option>Playing</option>
                 <option>Unplayed</option>
@@ -528,6 +555,12 @@ onClick={handleOpen}
                   <option key={item} value={item} />
                 ))}
               </datalist>
+              <input
+  value={genre}
+  onChange={(e) => setGenre(e.target.value)}
+  placeholder="Genre"
+  className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
+/>
                                           <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
                 <p className="mb-3 text-sm font-bold text-zinc-300">Achievements</p>
 
@@ -705,13 +738,6 @@ onClick={handleOpen}
                   className="mt-4 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
                 />
               </div>
-
-              <input
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                placeholder="Genre"
-                className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
-              />
 
               <input
                 value={developer}

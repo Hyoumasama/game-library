@@ -6,10 +6,11 @@ export async function POST(request: Request) {
   const gameId = Number(body.game_id);
   const title = String(body.title || "");
   const hours = Number(body.hours);
+  const currentTotalHours = Number(body.currentTotalHours);
   const month = Number(body.month);
   const year = Number(body.year);
 
-  if (!gameId || !title || !hours || !month || !year) {
+  if (!gameId || !title || Number.isNaN(hours) || Number.isNaN(currentTotalHours) || !month || !year) {
     return Response.json({ error: "Missing fields" }, { status: 400 });
   }
 
@@ -28,6 +29,15 @@ export async function POST(request: Request) {
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
+
+  const { error: updateGameError } = await supabase
+  .from("games")
+  .update({ hours_played: currentTotalHours })
+  .eq("id", gameId);
+
+if (updateGameError) {
+  return Response.json({ error: updateGameError.message }, { status: 500 });
+}
 
   return Response.json({ data });
 }
