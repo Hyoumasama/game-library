@@ -461,10 +461,12 @@ const completionYears = filterOptions.completionYears;
   className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
 >
   <option value="default">Sort</option>
-  <option value="hours-high">Highest Hours</option>
-  <option value="hours-low">Lowest Hours</option>
+  <option value="hours-high">+ Hours</option>
+  <option value="hours-low">- Hours</option>
   <option value="completion-newest">Newest Completion</option>
   <option value="completion-oldest">Oldest Completion</option>
+  <option value="score-high">+ Score</option>
+<option value="score-low">- Score</option>
 </select>
 
             <div className="col-span-2 md:col-span-1">

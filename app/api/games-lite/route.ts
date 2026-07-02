@@ -73,7 +73,7 @@ if (completion && completion !== "All") {
  const sortOptions: Record<
   string,
   {
-    column: "id" | "hours_played" | "completion_last_played";
+    column: "id" | "hours_played" | "completion_last_played" | "score";
     ascending: boolean;
   }
 > = {
@@ -97,6 +97,14 @@ if (completion && completion !== "All") {
     column: "completion_last_played",
     ascending: true,
   },
+  "score-high": {
+  column: "score",
+  ascending: false,
+},
+"score-low": {
+  column: "score",
+  ascending: true,
+},
 };
 
 const selectedSort = sortOptions[sort] || sortOptions.default;
