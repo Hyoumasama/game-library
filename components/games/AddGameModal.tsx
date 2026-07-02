@@ -53,7 +53,11 @@ developer?: string | null;
 publisher?: string | null;
 };
 
-export default function AddGameModal() {
+export default function AddGameModal({
+  onGameAdded,
+}: {
+  onGameAdded?: () => void;
+}) {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -314,9 +318,10 @@ completionPercentage: playStationGame
       return;
     }
         resetForm();
-    setOpen(false);
+setOpen(false);
 
-    router.refresh();
+onGameAdded?.();
+router.refresh();
   }
 
   return (
@@ -522,10 +527,25 @@ onChange={(e) => {
 
   setStatus(newStatus);
 
+    if (newStatus === "Wishlist") {
+    setDateOfPurchase("");
+    setPrice("");
+    setStore("");
+    setPlatform("");
+    setHardware("");
+    return;
+  }
+
+  if (!dateOfPurchase) {
+    setDateOfPurchase(new Date().toISOString().slice(0, 10));
+  }
+
   if (newStatus === "Playing" && !dateStarted) {
     setDateStarted(new Date().toISOString().slice(0, 10));
   }
-}} className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
+}}
+
+className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
                 <option>Completed</option>
                 <option>Playing</option>
                 <option>Unplayed</option>

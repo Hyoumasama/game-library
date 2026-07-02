@@ -127,7 +127,6 @@ if (currentPage > 1) params.set("page", String(currentPage));
   router,
 ]);
 
-  useEffect(() => {
     async function loadGames() {
       if (!hasLoadedFilters) return;
 
@@ -186,11 +185,11 @@ achievement_badge: game.achievement_badge,
       } finally {
         setIsLoading(false);
       }
-    }
+      }
 
-    loadGames();    
-    
-      }, [
+  useEffect(() => {
+    loadGames();
+  }, [
     hasLoadedFilters,
     currentPage,
     search,
@@ -317,7 +316,7 @@ const completionYears = filterOptions.completionYears;
             </Link>
 
             <AuthButton />
-            {isAdmin && <AddGameModal />}
+            {isAdmin && <AddGameModal onGameAdded={loadGames} />}
           </div>
 
           <button
@@ -358,7 +357,7 @@ const completionYears = filterOptions.completionYears;
                   Assets
                 </Link>
 
-                {isAdmin && <AddGameModal />}
+                {isAdmin && <AddGameModal onGameAdded={loadGames} />}
                 <AuthButton />
               </div>
             </div>

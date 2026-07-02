@@ -52,7 +52,13 @@ function toDateInput(value: string) {
   return date.toISOString().split("T")[0];
 }
 
-export default function EditGameModal({ game }: { game: any }) {
+export default function EditGameModal({
+  game,
+  onGameUpdated,
+}: {
+  game: any;
+  onGameUpdated?: () => void;
+}) {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -354,8 +360,10 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     }
 
     setMessage("");
-    setOpen(false);
-    router.refresh();
+setOpen(false);
+
+onGameUpdated?.();
+router.refresh();
   }
 
   return (

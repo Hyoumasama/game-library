@@ -2,7 +2,13 @@
 
 import { useRouter } from "next/navigation";
 
-export default function DeleteGameButton({ gameId }: { gameId: number }) {
+export default function DeleteGameButton({
+  gameId,
+  onGameDeleted,
+}: {
+  gameId: number;
+  onGameDeleted?: () => void;
+}) {
   const router = useRouter();
 
   async function deleteGame() {
@@ -25,6 +31,7 @@ export default function DeleteGameButton({ gameId }: { gameId: number }) {
   router.push("/");
 }
 
+onGameDeleted?.();
 router.refresh();
   }
 

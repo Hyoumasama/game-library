@@ -14,7 +14,8 @@ const selectColumns = `
   platform,
   hardware,
   genre,
-  cover_url,
+    cover_url,
+  wide_cover_url,
   steam_vertical_cover,
   game_achievements (
     platinum,
@@ -53,12 +54,28 @@ function mapGame(game: any) {
     "Completion Last Played": game.completion_last_played,
     "Completion / Last Played": game.completion_last_played,
     Cover: game.steam_vertical_cover || game.cover_url,
+    "Wide Cover": game.wide_cover_url,
     achievement_badge,
   };
 }
 
 export async function GET() {
-  const [playingResult, addedResult, completedResult] = await Promise.all([
+  const today = new Date();
+  const todayText = today.toISOString().slice(0, 10);
+
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
+  const sevenDaysAgoText = sevenDaysAgo.toISOString().slice(0, 10);
+
+  const [wishlistResult, playingResult, addedResult, completedResult] = await Promise.all([
+    supabase
+      .from("games")
+      .select(selectColumns)
+      .eq("status", "Wishlist")
+      .not("release", "is", null)
+      .gte("release", sevenDaysAgoText)
+      .order("release", { ascending: true })
+      .limit(7),
     supabase
       .from("games")
       .select(selectColumns)
@@ -81,6 +98,10 @@ export async function GET() {
       .limit(7),
   ]);
 
+    if (wishlistResult.error) {
+    return Response.json({ error: wishlistResult.error.message }, { status: 500 });
+  }
+
   if (playingResult.error) {
     return Response.json({ error: playingResult.error.message }, { status: 500 });
   }
@@ -93,7 +114,16 @@ export async function GET() {
     return Response.json({ error: completedResult.error.message }, { status: 500 });
   }
 
-  return Response.json({
+    return Response.json({
+    wishlist: (wishlistResult.data || []).map((game) => {
+      const mappedGame = mapGame(game);
+      const releaseText = game.release ? String(game.release).slice(0, 10) : null;
+
+      return {
+        ...mappedGame,
+        home_tag: releaseText && releaseText <= todayText ? "Available Now" : "Upcoming",
+      };
+    }),
     currentlyPlaying: (playingResult.data || []).map(mapGame),
     recentlyAdded: (addedResult.data || []).map(mapGame),
     recentlyCompleted: (completedResult.data || []).map(mapGame),
