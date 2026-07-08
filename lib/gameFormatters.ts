@@ -1,4 +1,4 @@
-export function formatHours(hours?: string | number) {
+export function formatHours(hours?: string | number | null) {
   const value = Number(hours || 0);
   if (!value) return "0";
   return value.toFixed(1).replace(".0", "");
@@ -13,7 +13,7 @@ export function getReleaseYear(game: any) {
   return match ? match[0] : "";
 }
 
-export function getYearFromDate(value?: string) {
+export function getYearFromDate(value?: string | null) {
   const match = value?.match(/\b(19|20)\d{2}\b/);
   return match ? match[0] : "";
 }
@@ -32,7 +32,7 @@ export function formatDisplayDate(value: string | null | undefined) {
   return formatted.replace(/ (\d{4})$/, ", $1");
 }
 
-export function getDaysBetween(start?: string, end?: string) {
+export function getDaysBetween(start?: string | null, end?: string | null) {
   if (!start || !end) return "-";
 
   const startDate = new Date(start);

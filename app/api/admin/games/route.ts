@@ -22,6 +22,19 @@ function toPlatinum(value: unknown) {
   return value === true || value === 1 || value === "1" ? 1 : 0;
 }
 
+function toGenres(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item).trim())
+      .filter(Boolean);
+  }
+
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function calculateCompletion(
   earnedAwards: number,
   totalAwards: number,
@@ -38,6 +51,7 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   const title = body.title?.trim();
+  const genres = toGenres(body.genres || body.genre);
 
   if (!title) {
     return Response.json({ error: "Title is required" }, { status: 400 });
@@ -73,6 +87,7 @@ completion_last_played: body.completionLastPlayed || null,
 
       summary: body.summary || null,
       genre: body.genre || null,
+      genres: genres.length > 0 ? genres : null,
       screenshots: body.screenshots || null,
       developer: body.developer || null,
       publisher: body.publisher || null,

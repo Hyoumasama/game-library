@@ -1,4 +1,4 @@
-export function getIcon(value?: string) {
+export function getIcon(value?: string | null) {
   const text = value?.trim().toLowerCase();
 
   const icons: Record<string, string> = {

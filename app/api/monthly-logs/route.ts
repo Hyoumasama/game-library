@@ -1,6 +1,24 @@
 import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
+
+async function requireAdmin() {
+  const cookieStore = await cookies();
+  const isAdmin = await verifyAdminSessionValue(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  );
+
+  if (!isAdmin) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await request.json();
 
   const gameId = Number(body.game_id);
@@ -42,6 +60,9 @@ if (updateGameError) {
   return Response.json({ data });
 }
 export async function DELETE(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(request.url);
   const id = Number(searchParams.get("id"));
 

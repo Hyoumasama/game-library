@@ -27,10 +27,10 @@ if (!game) {
   );
 }
 
-const coverImage = game.cover_url;
-const steamVerticalCover = game.steam_vertical_cover;
-const heroImage = game.hero_url;
-const wideCoverImage = game.wide_cover_url;
+const coverImage = game.cover_url || undefined;
+const steamVerticalCover = game.steam_vertical_cover || undefined;
+const heroImage = game.hero_url || undefined;
+const wideCoverImage = game.wide_cover_url || undefined;
 
 const releaseYear = getYearFromDate(game.Release);
 
@@ -476,7 +476,7 @@ function Stat({
   rank,
 }: {
   label: string;
-  value: string;
+  value?: string | number | null;
   rank?: string;
 }) {
   const score =
@@ -514,7 +514,13 @@ className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number | null;
+}) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
       <p className="text-sm border-zinc-800">{label}</p>

@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
 import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
 type MonthlyLog = {
   log_id: number;
   game_id: number;
@@ -55,6 +57,10 @@ export default async function MonthlyLogPage({
   searchParams,
 }: MonthlyLogPageProps) {
   const params = await searchParams;
+  const cookieStore = await cookies();
+  const isAdmin = await verifyAdminSessionValue(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  );
 
   const { data: yearsData, error: yearsError } = await supabase
     .from("monthly_play_logs")
@@ -152,7 +158,7 @@ const bestMonth = months
   selectedYear={selectedYear}
 />
 
-            <MonthlyLogAddModal />
+            {isAdmin && <MonthlyLogAddModal />}
           </div>
         </div>
 
@@ -260,17 +266,17 @@ const bestMonth = months
               </div>
 
               <div className="hidden overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 md:block">
-  <div className="grid grid-cols-[1fr_160px_140px_40px] border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300">
+  <div className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_40px]" : "grid-cols-[1fr_160px_140px]"} border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300`}>
     <div>Game</div>
     <div>Hours</div>
     <div>Month</div>
-    <div></div>
+    {isAdmin && <div></div>}
   </div>
 
   {monthLogs.map((log) => (
                   <div
                     key={log.log_id}
-                   className="grid grid-cols-[1fr_160px_140px_40px] items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0"
+                   className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_40px]" : "grid-cols-[1fr_160px_140px]"} items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0`}
                   >
                     <Link
                       href={`/game/${log.game_id}`}
@@ -293,9 +299,11 @@ const bestMonth = months
 <div className="font-black text-white">
   {monthNames[log.month] || log.month}
 </div>
-                    <div className="text-right">
-  <MonthlyLogDeleteButton logId={log.log_id} />
-</div>
+                    {isAdmin && (
+                      <div className="text-right">
+                        <MonthlyLogDeleteButton logId={log.log_id} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

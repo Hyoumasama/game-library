@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { mapDbGameToUiGame } from "@/lib/gameMappers";
 
 const selectColumns = `
   id,
@@ -22,42 +23,6 @@ const selectColumns = `
     completion_percentage
   )
 `;
-
-function mapGame(game: any) {
-  const achievement = Array.isArray(game.game_achievements)
-  ? game.game_achievements[0]
-  : game.game_achievements;
-
-  let achievement_badge = null;
-
-  if (Number(achievement?.completion_percentage || 0) >= 100) {
-    achievement_badge = "100completion";
-  } else if (Number(achievement?.platinum || 0) > 0) {
-    achievement_badge = "platinum";
-  }
-
-  const { game_achievements, ...cleanGame } = game;
-
-  return {
-    ...cleanGame,
-    Title: game.title,
-    Store: game.store,
-    Platform: game.platform,
-    Hardware: game.hardware,
-    Genre: game.genre,
-    Score: game.score,
-    Status: game.status,
-    Price: game.price,
-    "Hours Played": game.hours_played,
-    Release: game.release,
-    "Date of Purchase": game.date_of_purchase,
-    "Completion Last Played": game.completion_last_played,
-    "Completion / Last Played": game.completion_last_played,
-    Cover: game.steam_vertical_cover || game.cover_url,
-    "Wide Cover": game.wide_cover_url,
-    achievement_badge,
-  };
-}
 
 export async function GET() {
   const today = new Date();
@@ -116,7 +81,7 @@ export async function GET() {
 
     return Response.json({
     wishlist: (wishlistResult.data || []).map((game) => {
-      const mappedGame = mapGame(game);
+      const mappedGame = mapDbGameToUiGame(game);
       const releaseText = game.release ? String(game.release).slice(0, 10) : null;
 
       return {
@@ -124,8 +89,8 @@ export async function GET() {
         home_tag: releaseText && releaseText <= todayText ? "Available Now" : "Upcoming",
       };
     }),
-    currentlyPlaying: (playingResult.data || []).map(mapGame),
-    recentlyAdded: (addedResult.data || []).map(mapGame),
-    recentlyCompleted: (completedResult.data || []).map(mapGame),
+    currentlyPlaying: (playingResult.data || []).map(mapDbGameToUiGame),
+    recentlyAdded: (addedResult.data || []).map(mapDbGameToUiGame),
+    recentlyCompleted: (completedResult.data || []).map(mapDbGameToUiGame),
   });
 }
