@@ -55,9 +55,13 @@ function toDateInput(value: string) {
 export default function EditGameModal({
   game,
   onGameUpdated,
+  openSignal,
+  hideButton = false,
 }: {
   game: any;
   onGameUpdated?: () => void;
+  openSignal?: number;
+  hideButton?: boolean;
 }) {
   const router = useRouter();
 
@@ -212,6 +216,11 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
       console.error("Failed to load achievements:", error);
     }
   }
+    useEffect(() => {
+    if (!openSignal) return;
+
+    handleOpen();
+  }, [openSignal]);
   useEffect(() => {
     fetch("/api/admin/game-options")
       .then((res) => res.json())
@@ -368,12 +377,14 @@ router.refresh();
 
   return (
     <>
-      <button
-onClick={handleOpen}
-        className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-black"
-      >
-        Edit Game
-      </button>
+      {!hideButton && (
+        <button
+          onClick={handleOpen}
+          className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-black"
+        >
+          Edit Game
+        </button>
+      )}
 
       {open && (
   <div
@@ -499,6 +510,14 @@ onChange={(e) => {
   const newStatus = e.target.value;
 
   setStatus(newStatus);
+
+    if (
+    (newStatus === "Playing" || newStatus === "Unplayed") &&
+    status === "Wishlist" &&
+    !dateOfPurchase
+  ) {
+    setDateOfPurchase(new Date().toISOString().slice(0, 10));
+  }
 
   if (
     newStatus === "Playing" &&

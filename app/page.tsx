@@ -2,6 +2,8 @@
 
 import HomeGameSearch from "@/components/HomeGameSearch";
 import AddGameModal from "@/components/games/AddGameModal";
+import EditGameModal from "@/components/games/EditGameModal";
+import LongPressGameCard from "@/components/games/LongPressGameCard";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import AuthButton from "@/components/admin/AuthButton";
@@ -47,6 +49,31 @@ const [currentlyPlayingGames, setCurrentlyPlayingGames] = useState<Game[]>([]);
 const [recentlyAddedGames, setRecentlyAddedGames] = useState<Game[]>([]);
 const [recentlyCompletedGames, setRecentlyCompletedGames] = useState<Game[]>([]);
 const [isLoading, setIsLoading] = useState(true);
+
+const [editingGame, setEditingGame] = useState<Game | null>(null);
+const [editSignal, setEditSignal] = useState(0);
+
+function openEditGame(game: Game) {
+  setEditingGame(game);
+  setEditSignal((value) => value + 1);
+}
+
+async function deleteGame(gameId: number) {
+  const confirmed = confirm("Are you sure you want to delete this game?");
+
+  if (!confirmed) return;
+
+  const response = await fetch(`/api/admin/games/${gameId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    alert("Failed to delete game");
+    return;
+  }
+
+  await loadGames();
+}
 
   async function loadGames() {
   try {
@@ -134,8 +161,14 @@ useEffect(() => {
           </div>
 
           {isMenuOpen && (
-  <div className="fixed inset-0 z-50 bg-black/70 p-4 sm:hidden">
-    <div className="rounded-2xl border border-zinc-700 bg-zinc-950 p-4">
+  <div
+  className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 sm:hidden"
+  onClick={() => setIsMenuOpen(false)}
+>
+    <div
+  className="rounded-2xl border border-zinc-700 bg-zinc-950 p-4"
+  onClick={(e) => e.stopPropagation()}
+>
       <div className="mb-5 flex items-center justify-between">
         <p className="text-lg font-bold text-white">Menu</p>
 
@@ -190,29 +223,52 @@ useEffect(() => {
 )}
         </div>
 
+                {isAdmin && editingGame && (
+          <EditGameModal
+            game={editingGame}
+            onGameUpdated={loadGames}
+            openSignal={editSignal}
+            hideButton
+          />
+        )}
+
                         <GameSection
   title="Coming Soon"
   games={wishlistGames}
   href="/all-games?status=Wishlist"
   showHomeTag
   variant="wishlist"
+  isAdmin={isAdmin}
+  onEdit={openEditGame}
+  onDelete={deleteGame}
 />
 
 <section className="mb-8">
-  <CurrentlyPlayingGrid games={currentlyPlayingGames} />
+  <CurrentlyPlayingGrid
+  games={currentlyPlayingGames}
+  isAdmin={isAdmin}
+  onEdit={openEditGame}
+  onDelete={deleteGame}
+/>
 </section>
 
         <GameSection
-          title="Recently Added"
-          games={recentlyAddedGames}
-          href="/all-games?sort=recently-added"
-        />
+  title="Recently Added"
+  games={recentlyAddedGames}
+  href="/all-games?sort=recently-added"
+  isAdmin={isAdmin}
+  onEdit={openEditGame}
+  onDelete={deleteGame}
+/>
 
         <GameSection
-          title="Recently Completed"
-          games={recentlyCompletedGames}
-          href="/all-games?status=Completed&sort=completion-newest"
-        />
+  title="Recently Completed"
+  games={recentlyCompletedGames}
+  href="/all-games?status=Completed&sort=completion-newest"
+  isAdmin={isAdmin}
+  onEdit={openEditGame}
+  onDelete={deleteGame}
+/>
       </div>
     </main>
   );
@@ -244,13 +300,26 @@ function getWishlistCountdown(release: string | null | undefined) {
   return years === 1 ? "1 YEAR LEFT" : `${years} YEARS LEFT`;
 }
 
-function CurrentlyPlayingGrid({ games }: { games: Game[] }) {
+function CurrentlyPlayingGrid({
+  games,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: {
+  games: Game[];
+  isAdmin: boolean;
+  onEdit: (game: Game) => void;
+  onDelete: (gameId: number) => void;
+}) {
   return (
     <GameSection
-      title="Currently Playing"
-      games={games}
-      href="/all-games?status=Playing"
-    />
+  title="Currently Playing"
+  games={games}
+  href="/all-games?status=Playing"
+  isAdmin={isAdmin}
+  onEdit={onEdit}
+  onDelete={onDelete}
+/>
   );
 }
 function GameSection({
@@ -259,12 +328,18 @@ function GameSection({
   href,
   showHomeTag = false,
   variant = "default",
+  isAdmin,
+  onEdit,
+  onDelete,
 }: {
   title: string;
   games: Game[];
   href: string;
   showHomeTag?: boolean;
   variant?: "default" | "wishlist";
+    isAdmin: boolean;
+  onEdit: (game: Game) => void;
+  onDelete: (gameId: number) => void;
 }) {
   return (
     <section className="mb-12">
@@ -281,9 +356,43 @@ function GameSection({
           const image = variant === "wishlist" ? game.Cover : game.Cover;
 
           return (
-            <Link
+            <LongPressGameCard
               key={`${title}-${game.id || game.Title}-${index}`}
-              href={`/game/${game.id}`}
+              disabled={!isAdmin || !game.id}
+              title={game.Title}
+              imageUrl={image}
+              footer={
+                <>
+                  {Array.from(
+                    new Set(
+                      [game.Store, game.Platform, game.Hardware]
+                        .filter((value): value is string => Boolean(value))
+                        .map((value) => {
+                          const icon = getIcon(value);
+                          return icon ? `${icon}|||${value}` : null;
+                        })
+                        .filter((item): item is string => Boolean(item))
+                    )
+                  ).map((item) => {
+                    const [icon, value] = item.split("|||");
+
+                    return (
+                      <img
+                        key={icon}
+                        src={icon}
+                        alt=""
+                        className="h-5 w-5 object-contain"
+                        title={value}
+                      />
+                    );
+                  })}
+                </>
+              }
+              onEdit={() => onEdit(game)}
+              onDelete={() => onDelete(Number(game.id))}
+            >
+              <Link
+                href={`/game/${game.id}`}
               className={`group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:w-auto ${
                 variant !== "wishlist" && game.achievement_badge
                   ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
@@ -371,7 +480,8 @@ function GameSection({
                   </div>
                 )}
               </div>
-            </Link>
+                          </Link>
+            </LongPressGameCard>
           );
         })}
       </div>

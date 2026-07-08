@@ -1,6 +1,8 @@
 "use client";
 
 import AddGameModal from "@/components/games/AddGameModal";
+import EditGameModal from "@/components/games/EditGameModal";
+import LongPressGameCard from "@/components/games/LongPressGameCard";
 import AuthButton from "@/components/admin/AuthButton";
 import {
   formatHours,
@@ -76,6 +78,32 @@ const [dashboardStats, setDashboardStats] = useState({
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasLoadedFilters, setHasLoadedFilters] = useState(false);
+
+    const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [editSignal, setEditSignal] = useState(0);
+
+  function openEditGame(game: Game) {
+    setEditingGame(game);
+    setEditSignal((value) => value + 1);
+  }
+
+  async function deleteGame(gameId: number) {
+    const confirmed = confirm("Are you sure you want to delete this game?");
+
+    if (!confirmed) return;
+
+    const response = await fetch(`/api/admin/games/${gameId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      alert("Failed to delete game");
+      return;
+    }
+
+    await loadGames();
+    router.refresh();
+  }
 
   useEffect(() => {
     const searchValue = searchParams.get("search");
@@ -249,6 +277,22 @@ const completionYears = filterOptions.completionYears;
       });
     }
 
+        if (sort === "release-newest") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.Release || "").getTime();
+        const dateB = new Date(b.Release || "").getTime();
+        return dateB - dateA;
+      });
+    }
+
+    if (sort === "release-oldest") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.Release || "").getTime();
+        const dateB = new Date(b.Release || "").getTime();
+        return dateA - dateB;
+      });
+    }
+
     return filtered;
     }, [
     hasLoadedFilters,
@@ -329,8 +373,14 @@ const completionYears = filterOptions.completionYears;
         </div>
 
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 p-4 md:hidden">
-            <div className="rounded-3xl border border-zinc-700 bg-zinc-950 p-4">
+          <div
+  className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm p-4 md:hidden"
+  onClick={() => setIsMobileMenuOpen(false)}
+>
+            <div
+  className="rounded-3xl border border-zinc-700 bg-zinc-950 p-4"
+  onClick={(e) => e.stopPropagation()}
+>
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-lg font-black text-white">Menu</p>
 
@@ -461,12 +511,15 @@ const completionYears = filterOptions.completionYears;
   className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
 >
   <option value="default">Sort</option>
+    <option value="score-high">+ Score</option>
+<option value="score-low">- Score</option>
   <option value="hours-high">+ Hours</option>
   <option value="hours-low">- Hours</option>
   <option value="completion-newest">Newest Completion</option>
   <option value="completion-oldest">Oldest Completion</option>
-  <option value="score-high">+ Score</option>
-<option value="score-low">- Score</option>
+    <option value="release-newest">Newest Release</option>
+  <option value="release-oldest">Oldest Release</option>
+
 </select>
 
             <div className="col-span-2 md:col-span-1">
@@ -482,15 +535,49 @@ const completionYears = filterOptions.completionYears;
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
 {visibleGames.map((game, index) => (
-  <Link
+  <LongPressGameCard
     key={`${game.Title}-${index}`}
+    disabled={!isAdmin || !game.id}
+    title={game.Title}
+    footer={
+      <>
+        {Array.from(
+          new Set(
+            [game.Store, game.Platform, game.Hardware]
+              .filter((value): value is string => Boolean(value))
+              .map((value) => {
+                const icon = getIcon(value);
+                return icon ? `${icon}|||${value}` : null;
+              })
+              .filter((item): item is string => Boolean(item))
+          )
+        ).map((item) => {
+          const [icon, value] = item.split("|||");
+
+          return (
+            <img
+              key={icon}
+              src={icon}
+              alt=""
+              title={value}
+              className="h-5 w-5 object-contain"
+            />
+          );
+        })}
+      </>
+    }
+    imageUrl={game.Cover}
+    onEdit={() => openEditGame(game)}
+    onDelete={() => deleteGame(Number(game.id))}
+  >
+    <Link
     href={`/game/${game.id}`}
 className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:block ${
   game.achievement_badge
     ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
     : "border-zinc-800 hover:border-cyan-400/70 hover:shadow-cyan-950/40"
 }`}  >
-    <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-t-[1.6rem] bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto">            {game.Cover ? (
+   <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-l-[1.6rem] bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto md:rounded-t-[1.6rem] md:rounded-b-none">            {game.Cover ? (
                   <img
                     src={game.Cover}
                     alt={game.Title}
@@ -559,17 +646,19 @@ className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-
 
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <span
-  className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
-    game.Status === "Playing"
-      ? "border-blue-400/40 bg-blue-400/10 text-blue-300"
-      : game.Status === "Dropped"
-        ? "border-red-400/40 bg-red-400/10 text-red-300"
-        : game.Status === "Completed"
-          ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
-          : game.Status === "Unplayed"
-            ? "border-yellow-400/40 bg-yellow-400/10 text-yellow-300"
+className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
+  game.Status === "Playing"
+    ? "border-blue-400/40 bg-blue-400/10 text-blue-300"
+    : game.Status === "Dropped"
+      ? "border-red-400/40 bg-red-400/10 text-red-300"
+      : game.Status === "Completed"
+        ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
+        : game.Status === "Unplayed"
+          ? "border-yellow-400/40 bg-yellow-400/10 text-yellow-300"
+          : game.Status === "Wishlist"
+            ? "border-purple-500/40 bg-purple-500/10 text-purple-300"
             : "border-zinc-800 bg-black/60 text-zinc-400"
-  }`}
+}`}
 >
   {game.Status || "-"}
 </span>
@@ -577,8 +666,18 @@ className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-
                 </div>
               </div>
             </Link>
+          </LongPressGameCard>
           ))}
         </section>
+
+        {isAdmin && editingGame && (
+          <EditGameModal
+            game={editingGame}
+            onGameUpdated={loadGames}
+            openSignal={editSignal}
+            hideButton
+          />
+        )}
 
         <div className="mt-8 flex items-center justify-center gap-4">
           <button
