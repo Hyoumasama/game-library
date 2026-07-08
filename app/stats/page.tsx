@@ -102,10 +102,41 @@ type LibraryGame = {
   steam_vertical_cover: string | null;
   cover_url: string | null;
   wide_cover_url: string | null;
+  release?: string | null;
+  date_started?: string | null;
+  completion_last_played?: string | null;
+  platform?: string | null;
+  hardware?: string | null;
   store: string | null;
+  status?: string | null;
   score: string | number | null;
   price: string | number | null;
+  hours_played?: string | number | null;
+  genres?: string[] | null;
 };
+
+type ArchiveGame = Required<
+  Pick<
+    LibraryGame,
+    | "id"
+    | "title"
+    | "release"
+    | "date_started"
+    | "date_of_purchase"
+    | "completion_last_played"
+    | "steam_vertical_cover"
+    | "cover_url"
+    | "wide_cover_url"
+    | "platform"
+    | "hardware"
+    | "store"
+    | "status"
+    | "score"
+    | "price"
+    | "hours_played"
+    | "genres"
+  >
+>;
 
 type TimelineGame = {
   id: number;
@@ -192,6 +223,12 @@ function getYear(value: string | null | undefined) {
 
   const parsedDate = new Date(text);
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
+}
+
+function getMonth(value: string | null | undefined) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.getMonth() + 1;
 }
 
 function getFirstPlayedYear(log: PlayLog) {
@@ -343,12 +380,61 @@ function buildTimelineGames(
   });
 }
 
+function buildArchiveTimelineGames(
+  games: ArchiveGame[],
+  monthHours: Record<number, number>,
+  year: number
+) {
+  return games.map((game) => {
+    const month = getMonth(game.completion_last_played) || 1;
+    const hours = Number(game.hours_played || 0);
+    const monthTotal = monthHours[month] || 0;
+    const startedYear =
+      getYear(game.date_started) || getYear(game.date_of_purchase);
+
+    return {
+      id: game.id,
+      title: game.title || "Untitled",
+      hours,
+      month,
+      percent: monthTotal > 0 ? (hours / monthTotal) * 100 : 0,
+      cover: game.steam_vertical_cover || game.cover_url || null,
+      wideCover:
+        game.wide_cover_url ||
+        game.cover_url ||
+        game.steam_vertical_cover ||
+        null,
+      firstPlayedThisYear: startedYear === year,
+      returningThisYear: false,
+      platform: game.platform || null,
+      hardware: game.hardware || game.platform || game.store || "Unknown",
+      releaseYear: getYear(game.release),
+      status: game.status || null,
+      score: Number(game.score || 0),
+      price: parsePrice(game.price),
+      store: game.store || null,
+      genres: game.genres?.filter(Boolean) || [],
+      startedDate: game.date_started || game.date_of_purchase || null,
+      purchaseDate: game.date_of_purchase,
+      completionDate: game.completion_last_played,
+    };
+  });
+}
+
 function groupByMonth(games: TimelineGame[]) {
-  return games.reduce<Record<number, TimelineGame[]>>((groups, game) => {
+  const groups = games.reduce<Record<number, TimelineGame[]>>((groups, game) => {
     if (!groups[game.month]) groups[game.month] = [];
     groups[game.month].push(game);
     return groups;
   }, {});
+
+  for (const month of Object.keys(groups)) {
+    groups[Number(month)].sort(
+      (a, b) => b.hours - a.hours || a.title.localeCompare(b.title)
+    );
+  }
+
+  return groups;
 }
 
 function getDeviceStats(games: TimelineGame[]) {
@@ -522,10 +608,29 @@ async function getAvailableStatsYears() {
   const { data: statsYears, error: statsYearsError } =
     await supabase.rpc("get_stats_years");
 
+  const { data: completionYearsData, error: completionYearsError } =
+    await supabase
+      .from("games")
+      .select("completion_last_played")
+      .not("completion_last_played", "is", null);
+
+  if (completionYearsError) {
+    throw completionYearsError;
+  }
+
+  const completionYears = (completionYearsData || [])
+    .map((item) => getYear(item.completion_last_played))
+    .filter((year): year is number => Boolean(year));
+
   if (!statsYearsError) {
-    return ((statsYears || []) as StatsYearRow[])
-      .map((item) => Number(item.year))
-      .filter(Boolean);
+    return Array.from(
+      new Set([
+        ...((statsYears || []) as StatsYearRow[])
+          .map((item) => Number(item.year))
+          .filter(Boolean),
+        ...completionYears,
+      ])
+    ).sort((a, b) => b - a);
   }
 
   const { data: yearsData, error: yearsError } = await supabase
@@ -538,7 +643,10 @@ async function getAvailableStatsYears() {
   }
 
   return Array.from(
-    new Set((yearsData || []).map((item) => Number(item.year)).filter(Boolean))
+    new Set([
+      ...(yearsData || []).map((item) => Number(item.year)).filter(Boolean),
+      ...completionYears,
+    ])
   ).sort((a, b) => b - a);
 }
 
@@ -611,17 +719,18 @@ function conicGradient(items: { value: number; color: string }[]) {
 
 function GamePoster({
   game,
-  isMonthlyChampion = false,
 }: {
   game: TimelineGame;
   isMonthlyChampion?: boolean;
 }) {
+  const isDropped = game.status?.toLowerCase() === "dropped";
+
   return (
     <Link
       href={`/game/${game.id}`}
       className={`group relative block aspect-[2/3] min-h-[150px] overflow-hidden rounded-lg bg-zinc-950 shadow-[0_18px_32px_rgba(0,0,0,0.42)] ${
-        isMonthlyChampion
-          ? "border-2 border-cyan-300"
+        isDropped
+          ? "border-2 border-red-500/80 shadow-[0_0_26px_rgba(239,68,68,0.28),0_18px_32px_rgba(0,0,0,0.42)]"
           : "border border-zinc-800"
       }`}
       title={game.title}
@@ -639,16 +748,18 @@ function GamePoster({
         </div>
       )}
 
-      {game.returningThisYear && (
+      {isDropped ? (
+        <div className="absolute left-0 top-0 bg-red-500 px-2 py-1 text-[9px] font-black uppercase leading-none text-white shadow-[0_0_14px_rgba(239,68,68,0.55)]">
+          Dropped
+        </div>
+      ) : game.returningThisYear ? (
         <div className="absolute left-0 top-0 bg-violet-400 px-2 py-1 text-[9px] font-black uppercase leading-none text-black">
           Returning
         </div>
-      )}
+      ) : null}
 
-      {isMonthlyChampion && (
-        <div className="absolute right-1 top-1 rounded-full bg-zinc-950/90 px-2 py-1 text-[10px] font-black text-cyan-200">
-          #1
-        </div>
+      {isDropped && (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-red-500/10 via-transparent to-red-950/25" />
       )}
 
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-md bg-zinc-100 px-2 py-0.5 text-[11px] font-black text-zinc-950">
@@ -776,10 +887,13 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
   const availableYears = await getAvailableStatsYears();
   const selectedYear = Number(params.year || availableYears[0] || new Date().getFullYear());
+  const useArchiveTimeline = selectedYear < 2024;
   const purchaseYearStart = `${selectedYear}-01-01`;
   const purchaseYearEnd = `${selectedYear + 1}-01-01`;
+  const completionYearStart = `${selectedYear}-01-01`;
+  const completionYearEnd = `${selectedYear + 1}-01-01`;
 
-  const [logsResult, libraryGamesResult] = await Promise.all([
+  const [logsResult, libraryGamesResult, archiveGamesResult] = await Promise.all([
     supabase
       .from("monthly_play_logs")
       .select(
@@ -830,6 +944,33 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
       )
       .gte("date_of_purchase", purchaseYearStart)
       .lt("date_of_purchase", purchaseYearEnd),
+    supabase
+      .from("games")
+      .select(
+        `
+          id,
+          title,
+          release,
+          date_started,
+          date_of_purchase,
+          completion_last_played,
+          steam_vertical_cover,
+          cover_url,
+          wide_cover_url,
+          platform,
+          hardware,
+          store,
+          status,
+          score,
+          price,
+          hours_played,
+          genres
+        `
+      )
+      .gte("completion_last_played", completionYearStart)
+      .lt("completion_last_played", completionYearEnd)
+      .order("completion_last_played", { ascending: true })
+      .order("hours_played", { ascending: false }),
   ]);
 
   if (logsResult.error) {
@@ -840,13 +981,28 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     throw libraryGamesResult.error;
   }
 
+  if (archiveGamesResult.error) {
+    throw archiveGamesResult.error;
+  }
+
   const logs = (logsResult.data || []) as unknown as PlayLog[];
-  const totalHours = logs.reduce((sum, log) => sum + Number(log.hours || 0), 0);
-  const monthHours = logs.reduce<Record<number, number>>((totals, log) => {
+  const archiveGames = (archiveGamesResult.data || []) as ArchiveGame[];
+  const archiveMonthHours = archiveGames.reduce<Record<number, number>>(
+    (totals, game) => {
+      const month = getMonth(game.completion_last_played) || 1;
+      totals[month] = (totals[month] || 0) + Number(game.hours_played || 0);
+      return totals;
+    },
+    {}
+  );
+  const logMonthHours = logs.reduce<Record<number, number>>((totals, log) => {
     totals[log.month] = (totals[log.month] || 0) + Number(log.hours || 0);
     return totals;
   }, {});
-  const timelineGames = buildTimelineGames(logs, monthHours, selectedYear);
+  const timelineGames = useArchiveTimeline
+    ? buildArchiveTimelineGames(archiveGames, archiveMonthHours, selectedYear)
+    : buildTimelineGames(logs, logMonthHours, selectedYear);
+  const totalHours = timelineGames.reduce((sum, game) => sum + game.hours, 0);
   const gamesByMonth = groupByMonth(timelineGames);
   const months = Object.keys(gamesByMonth).map(Number).sort((a, b) => a - b);
   const completedGames = timelineGames.filter(
@@ -865,7 +1021,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     timelineGames,
     selectedYear
   );
-  const uniqueGameIds = new Set(logs.map((log) => log.game_id));
+  const uniqueGameIds = new Set(timelineGames.map((game) => game.id));
   const newGames = timelineGames.filter((game) => game.firstPlayedThisYear);
   const newDiscoveryHours = newGames.reduce((sum, game) => sum + game.hours, 0);
   const newDiscoveries = getTopGames(newGames, newDiscoveryHours).slice(0, 5);
@@ -953,7 +1109,9 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
           <section className="mx-auto mt-16 max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center">
             <h2 className="text-2xl font-black">No playtime logged yet</h2>
             <p className="mt-3 text-sm font-semibold text-zinc-400">
-              Add monthly logs for {selectedYear} and this replay will fill in.
+              {useArchiveTimeline
+                ? `Add completed games for ${selectedYear} and this replay will fill in.`
+                : `Add monthly logs for ${selectedYear} and this replay will fill in.`}
             </p>
           </section>
         ) : (
@@ -969,7 +1127,9 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                   </h2>
                 </div>
                 <p className="hidden max-w-sm text-right text-sm font-semibold text-zinc-500 md:block">
-                  Ranked by logged playtime from games marked Completed.
+                  {useArchiveTimeline
+                    ? "Ranked by total playtime from games completed this year."
+                    : "Ranked by logged playtime from games marked Completed."}
                 </p>
               </div>
 
@@ -1337,7 +1497,6 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                 {months.map((month, index) => {
                   const games = gamesByMonth[month].slice(0, 8);
                   const isRight = index % 2 === 0;
-                  const monthlyChampionId = games[0]?.id;
 
                   return (
                     <div
@@ -1367,21 +1526,18 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                         </div>
 
                         <div
-                          className={`grid grid-cols-3 gap-1.5 sm:grid-cols-4 ${
-                            isRight ? "" : "md:[direction:rtl]"
+                          className={`grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:flex md:flex-wrap ${
+                            isRight
+                              ? "md:flex-row"
+                              : "md:flex-row-reverse"
                           }`}
                         >
                           {games.map((game) => (
                             <div
                               key={`${month}-${game.id}`}
-                              className={isRight ? "" : "md:[direction:ltr]"}
+                              className="md:w-[calc((100%-18px)/4)]"
                             >
-                              <GamePoster
-                                game={game}
-                                isMonthlyChampion={
-                                  game.id === monthlyChampionId
-                                }
-                              />
+                              <GamePoster game={game} />
                             </div>
                           ))}
                         </div>

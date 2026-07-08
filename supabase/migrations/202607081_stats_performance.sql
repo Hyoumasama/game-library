@@ -7,6 +7,9 @@ on public.monthly_play_logs (year, month, hours desc);
 create index if not exists games_date_of_purchase_idx
 on public.games (date_of_purchase);
 
+create index if not exists games_completion_last_played_idx
+on public.games (completion_last_played);
+
 create or replace function public.get_stats_years()
 returns table(year integer)
 language sql
@@ -14,9 +17,18 @@ stable
 security definer
 set search_path = public
 as $$
-  select distinct monthly_play_logs.year::integer
-  from public.monthly_play_logs
-  where monthly_play_logs.year is not null
+  select distinct years.year
+  from (
+    select monthly_play_logs.year::integer as year
+    from public.monthly_play_logs
+    where monthly_play_logs.year is not null
+
+    union
+
+    select extract(year from games.completion_last_played)::integer as year
+    from public.games
+    where games.completion_last_played is not null
+  ) as years
   order by 1 desc;
 $$;
 
