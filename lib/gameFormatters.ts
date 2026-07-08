@@ -1,14 +1,16 @@
+import type { UiGame } from "./gameTypes";
+
 export function formatHours(hours?: string | number | null) {
   const value = Number(hours || 0);
   if (!value) return "0";
   return value.toFixed(1).replace(".0", "");
 }
 
-export function getCompletionDate(game: any) {
+export function getCompletionDate(game: Pick<UiGame, "Completion Last Played" | "Completion / Last Played">) {
   return game["Completion Last Played"] || game["Completion / Last Played"] || "";
 }
 
-export function getReleaseYear(game: any) {
+export function getReleaseYear(game: Pick<UiGame, "Release">) {
   const match = game.Release?.match(/\b(19|20)\d{2}\b/);
   return match ? match[0] : "";
 }

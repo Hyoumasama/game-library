@@ -55,11 +55,13 @@ export async function GET(request: Request) {
       { cache: "no-store" }
     );
 
-    const searchData = await searchResponse.json();
+    const searchData = (await searchResponse.json()) as {
+      items?: SteamSearchItem[];
+    };
     const items = searchData.items || [];
 
     const results = await Promise.all(
-      items.slice(0, 10).map(async (item: any) => {
+      items.slice(0, 10).map(async (item) => {
         const appid = item.id;
 
         const detailResponse = await fetch(
@@ -67,7 +69,10 @@ export async function GET(request: Request) {
           { cache: "no-store" }
         );
 
-        const detailData = await detailResponse.json();
+        const detailData = (await detailResponse.json()) as Record<
+          string,
+          { data?: SteamAppDetails }
+        >;
         const data = detailData?.[appid]?.data;
 
         const steamDate = data?.release_date?.date || "";
@@ -84,11 +89,13 @@ steamReleaseText: steamDate,
           heroUrl: data?.header_image || data?.capsule_image || null,
           summary: data?.short_description || "",
           genre:
-            data?.genres?.map((g: any) => g.description).join(", ") || "",
+            data?.genres?.map((genre) => genre.description).join(", ") || "",
           developer: data?.developers?.join(", ") || "",
           publisher: data?.publishers?.join(", ") || "",
           screenshots:
-            data?.screenshots?.map((s: any) => s.path_full).join(",") || "",
+            data?.screenshots
+              ?.map((screenshot) => screenshot.path_full)
+              .join(",") || "",
         };
       })
     );
@@ -99,3 +106,20 @@ steamReleaseText: steamDate,
     return Response.json({ results: [], error: "Steam search failed" });
   }
 }
+type SteamSearchItem = {
+  id: number;
+  name?: string;
+  tiny_image?: string;
+};
+type SteamGenre = { description?: string };
+type SteamScreenshot = { path_full?: string };
+type SteamAppDetails = {
+  release_date?: { date?: string };
+  capsule_image?: string;
+  header_image?: string;
+  short_description?: string;
+  genres?: SteamGenre[];
+  developers?: string[];
+  publishers?: string[];
+  screenshots?: SteamScreenshot[];
+};

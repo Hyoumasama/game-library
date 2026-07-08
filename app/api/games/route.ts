@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
+import type { DbGame } from "@/lib/gameTypes";
 
 export async function GET() {
   const pageSize = 1000;
   let from = 0;
-  let allGames: any[] = [];
+  let allGames: DbGame[] = [];
 
   while (true) {
     const { data, error } = await supabase

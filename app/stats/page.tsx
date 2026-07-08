@@ -608,29 +608,10 @@ async function getAvailableStatsYears() {
   const { data: statsYears, error: statsYearsError } =
     await supabase.rpc("get_stats_years");
 
-  const { data: completionYearsData, error: completionYearsError } =
-    await supabase
-      .from("games")
-      .select("completion_last_played")
-      .not("completion_last_played", "is", null);
-
-  if (completionYearsError) {
-    throw completionYearsError;
-  }
-
-  const completionYears = (completionYearsData || [])
-    .map((item) => getYear(item.completion_last_played))
-    .filter((year): year is number => Boolean(year));
-
   if (!statsYearsError) {
-    return Array.from(
-      new Set([
-        ...((statsYears || []) as StatsYearRow[])
-          .map((item) => Number(item.year))
-          .filter(Boolean),
-        ...completionYears,
-      ])
-    ).sort((a, b) => b - a);
+    return ((statsYears || []) as StatsYearRow[])
+      .map((item) => Number(item.year))
+      .filter(Boolean);
   }
 
   const { data: yearsData, error: yearsError } = await supabase
@@ -643,10 +624,7 @@ async function getAvailableStatsYears() {
   }
 
   return Array.from(
-    new Set([
-      ...(yearsData || []).map((item) => Number(item.year)).filter(Boolean),
-      ...completionYears,
-    ])
+    new Set((yearsData || []).map((item) => Number(item.year)).filter(Boolean))
   ).sort((a, b) => b - a);
 }
 

@@ -1,5 +1,24 @@
 import { getIgdbCoverUrl } from "@/lib/igdb";
 
+type IgdbImage = { image_id?: string };
+type IgdbGenre = { name?: string };
+type IgdbCompany = {
+  developer?: boolean;
+  publisher?: boolean;
+  company?: { name?: string };
+};
+type IgdbGame = {
+  id?: number;
+  name?: string;
+  first_release_date?: number;
+  cover?: IgdbImage;
+  artworks?: IgdbImage[];
+  screenshots?: IgdbImage[];
+  summary?: string;
+  genres?: IgdbGenre[];
+  involved_companies?: IgdbCompany[];
+};
+
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
 async function getIgdbToken() {
@@ -64,7 +83,7 @@ screenshots.image_id,
     cache: "no-store",
   });
 
-  const games = await response.json();
+  const games = (await response.json()) as IgdbGame[];
 
     let finalGames = games;
 
@@ -94,10 +113,10 @@ screenshots.image_id,
       cache: "no-store",
     });
 
-    finalGames = await exactResponse.json();
+    finalGames = (await exactResponse.json()) as IgdbGame[];
   }
 
-  const results = finalGames.map((game: any) => ({
+  const results = finalGames.map((game: IgdbGame) => ({
     igdbId: game.id,
     title: game.name,
     year: game.first_release_date
@@ -119,23 +138,23 @@ heroUrl:
 summary: game.summary || "",
 
 genre:
-  game.genres?.map((g: any) => g.name).join(", ") || null,
+  game.genres?.map((genre) => genre.name).join(", ") || null,
 
 screenshots:
   game.screenshots
     ?.slice(0, 8)
     .map(
-      (s: any) =>
-        `https://images.igdb.com/igdb/image/upload/t_1080p/${s.image_id}.jpg`
+      (screenshot) =>
+        `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
     )
     .join(",") || null,
 
 developer:
-  game.involved_companies?.find((x: any) => x.developer)?.company?.name ||
+  game.involved_companies?.find((company) => company.developer)?.company?.name ||
   null,
 
 publisher:
-  game.involved_companies?.find((x: any) => x.publisher)?.company?.name ||
+  game.involved_companies?.find((company) => company.publisher)?.company?.name ||
   null,
   }));
 

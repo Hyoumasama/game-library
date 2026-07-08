@@ -1,5 +1,13 @@
 import { supabase } from "@/lib/supabase";
 
+type AssetOptionRow = {
+  type?: string | null;
+  category?: string | null;
+  brand?: string | null;
+  market?: string | null;
+  status?: string | null;
+};
+
 export async function GET() {
   const { data, error } = await supabase
     .from("library_assets")
@@ -10,12 +18,12 @@ export async function GET() {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
-  const unique = (key: string) =>
+  const unique = (key: keyof AssetOptionRow) =>
     Array.from(
       new Set(
-        (data || [])
-          .map((item: any) => item[key])
-          .filter(Boolean)
+        ((data || []) as AssetOptionRow[])
+          .map((item) => item[key])
+          .filter((value): value is string => Boolean(value))
       )
     ).sort();
 

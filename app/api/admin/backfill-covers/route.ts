@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { getIgdbGame } from "@/lib/igdb";
 
+type IgdbScreenshot = { image_id?: string };
+
 export async function POST() {
   const { data: games, error } = await supabase
     .from("games")
@@ -35,8 +37,8 @@ export async function POST() {
         igdbGame?.screenshots
           ?.slice(0, 8)
           .map(
-            (s: any) =>
-              `https://images.igdb.com/igdb/image/upload/t_1080p/${s.image_id}.jpg`
+            (screenshot: IgdbScreenshot) =>
+              `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
           )
           .join(",") || null;
 
@@ -54,12 +56,12 @@ export async function POST() {
         screenshots: screenshots ? screenshots.split(",").length : 0,
         error: updateError?.message || null,
       });
-    } catch (error: any) {
+    } catch (error) {
       results.push({
         id: game.id,
         title: game.title,
         updated: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

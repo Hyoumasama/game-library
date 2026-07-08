@@ -41,13 +41,6 @@ const scoreRank = await getRankFromDatabase({
   currentYear: releaseYear,
 });
 
-const playtimeRank = await getRankFromDatabase({
-  column: "hours_played",
-  currentValue: Number(game["Hours Played"] || 0),
-  yearColumn: "release",
-  currentYear: releaseYear,
-});
-
 const completedYear = getYearFromDate(game["Completion Last Played"]);
 
 const status = game.Status?.trim();
@@ -110,8 +103,8 @@ const daysToComplete = getDaysBetween(
       className="aspect-[2/3] w-full object-cover"
     />
   ) : (
-    <div className="flex aspect-[2/3] items-center justify-center text-7xl">
-      🎮
+    <div className="flex aspect-[2/3] items-center justify-center text-4xl font-black text-zinc-600">
+      No Image
     </div>
   )}
 
@@ -469,50 +462,6 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
   );
 }
 
-
-function Stat({
-  label,
-  value,
-  rank,
-}: {
-  label: string;
-  value?: string | number | null;
-  rank?: string;
-}) {
-  const score =
-    label === "Score" ? Number(value || 0) : null;
-
-  const scoreClass =
-    score === null
-      ? ""
-      : score >= 76
-        ? "bg-emerald-400 text-black"
-        : score >= 60
-          ? "bg-yellow-400 text-black"
-          : "bg-red-400 text-black";
-
-  return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
-      
-            {label === "Score" ? (
-<span
-className={`inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-2 text-lg font-black ${scoreClass}`}
-
->
-{value}
-  </span>
-) : label === "Playtime" ? (
-  <p className="text-2xl font-bold text-cyan-300">
-    {value}
-  </p>
-) : (
-  <p className="text-2xl font-bold">
-    {value}
-  </p>
-)}
-    </div>
-  );
-}
 
 function Info({
   label,

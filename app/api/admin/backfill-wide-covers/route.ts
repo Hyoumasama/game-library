@@ -105,12 +105,12 @@ export async function POST() {
         wideCoverUrl,
         error: updateError?.message || null,
       });
-    } catch (error: any) {
+    } catch (error) {
       results.push({
         id: game.id,
         title: game.title,
         updated: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

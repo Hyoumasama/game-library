@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import EditGameModal from "./EditGameModal";
 import DeleteGameButton from "./DeleteGameButton";
+import type { UiGame } from "@/lib/gameTypes";
 
-export default function GameAdminActions({ game }: { game: any }) {
+export default function GameAdminActions({ game }: { game: UiGame }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -19,10 +20,12 @@ export default function GameAdminActions({ game }: { game: any }) {
 
   if (!isAdmin) return null;
 
+  const gameId = Number(game.id);
+
   return (
     <div className="flex items-center gap-3">
       <EditGameModal game={game} />
-      <DeleteGameButton gameId={game.id} />
+      {Number.isFinite(gameId) && <DeleteGameButton gameId={gameId} />}
     </div>
   );
 }

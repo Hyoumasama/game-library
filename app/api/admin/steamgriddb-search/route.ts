@@ -28,6 +28,21 @@ function uniqueImages(images: string[]) {
   return Array.from(new Set(images.filter(Boolean)));
 }
 
+function isString(value: string | null): value is string {
+  return Boolean(value);
+}
+
+type IgdbImage = { image_id?: string };
+type IgdbImageGame = {
+  cover?: IgdbImage;
+  screenshots?: IgdbImage[];
+};
+type SteamGridImage = {
+  width?: number;
+  height?: number;
+  url?: string;
+};
+
 async function fetchSteamHeader(title: string | null, steamAppId: string | null) {
   try {
     let appId = steamAppId;
@@ -68,7 +83,7 @@ export async function GET(request: Request) {
     const steamAppId = searchParams.get("steamAppId");
     const title = searchParams.get("title");
 
-    async function fetchGrids(url: string) {
+    async function fetchGrids(url: string): Promise<SteamGridImage[]> {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${process.env.STEAMGRIDDB_API_KEY}`,
@@ -100,19 +115,19 @@ export async function GET(request: Request) {
           cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = (await response.json()) as IgdbImageGame[];
 
         const verticalOptions = uniqueImages(
           data
-            .map((game: any) => getIgdbCoverUrl(game?.cover?.image_id))
-            .filter(Boolean)
+            .map((game) => getIgdbCoverUrl(game.cover?.image_id))
+            .filter(isString)
         ).slice(0, 5);
 
         const wideOptions = uniqueImages(
           data
-            .flatMap((game: any) => game?.screenshots || [])
-            .map((screenshot: any) => getIgdbImageUrl(screenshot?.image_id))
-            .filter(Boolean)
+            .flatMap((game) => game.screenshots || [])
+            .map((screenshot) => getIgdbImageUrl(screenshot.image_id))
+            .filter(isString)
         ).slice(0, 5);
 
         return {
@@ -129,7 +144,7 @@ export async function GET(request: Request) {
       }
     }
 
-    let grids: any[] = [];
+    let grids: SteamGridImage[] = [];
 
     if (steamAppId) {
       grids = await fetchGrids(
@@ -162,17 +177,19 @@ export async function GET(request: Request) {
 
     const steamWideCoverOptions = grids
       .filter(
-        (image: any) =>
-          (image?.width === 920 && image?.height === 430) ||
-          (image?.width === 460 && image?.height === 215)
+        (image) =>
+          (image.width === 920 && image.height === 430) ||
+          (image.width === 460 && image.height === 215)
       )
       .slice(0, 5)
-      .map((image: any) => image.url);
+      .map((image) => image.url)
+      .filter((url): url is string => Boolean(url));
 
     const steamVerticalCoverOptions = grids
-      .filter((image: any) => image?.width === 600 && image?.height === 900)
+      .filter((image) => image.width === 600 && image.height === 900)
       .slice(0, 5)
-      .map((image: any) => image.url);
+      .map((image) => image.url)
+      .filter((url): url is string => Boolean(url));
 
     const igdbImages = title
       ? await fetchIgdbImages(title)

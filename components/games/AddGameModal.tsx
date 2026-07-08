@@ -166,7 +166,6 @@ useEffect(() => {
   setSelectedGame(game);
   setTitle(game.title);
   setRelease(game.releaseDate || "");
-console.log("Selected Steam game:", game);
 
   setCoverUrl(game.coverUrl || "");
   setHeroUrl(game.heroUrl || "");

@@ -1,5 +1,13 @@
 import { supabase } from "@/lib/supabase";
 
+type IgdbWebsite = { url?: string };
+type IgdbSyncGame = {
+  id?: number;
+  rating?: number | null;
+  rating_count?: number | null;
+  websites?: IgdbWebsite[];
+};
+
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
 
@@ -71,7 +79,7 @@ export async function GET() {
       cache: "no-store",
     });
 
-    const igdbGames = await igdbResponse.json();
+    const igdbGames = (await igdbResponse.json()) as IgdbSyncGame[];
 
     if (!Array.isArray(igdbGames)) {
       return Response.json(
@@ -84,7 +92,7 @@ export async function GET() {
       processed++;
 
       const igdbGame = igdbGames.find(
-        (game: any) => Number(game.id) === Number(localGame.igdb_id)
+        (game) => Number(game.id) === Number(localGame.igdb_id)
       );
 
       if (!igdbGame) {
@@ -94,9 +102,9 @@ export async function GET() {
 
       const steamUrl =
         igdbGame.websites
-          ?.map((site: any) => site.url)
-          ?.find((url: string) =>
-            url.includes("store.steampowered.com/app/")
+          ?.map((site) => site.url)
+          ?.find((url): url is string =>
+            Boolean(url?.includes("store.steampowered.com/app/"))
           ) ?? null;
 
       const steamAppId = extractSteamAppId(steamUrl);
@@ -104,7 +112,7 @@ export async function GET() {
       if (steamAppId) steamFound++;
       if (igdbGame.rating == null) noRating++;
 
-      const updatePayload: Record<string, any> = {
+      const updatePayload: Record<string, string | number | null> = {
         igdb_score: igdbGame.rating ?? null,
         igdb_rating_count: igdbGame.rating_count ?? null,
         igdb_score_updated_at: new Date().toISOString(),

@@ -1,32 +1,15 @@
 import { supabase } from "@/lib/supabase";
-import { slugify } from "@/lib/gameHelpers";
-
-function toNumber(value: string) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
+import { buildGamePayload } from "@/lib/server/adminGamePayload";
 
 export async function POST(request: Request) {
   const body = await request.json();
+  const gamePayload = buildGamePayload(body);
 
-  const title = body.title?.trim();
-
-  if (!title) {
+  if (!gamePayload.title) {
     return Response.json({ error: "Title is required" }, { status: 400 });
   }
 
-  const { error } = await supabase.from("games").insert({
-    title,
-    slug: slugify(title),
-    release: body.release || null,
-    status: body.status || null,
-    score: toNumber(body.score),
-    hours_played: toNumber(body.hoursPlayed),
-    price: body.price || null,
-    store: body.store || null,
-    platform: body.platform || null,
-    hardware: body.hardware || null,
-  });
+  const { error } = await supabase.from("games").insert(gamePayload);
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { UiGame } from "@/lib/gameTypes";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -42,6 +43,17 @@ type SearchResult = {
   publisher?: string | null;
 };
 
+type EditableGame = UiGame & {
+  coverUrl?: string | null;
+  heroUrl?: string | null;
+  wideCoverUrl?: string | null;
+  steamVerticalCover?: string | null;
+  dateStarted?: string | null;
+  igdbId?: number | null;
+  steamAppId?: number | null;
+  steam_app_id?: number | null;
+};
+
 function toDateInput(value: string) {
   if (!value) return "";
 
@@ -58,7 +70,7 @@ export default function EditGameModal({
   openSignal,
   hideButton = false,
 }: {
-  game: any;
+  game: EditableGame;
   onGameUpdated?: () => void;
   openSignal?: number;
   hideButton?: boolean;
@@ -69,7 +81,6 @@ export default function EditGameModal({
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [selectedGame, setSelectedGame] = useState<SearchResult | null>(null);
 
   const [title, setTitle] = useState(game.Title || game.title || "");
   const [release, setRelease] = useState(
@@ -143,7 +154,6 @@ const [dateStarted, setDateStarted] = useState(
     function resetFormToSavedGame() {
     setQuery("");
     setResults([]);
-    setSelectedGame(null);
     setMessage("");
 
     setTitle(game.Title || game.title || "");
@@ -270,10 +280,8 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
 }
 
   async function selectGame(game: SearchResult) {
-    setSelectedGame(game);
     setTitle(game.title);
     setRelease(game.releaseDate || "");
-    console.log("Selected Steam game:", game);
 
     setCoverUrl(game.coverUrl || "");
     setHeroUrl(game.heroUrl || "");
