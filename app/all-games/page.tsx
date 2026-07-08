@@ -17,6 +17,7 @@ type FilterOptions = {
   stores: string[];
   years: string[];
   completionYears: string[];
+  genres: string[];
 };
 type Game = {
   id?: number | string;
@@ -27,6 +28,7 @@ type Game = {
   Store?: string;
   Hardware?: string;
   Genre?: string;
+    genres?: string[];
   Release?: string;
   "Hours Played"?: string | number;
   Price?: string | number;
@@ -61,6 +63,7 @@ const [filterOptions, setFilterOptions] = useState<FilterOptions>({
   stores: [],
   years: [],
   completionYears: [],
+  genres: [],
 });
 const [dashboardStats, setDashboardStats] = useState({
   total_games: 0,
@@ -74,6 +77,7 @@ const [dashboardStats, setDashboardStats] = useState({
   const [storeFilter, setStoreFilter] = useState("All");
   const [yearFilter, setYearFilter] = useState("All");
   const [completionYearFilter, setCompletionYearFilter] = useState("All");
+    const [genreFilter, setGenreFilter] = useState("All");
   const [sortFilter, setSortFilter] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,6 +115,7 @@ const [dashboardStats, setDashboardStats] = useState({
     const store = searchParams.get("store");
     const release = searchParams.get("release");
     const completion = searchParams.get("completion");
+        const genre = searchParams.get("genre");
     const sort = searchParams.get("sort");
 const page = searchParams.get("page");
 
@@ -119,6 +124,7 @@ setStatusFilter(status ?? "All");
 setStoreFilter(store ?? "All");
 setYearFilter(release ?? "All");
 setCompletionYearFilter(completion ?? "All");
+setGenreFilter(genre ?? "All");
 setSortFilter(sort ?? "default");
 setCurrentPage(page ? Number(page) : 1);
 
@@ -135,6 +141,7 @@ setCurrentPage(page ? Number(page) : 1);
     if (storeFilter !== "All") params.set("store", storeFilter);
     if (yearFilter !== "All") params.set("release", yearFilter);
     if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+        if (genreFilter !== "All") params.set("genre", genreFilter);
     if (sortFilter !== "default") params.set("sort", sortFilter);
 if (currentPage > 1) params.set("page", String(currentPage));
 
@@ -149,6 +156,7 @@ if (currentPage > 1) params.set("page", String(currentPage));
     storeFilter,
     yearFilter,
       completionYearFilter,
+      genreFilter,
       sortFilter,
   currentPage,
   hasLoadedFilters,
@@ -169,6 +177,7 @@ if (statusFilter !== "All") params.set("status", statusFilter);
 if (storeFilter !== "All") params.set("store", storeFilter);
 if (yearFilter !== "All") params.set("release", yearFilter);
 if (completionYearFilter !== "All") params.set("completion", completionYearFilter);
+if (genreFilter !== "All") params.set("genre", genreFilter);
 if (sortFilter !== "default") params.set("sort", sortFilter);
 
 const response = await fetch(`/api/games-lite?${params.toString()}`);
@@ -182,6 +191,7 @@ const data = await response.json();
           Platform: game.platform,
           Hardware: game.hardware,
           Genre: game.genre,
+                    genres: game.genres || [],
           Score: game.score,
           Status: game.status,
           Price: game.price,
@@ -201,6 +211,7 @@ achievement_badge: game.achievement_badge,
           stores: [],
           years: [],
           completionYears: [],
+          genres: [],
         });
         setDashboardStats(
   data.stats || {
@@ -225,6 +236,7 @@ achievement_badge: game.achievement_badge,
     storeFilter,
     yearFilter,
     completionYearFilter,
+    genreFilter,
     sortFilter,
   ]);
 
@@ -251,6 +263,8 @@ const years = filterOptions.years;
 
 const completionYears = filterOptions.completionYears;
 
+const genres = filterOptions.genres;
+
   const filteredGames = useMemo(() => {
     let filtered = games.filter((game) => {
       const status = game.Status?.trim();
@@ -263,7 +277,8 @@ const completionYears = filterOptions.completionYears;
         (statusFilter === "All" || status === statusFilter) &&
         (storeFilter === "All" || game.Store === storeFilter) &&
         (yearFilter === "All" || releaseYear === yearFilter) &&
-        (completionYearFilter === "All" || completionYear === completionYearFilter)
+        (completionYearFilter === "All" || completionYear === completionYearFilter) &&
+        (genreFilter === "All" || game.genres?.includes(genreFilter))
       );
     });
 
@@ -302,12 +317,13 @@ const completionYears = filterOptions.completionYears;
     storeFilter,
     yearFilter,
     completionYearFilter,
+    genreFilter,
     sortFilter,
   ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter, sortFilter]);
+  }, [search, statusFilter, storeFilter, yearFilter, completionYearFilter, genreFilter, sortFilter]);
 
   const visibleGames = games;
 
@@ -498,6 +514,22 @@ const completionYears = filterOptions.completionYears;
               {completionYears.map((year) => (
                 <option key={year} value={year}>
                   {year}
+                </option>
+              ))}
+            </select>
+
+                        <select
+              value={genreFilter}
+              onChange={(event) => {
+                setGenreFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
+            >
+              <option value="All">All Genres</option>
+              {genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
                 </option>
               ))}
             </select>

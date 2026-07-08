@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   const release = searchParams.get("release") || "";
   const completion = searchParams.get("completion") || "";
   const sort = searchParams.get("sort") || "";
+  const genre = searchParams.get("genre") || "";
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
         platform,
         hardware,
         genre,
+        genres,
         cover_url,
         steam_vertical_cover,
                 wide_cover_url,
@@ -62,6 +64,10 @@ if (release && release !== "All") {
   query = query
     .gte("release", `${release}-01-01`)
     .lt("release", `${Number(release) + 1}-01-01`);
+}
+
+if (genre && genre !== "All") {
+  query = query.contains("genres", [genre]);
 }
 
 if (completion && completion !== "All") {
@@ -144,10 +150,11 @@ query = query.order(selectedSort.column, {
   };
 
   const filters = filtersData?.[0] || {
-    stores: [],
-    years: [],
-    completion_years: [],
-  };
+  stores: [],
+  years: [],
+  completion_years: [],
+  genres: [],
+};
 
   const games = (data || []).map((game: any) => {
     const achievement = Array.isArray(game.game_achievements)
@@ -181,6 +188,7 @@ query = query.order(selectedSort.column, {
   stores: filters.stores || [],
   years: (filters.years || []).map(String),
   completionYears: (filters.completion_years || []).map(String),
+  genres: filters.genres || [],
 },
   });
 }
