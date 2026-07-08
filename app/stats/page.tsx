@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getIcon } from "@/lib/gameIcons";
 import StatsYearSelect from "./StatsYearSelect";
 
 const monthNames = [
@@ -60,6 +61,8 @@ type GameRelation =
       hardware: string | null;
       store: string | null;
       status: string | null;
+      score: string | number | null;
+      price: string | number | null;
       genres: string[] | null;
     }
   | {
@@ -76,6 +79,8 @@ type GameRelation =
       hardware: string | null;
       store: string | null;
       status: string | null;
+      score: string | number | null;
+      price: string | number | null;
       genres: string[] | null;
     }[]
   | null;
@@ -90,6 +95,18 @@ type PlayLog = {
   games: GameRelation;
 };
 
+type LibraryGame = {
+  id: number;
+  title: string | null;
+  date_of_purchase: string | null;
+  steam_vertical_cover: string | null;
+  cover_url: string | null;
+  wide_cover_url: string | null;
+  store: string | null;
+  score: string | number | null;
+  price: string | number | null;
+};
+
 type TimelineGame = {
   id: number;
   title: string;
@@ -97,11 +114,16 @@ type TimelineGame = {
   month: number;
   percent: number;
   cover: string | null;
+  wideCover: string | null;
   firstPlayedThisYear: boolean;
   returningThisYear: boolean;
+  platform: string | null;
   hardware: string;
   releaseYear: number | null;
   status: string | null;
+  score: number;
+  price: number;
+  store: string | null;
   genres: string[];
   startedDate: string | null;
   purchaseDate: string | null;
@@ -114,13 +136,29 @@ type TopGame = {
   hours: number;
   percent: number;
   cover: string | null;
+  platform: string | null;
   months: number[];
+};
+
+type PurchaseGame = {
+  id: number;
+  title: string;
+  price: number;
+  score: number;
+  cover: string | null;
+  wideCover: string | null;
+  store: string | null;
+  purchaseDate: string | null;
 };
 
 type StatsPageProps = {
   searchParams: Promise<{
     year?: string;
   }>;
+};
+
+type StatsYearRow = {
+  year: number | string | null;
 };
 
 function getGame(log: PlayLog) {
@@ -133,10 +171,27 @@ function getCover(log: PlayLog) {
   return game?.steam_vertical_cover || game?.cover_url || null;
 }
 
+function getWideCover(log: PlayLog) {
+  const game = getGame(log);
+  return (
+    game?.wide_cover_url ||
+    game?.cover_url ||
+    game?.steam_vertical_cover ||
+    null
+  );
+}
+
 function getYear(value: string | null | undefined) {
   if (!value) return null;
-  const match = String(value).match(/\b(19|20)\d{2}\b/);
-  return match ? Number(match[0]) : null;
+  const text = String(value).trim();
+  const fourDigitYear = text.match(/\b(19|20)\d{2}\b/);
+  if (fourDigitYear) return Number(fourDigitYear[0]);
+
+  const excelDateYear = text.match(/\b\d{1,2}[-/][A-Za-z]{3,9}[-/](\d{2})\b/);
+  if (excelDateYear) return 2000 + Number(excelDateYear[1]);
+
+  const parsedDate = new Date(text);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
 }
 
 function getFirstPlayedYear(log: PlayLog) {
@@ -153,9 +208,54 @@ function getHardware(log: PlayLog) {
   return game?.hardware || game?.platform || game?.store || "Unknown";
 }
 
+function getPlatform(log: PlayLog) {
+  const game = getGame(log);
+  return game?.platform || null;
+}
+
 function getStatus(log: PlayLog) {
   const game = getGame(log);
   return game?.status || null;
+}
+
+function getStore(log: PlayLog) {
+  const game = getGame(log);
+  return game?.store || null;
+}
+
+function getScore(log: PlayLog) {
+  const game = getGame(log);
+  return Number(game?.score || 0);
+}
+
+function parsePrice(rawPrice: string | number | null | undefined) {
+  if (rawPrice === null || rawPrice === undefined) return 0;
+  if (typeof rawPrice === "number") return rawPrice;
+
+  const cleaned = rawPrice.trim().replace(/[^\d.,]/g, "");
+  const normalized =
+    cleaned.includes(",") && !cleaned.includes(".")
+      ? cleaned.replace(",", ".")
+      : cleaned.replace(/,/g, "");
+
+  return Number(normalized || 0);
+}
+
+function getPrice(log: PlayLog) {
+  const game = getGame(log);
+  return parsePrice(game?.price);
+}
+
+function formatPrice(value: number) {
+  const formatted = Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(2).replace(/\.?0+$/, "");
+
+  return `${formatted} SAR`;
+}
+
+function isPiracyStore(store: string | null) {
+  return (store || "").toLowerCase().includes("piracy");
 }
 
 function getGenres(log: PlayLog) {
@@ -225,11 +325,16 @@ function buildTimelineGames(
       month: log.month,
       percent: monthTotal > 0 ? (hours / monthTotal) * 100 : 0,
       cover: getCover(log),
+      wideCover: getWideCover(log),
       firstPlayedThisYear: getFirstPlayedYear(log) === year,
       returningThisYear: !!startedYear && startedYear < year,
+      platform: getPlatform(log),
       hardware: getHardware(log),
       releaseYear: getYear(game?.release),
       status: getStatus(log),
+      score: getScore(log),
+      price: getPrice(log),
+      store: getStore(log),
       genres: getGenres(log),
       startedDate: getStartedDate(log),
       purchaseDate: getPurchaseDate(log),
@@ -263,7 +368,11 @@ function getDeviceStats(games: TimelineGame[]) {
   return Object.values(stats).sort((a, b) => b.hours - a.hours);
 }
 
-function getTopGames(games: TimelineGame[], totalHours: number) {
+function getTopGames(
+  games: TimelineGame[],
+  totalHours: number,
+  limit = 3
+) {
   const topGames = games.reduce<
     Record<number, Omit<TopGame, "percent" | "months"> & { months: Set<number> }>
   >((groups, game) => {
@@ -273,6 +382,7 @@ function getTopGames(games: TimelineGame[], totalHours: number) {
         title: game.title,
         hours: 0,
         cover: game.cover,
+        platform: game.platform,
         months: new Set<number>(),
       };
     }
@@ -280,6 +390,9 @@ function getTopGames(games: TimelineGame[], totalHours: number) {
     groups[game.id].hours += game.hours;
     groups[game.id].months.add(game.month);
     if (!groups[game.id].cover && game.cover) groups[game.id].cover = game.cover;
+    if (!groups[game.id].platform && game.platform) {
+      groups[game.id].platform = game.platform;
+    }
 
     return groups;
   }, {});
@@ -291,7 +404,7 @@ function getTopGames(games: TimelineGame[], totalHours: number) {
       months: Array.from(game.months).sort((a, b) => a - b),
     }))
     .sort((a, b) => b.hours - a.hours)
-    .slice(0, 3);
+    .slice(0, limit);
 }
 
 function getTopGenres(games: TimelineGame[]) {
@@ -374,6 +487,93 @@ function getCompletedPurchaseImpact(
     backlog,
     unknown,
   };
+}
+
+function getPaidPurchasesFromLibrary(
+  games: LibraryGame[],
+  selectedYear: number
+) {
+  return games
+    .filter((game) => {
+      const price = parsePrice(game.price);
+
+      return (
+        getYear(game.date_of_purchase) === selectedYear &&
+        price > 0 &&
+        !isPiracyStore(game.store)
+      );
+    })
+    .map((game) => ({
+      id: game.id,
+      title: game.title || "Untitled",
+      price: parsePrice(game.price),
+      score: Number(game.score || 0),
+      cover: game.steam_vertical_cover || game.cover_url || null,
+      wideCover:
+        game.wide_cover_url || game.cover_url || game.steam_vertical_cover || null,
+      store: game.store,
+      purchaseDate: game.date_of_purchase,
+    }))
+    .sort((a, b) => b.price - a.price || a.title.localeCompare(b.title))
+    .slice(0, 10);
+}
+
+async function getAvailableStatsYears() {
+  const { data: statsYears, error: statsYearsError } =
+    await supabase.rpc("get_stats_years");
+
+  if (!statsYearsError) {
+    return ((statsYears || []) as StatsYearRow[])
+      .map((item) => Number(item.year))
+      .filter(Boolean);
+  }
+
+  const { data: yearsData, error: yearsError } = await supabase
+    .from("monthly_play_logs")
+    .select("year")
+    .order("year", { ascending: false });
+
+  if (yearsError) {
+    throw yearsError;
+  }
+
+  return Array.from(
+    new Set((yearsData || []).map((item) => Number(item.year)).filter(Boolean))
+  ).sort((a, b) => b - a);
+}
+
+function getTopRatedCompletions(games: TimelineGame[], selectedYear: number) {
+  const completed = games.reduce<Record<number, PurchaseGame>>(
+    (groups, game) => {
+      if (
+        game.status !== "Completed" ||
+        getYear(game.completionDate) !== selectedYear ||
+        game.score <= 0
+      ) {
+        return groups;
+      }
+
+      if (!groups[game.id]) {
+        groups[game.id] = {
+          id: game.id,
+          title: game.title,
+          price: game.price,
+          score: game.score,
+          cover: game.cover,
+          wideCover: game.wideCover,
+          store: game.store,
+          purchaseDate: game.purchaseDate,
+        };
+      }
+
+      return groups;
+    },
+    {}
+  );
+
+  return Object.values(completed)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
 }
 
 function getReleaseMix(games: TimelineGame[], selectedYear: number) {
@@ -473,63 +673,57 @@ function GamePoster({
 
 function TopGameCard({
   game,
-  rank,
 }: {
   game: TopGame;
-  rank: number;
 }) {
+  const platformIcon = getIcon(game.platform);
+
   return (
     <Link
       href={`/game/${game.id}`}
-      className="group relative grid min-h-64 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:grid-cols-[160px_1fr]"
+      className="group relative block aspect-[2/3] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-[0_18px_50px_rgba(0,0,0,0.35)]"
     >
-      <div className="relative min-h-64 overflow-hidden bg-zinc-900">
-        {game.cover ? (
+      {game.cover ? (
+        <img
+          src={game.cover}
+          alt={game.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-4xl font-black text-zinc-600">
+          {game.title.slice(0, 2)}
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
+        {platformIcon ? (
           <img
-            src={game.cover}
-            alt={game.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            src={platformIcon}
+            alt=""
+            title={game.platform || ""}
+            className="h-5 w-5 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl font-black text-zinc-600">
-            {game.title.slice(0, 2)}
-          </div>
+          <div />
         )}
-        <div className="absolute left-3 top-3 rounded-full bg-cyan-300 px-3 py-1 text-xs font-black text-black">
-          #{rank}
+        <div className="rounded-full border border-white/15 bg-black/70 px-3 py-1 text-xs font-black text-white backdrop-blur">
+          {formatPercent(game.percent)}
         </div>
       </div>
 
-      <div className="flex flex-col justify-between p-5">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-300">
-            Top completed
-          </p>
-          <h2 className="mt-3 line-clamp-3 text-2xl font-black leading-tight">
-            {game.title}
-          </h2>
-        </div>
-
-        <div className="mt-8 grid grid-cols-2 gap-3">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 pt-16">
+        <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-3xl font-black">{Math.round(game.hours)}h</p>
-            <p className="text-xs font-bold uppercase text-zinc-500">
+            <p className="text-[10px] font-bold uppercase text-zinc-500">
               Playtime
             </p>
           </div>
-          <div>
-            <p className="text-3xl font-black">{formatPercent(game.percent)}</p>
-            <p className="text-xs font-bold uppercase text-zinc-500">
-              Of completed
-            </p>
-          </div>
+          <p className="max-w-28 text-right text-xs font-semibold text-zinc-400">
+            {game.months.map((month) => monthShortNames[month]).join(", ")}
+          </p>
         </div>
-
-        <p className="mt-4 text-xs font-semibold text-zinc-400">
-          Played in{" "}
-          {game.months.map((month) => monthShortNames[month]).join(", ")}
-        </p>
       </div>
     </Link>
   );
@@ -557,60 +751,96 @@ function StatTile({
   );
 }
 
+function StoreBadge({ store }: { store: string | null }) {
+  const icon = getIcon(store);
+
+  return icon ? (
+    <img
+      src={icon}
+      alt=""
+      title={store || "Unknown store"}
+      className="h-5 w-5 object-contain"
+    />
+  ) : (
+    <span
+      title={store || "Unknown store"}
+      className="inline-flex h-5 w-5 items-center justify-center text-[10px] font-black text-zinc-400"
+    >
+      {(store || "?").slice(0, 1).toUpperCase()}
+    </span>
+  );
+}
+
 export default async function StatsPage({ searchParams }: StatsPageProps) {
   const params = await searchParams;
 
-  const { data: yearsData, error: yearsError } = await supabase
-    .from("monthly_play_logs")
-    .select("year")
-    .order("year", { ascending: false });
-
-  if (yearsError) {
-    throw yearsError;
-  }
-
-  const availableYears = Array.from(
-    new Set((yearsData || []).map((item) => Number(item.year)).filter(Boolean))
-  ).sort((a, b) => b - a);
+  const availableYears = await getAvailableStatsYears();
   const selectedYear = Number(params.year || availableYears[0] || new Date().getFullYear());
+  const purchaseYearStart = `${selectedYear}-01-01`;
+  const purchaseYearEnd = `${selectedYear + 1}-01-01`;
 
-  const { data: rawLogs, error } = await supabase
-    .from("monthly_play_logs")
-    .select(
-      `
-        log_id,
-        game_id,
-        title,
-        hours,
-        month,
-        year,
-        games (
+  const [logsResult, libraryGamesResult] = await Promise.all([
+    supabase
+      .from("monthly_play_logs")
+      .select(
+        `
+          log_id,
+          game_id,
+          title,
+          hours,
+          month,
+          year,
+          games (
+            id,
+            title,
+            release,
+            date_started,
+            date_of_purchase,
+            completion_last_played,
+            steam_vertical_cover,
+            cover_url,
+            wide_cover_url,
+            platform,
+            hardware,
+            store,
+            status,
+            score,
+            price,
+            genres
+          )
+        `
+      )
+      .eq("year", selectedYear)
+      .order("month", { ascending: true })
+      .order("hours", { ascending: false }),
+    supabase
+      .from("games")
+      .select(
+        `
           id,
           title,
-          release,
-          date_started,
           date_of_purchase,
-          completion_last_played,
           steam_vertical_cover,
           cover_url,
           wide_cover_url,
-          platform,
-          hardware,
           store,
-          status,
-          genres
-        )
-      `
-    )
-    .eq("year", selectedYear)
-    .order("month", { ascending: true })
-    .order("hours", { ascending: false });
+          score,
+          price
+        `
+      )
+      .gte("date_of_purchase", purchaseYearStart)
+      .lt("date_of_purchase", purchaseYearEnd),
+  ]);
 
-  if (error) {
-    throw error;
+  if (logsResult.error) {
+    throw logsResult.error;
   }
 
-  const logs = (rawLogs || []) as unknown as PlayLog[];
+  if (libraryGamesResult.error) {
+    throw libraryGamesResult.error;
+  }
+
+  const logs = (logsResult.data || []) as unknown as PlayLog[];
   const totalHours = logs.reduce((sum, log) => sum + Number(log.hours || 0), 0);
   const monthHours = logs.reduce<Record<number, number>>((totals, log) => {
     totals[log.month] = (totals[log.month] || 0) + Number(log.hours || 0);
@@ -626,7 +856,15 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     (sum, game) => sum + game.hours,
     0
   );
-  const topGames = getTopGames(completedGames, completedHours);
+  const topGames = getTopGames(completedGames, completedHours, 5);
+  const paidPurchases = getPaidPurchasesFromLibrary(
+    (libraryGamesResult.data || []) as LibraryGame[],
+    selectedYear
+  );
+  const topRatedCompletions = getTopRatedCompletions(
+    timelineGames,
+    selectedYear
+  );
   const uniqueGameIds = new Set(logs.map((log) => log.game_id));
   const newGames = timelineGames.filter((game) => game.firstPlayedThisYear);
   const newDiscoveryHours = newGames.reduce((sum, game) => sum + game.hours, 0);
@@ -736,12 +974,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               </div>
 
               {topGames.length > 0 ? (
-                <div className="grid gap-4 lg:grid-cols-3">
-                  {topGames.map((game, index) => (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  {topGames.map((game) => (
                     <TopGameCard
                       key={game.id}
                       game={game}
-                      rank={index + 1}
                     />
                   ))}
                 </div>
@@ -750,6 +987,142 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                   No completed games with logged playtime in {selectedYear} yet.
                 </div>
               )}
+            </section>
+
+            <section className="mx-auto mt-16 max-w-6xl">
+              <div className="mb-5">
+                <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan-300">
+                  Collection highlights
+                </p>
+                <h2 className="mt-2 text-3xl font-black">
+                  Premium Picks & Best Finishes
+                </h2>
+              </div>
+
+              <div className="grid gap-5 lg:grid-cols-2">
+                <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/80">
+                  <div className="border-b border-zinc-800 p-5">
+                    <p className="text-xs font-black uppercase text-zinc-500">
+                      Paid purchases
+                    </p>
+                    <h3 className="mt-2 text-2xl font-black">
+                      Most Expensive Bought Games
+                    </h3>
+                    <p className="mt-2 text-sm font-semibold text-zinc-400">
+                      Paid games bought in {selectedYear}, excluding free and
+                      piracy entries.
+                    </p>
+                  </div>
+
+                  {paidPurchases.length > 0 ? (
+                    <div>
+                      {paidPurchases.map((game, index) => (
+                        <Link
+                          key={game.id}
+                          href={`/game/${game.id}`}
+                          className={`grid grid-cols-[96px_1fr_auto] items-center gap-4 p-4 transition hover:bg-zinc-900 sm:grid-cols-[116px_1fr_auto] ${
+                            index > 0 ? "border-t border-zinc-800" : ""
+                          }`}
+                        >
+                          <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-zinc-900">
+                            {game.wideCover ? (
+                              <img
+                                src={game.wideCover}
+                                alt={game.title}
+                                loading="lazy"
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs font-black text-zinc-600">
+                                {game.title.slice(0, 2)}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="line-clamp-1 text-sm font-black">
+                              {game.title}
+                            </p>
+                            <div className="mt-2 flex items-center gap-2">
+                              <StoreBadge store={game.store} />
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-xl font-black text-cyan-300">
+                              {formatPrice(game.price)}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="p-5 text-sm font-semibold text-zinc-500">
+                      No paid purchases found for {selectedYear}.
+                    </p>
+                  )}
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/80">
+                  <div className="border-b border-zinc-800 p-5">
+                    <p className="text-xs font-black uppercase text-zinc-500">
+                      Finished quality
+                    </p>
+                    <h3 className="mt-2 text-2xl font-black">
+                      Highest Rated Finished Games
+                    </h3>
+                    <p className="mt-2 text-sm font-semibold text-zinc-400">
+                      Completed in {selectedYear}, ranked by your score.
+                    </p>
+                  </div>
+
+                  {topRatedCompletions.length > 0 ? (
+                    <div>
+                      {topRatedCompletions.map((game, index) => (
+                        <Link
+                          key={game.id}
+                          href={`/game/${game.id}`}
+                          className={`grid grid-cols-[96px_1fr_auto] items-center gap-4 p-4 transition hover:bg-zinc-900 sm:grid-cols-[116px_1fr_auto] ${
+                            index > 0 ? "border-t border-zinc-800" : ""
+                          }`}
+                        >
+                          <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-zinc-900">
+                            {game.wideCover ? (
+                              <img
+                                src={game.wideCover}
+                                alt={game.title}
+                                loading="lazy"
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs font-black text-zinc-600">
+                                {game.title.slice(0, 2)}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="line-clamp-1 text-sm font-black">
+                              {game.title}
+                            </p>
+                            <div className="mt-2 flex items-center gap-2">
+                              <StoreBadge store={game.store} />
+                            </div>
+                          </div>
+
+                          <div className="flex h-12 min-w-12 items-center justify-center rounded-xl bg-emerald-400 px-3 text-xl font-black text-black">
+                            {game.score}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="p-5 text-sm font-semibold text-zinc-500">
+                      No scored completed games found for {selectedYear}.
+                    </p>
+                  )}
+                </div>
+              </div>
             </section>
 
             <section className="mx-auto mt-16 max-w-6xl rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 md:p-10">
