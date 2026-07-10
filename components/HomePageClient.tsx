@@ -6,7 +6,7 @@ import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AuthButton from "@/components/admin/AuthButton";
 import {
   formatHours,
@@ -49,6 +49,27 @@ function openEditGame(game: Game) {
   setEditSignal((value) => value + 1);
 }
 
+const loadGames = useCallback(async () => {
+  try {
+    const response = await fetch("/api/home-games", {
+      cache: "no-store",
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("HOME GAMES API ERROR:", data);
+      return;
+    }
+
+    setWishlistGames(data.wishlist || []);
+    setCurrentlyPlayingGames(data.currentlyPlaying || []);
+    setRecentlyAddedGames(data.recentlyAdded || []);
+    setRecentlyCompletedGames(data.recentlyCompleted || []);
+  } catch (error) {
+    console.error("HOME GAMES API ERROR:", error);
+  }
+}, []);
+
 async function deleteGame(gameId: number) {
   const confirmed = confirm("Are you sure you want to delete this game?");
 
@@ -66,24 +87,16 @@ async function deleteGame(gameId: number) {
   await loadGames();
 }
 
-  async function loadGames() {
-  try {
-    const response = await fetch("/api/home-games");
-    const data = await response.json();
+useEffect(() => {
+  setWishlistGames(initialData.wishlist);
+  setCurrentlyPlayingGames(initialData.currentlyPlaying);
+  setRecentlyAddedGames(initialData.recentlyAdded);
+  setRecentlyCompletedGames(initialData.recentlyCompleted);
+}, [initialData]);
 
-    if (!response.ok) {
-      console.error("HOME GAMES API ERROR:", data);
-      return;
-    }
-
-    setWishlistGames(data.wishlist || []);
-    setCurrentlyPlayingGames(data.currentlyPlaying || []);
-    setRecentlyAddedGames(data.recentlyAdded || []);
-    setRecentlyCompletedGames(data.recentlyCompleted || []);
-  } catch (error) {
-    console.error("HOME GAMES API ERROR:", error);
-  }
-}
+useEffect(() => {
+  loadGames();
+}, [loadGames]);
 
 useEffect(() => {
   async function checkAdmin() {
