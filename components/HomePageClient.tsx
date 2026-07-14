@@ -279,7 +279,7 @@ function getWishlistCountdown(release: string | null | undefined) {
     (releaseDate.getTime() - today.getTime()) / 86400000
   );
 
-  if (diffDays <= 0) return "AVAILABLE NOW";
+  if (diffDays < 0) return "AVAILABLE NOW";
 
   if (diffDays < 30) return `${diffDays} DAYS LEFT`;
 

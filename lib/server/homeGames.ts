@@ -76,7 +76,7 @@ export async function getHomeGames() {
       const mappedGame = mapDbGameToUiGame(game);
       const releaseText = game.release ? String(game.release).slice(0, 10) : null;
       const homeTag: UiGame["home_tag"] =
-        releaseText && releaseText <= todayText ? "Available Now" : "Upcoming";
+        releaseText && releaseText < todayText ? "Available Now" : "Upcoming";
 
       return {
         ...mappedGame,
