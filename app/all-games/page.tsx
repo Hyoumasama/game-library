@@ -112,6 +112,13 @@ function scoreClass(score?: string | number | null) {
   return "bg-zinc-800 text-zinc-400";
 }
 
+function hasGoldenAchievement(game: UiGame) {
+  return (
+    game.achievement_badge === "platinum" ||
+    game.achievement_badge === "100completion"
+  );
+}
+
 function AllGamesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -481,7 +488,10 @@ function AllGamesContent() {
         </section>
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-{visibleGames.map((game, index) => (
+{visibleGames.map((game, index) => {
+  const hasGoldenAchievementBadge = hasGoldenAchievement(game);
+
+  return (
   <LongPressGameCard
     key={`${game.Title}-${index}`}
     disabled={!isAdmin || !game.id}
@@ -520,8 +530,8 @@ function AllGamesContent() {
     <Link
     href={`/game/${game.id}`}
 className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:block ${
-  game.achievement_badge
-    ? "achievement-card border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
+  hasGoldenAchievementBadge
+    ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
     : "border-zinc-800 hover:border-cyan-400/70 hover:shadow-cyan-950/40"
 }`}  >
    <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-l-[1.6rem] bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto md:rounded-t-[1.6rem] md:rounded-b-none">            {game.Cover ? (
@@ -557,14 +567,14 @@ className={`group relative flex overflow-hidden rounded-[1.6rem] border bg-zinc-
                 )}
               </div>
 
-              <div className="flex flex-1 flex-col justify-between p-4 md:block">
+              <div className="flex flex-1 flex-col p-4 md:block">
                 <h3 className="line-clamp-2 h-12 text-base font-black leading-6 text-white md:h-10 md:text-sm md:leading-5">
                   {game.Title}
                 </h3>
 
-                <div className="mt-3 flex items-center gap-2 text-xs font-bold text-zinc-400">
+                <div className="mt-2 flex items-center gap-2 text-xs font-bold text-zinc-400">
                   
-                 <div className="mt-1 flex h-5 items-center gap-2 md:mt-3 md:h-6">
+                 <div className="flex h-5 items-center gap-2 md:h-6">
   {Array.from(
   new Set(
     [game.Store, game.Platform, game.Hardware]
@@ -614,7 +624,8 @@ className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
               </div>
             </Link>
           </LongPressGameCard>
-          ))}
+  );
+})}
         </section>
 
         {isAdmin && editingGame && (

@@ -62,9 +62,14 @@ const completedRank =
 );
 
 const daysToComplete = getDaysBetween(
-  game["Date of Purchase"],
+  game.date_started,
   game["Completion Last Played"]
 );
+
+const displayPrice =
+  game.Price && !isNaN(Number(game.Price))
+    ? `${game.Price} SAR`
+    : game.Price || "-";
 
   const statusStyle =
   status === "Completed"
@@ -195,23 +200,16 @@ const daysToComplete = getDaysBetween(
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
   <Info label="Release Date" value={formatDisplayDate(game.Release)} />
   <Info label="Purchase Date" value={formatDisplayDate(game["Date of Purchase"])} />
+  <Info label="Days to Purchase" value={daysToPurchase} />
+
+  <Info label="Start Date" value={formatDisplayDate(game.date_started)} />
   <Info
     label="Completion / Last Played"
     value={formatDisplayDate(game["Completion Last Played"])}
   />
-
-  <Info label="Price" value={game.Price} />
-  <Info label="Days to Purchase" value={daysToPurchase} />
   <Info label="Days to Complete" value={daysToComplete} />
 
-  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
-    <p className="text-sm border-zinc-800">Hardware</p>
-
-    <div className="mt-2 flex items-center gap-2 font-semibold">
-   
-      <span>{game["Hardware (1)"] || "-"}</span>
-    </div>
-  </div>
+  <Info label="Price" value={displayPrice} />
 
   <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
     <p className="text-sm border-zinc-800">Store</p>
@@ -347,9 +345,7 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
 
   <div className="mt-2 flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">
-          {game.Price && !isNaN(Number(game.Price))
-            ? `${game.Price} SAR`
-            : game.Price || "-"}
+          {displayPrice}
         </span>
 
 {getIcon(game.Platform) && (
@@ -379,61 +375,22 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
     <h2 className="mb-4 text-xl font-bold">Library Details</h2>
 
     <div className="space-y-3 text-sm">
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Release Date</span>
-    <span>{formatDisplayDate(game.Release)}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Purchase Date</span>
-    <span>{formatDisplayDate(game["Date of Purchase"])}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Completion / Last Played</span>
-    <span>{formatDisplayDate(game["Completion Last Played"])}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Days to Purchase</span>
-    <span>{daysToPurchase}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Price</span>
-    <span>{game.Price && !isNaN(Number(game.Price)) ? `${game.Price} SAR` : game.Price || "-"}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Days to Complete</span>
-    <span>{daysToComplete}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Developer</span>
-    <span>{game.developer || "-"}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Publisher</span>
-    <span>{game.publisher || "-"}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Store</span>
-    <span>{game.Store || "-"}</span>
-  </div>
-
-  <div className="flex justify-between border-b border-zinc-800 pb-2">
-    <span className="text-zinc-400">Platform</span>
-    <span>{game.Platform || "-"}</span>
-  </div>
-
-  <div className="flex justify-between">
-    <span className="text-zinc-400">Hardware</span>
-    <span>{game["Hardware (1)"] || "-"}</span>
-  </div>
-</div>
+      <DetailRow label="Release Date" value={formatDisplayDate(game.Release)} />
+      <DetailRow
+        label="Purchase Date"
+        value={formatDisplayDate(game["Date of Purchase"])}
+      />
+      <DetailRow label="Days to Purchase" value={daysToPurchase} />
+      <DetailRow label="Start Date" value={formatDisplayDate(game.date_started)} />
+      <DetailRow
+        label="Completion / Last Played"
+        value={formatDisplayDate(game["Completion Last Played"])}
+      />
+      <DetailRow label="Days to Complete" value={daysToComplete} />
+      <DetailRow label="Price" value={displayPrice} />
+      <DetailRow label="Store" value={game.Store || "-"} />
+      <DetailRow label="Platform" value={game.Platform || "-"} last />
+    </div>
   </section>
 
   {game.screenshots ? (
@@ -474,6 +431,27 @@ function Info({
     <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
       <p className="text-sm border-zinc-800">{label}</p>
       <p className="mt-1 font-semibold">{value || "-"}</p>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  last = false,
+}: {
+  label: string;
+  value?: string | number | null;
+  last?: boolean;
+}) {
+  return (
+    <div
+      className={`flex justify-between ${
+        last ? "" : "border-b border-zinc-800 pb-2"
+      }`}
+    >
+      <span className="text-zinc-400">{label}</span>
+      <span>{value || "-"}</span>
     </div>
   );
 }
