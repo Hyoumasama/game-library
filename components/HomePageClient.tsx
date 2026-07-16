@@ -385,7 +385,7 @@ function GameSection({
                 href={`/game/${game.id}`}
               className={`group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:w-auto ${
                 variant !== "wishlist" && game.achievement_badge
-                  ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
+                  ? "achievement-card relative border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
                   : variant === "wishlist"
                     ? "border-zinc-800 hover:border-pink-400/70 hover:shadow-pink-950/40"
                     : "border-zinc-800 hover:border-cyan-400/70 hover:shadow-cyan-950/40"

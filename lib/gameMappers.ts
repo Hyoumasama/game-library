@@ -29,6 +29,8 @@ export function getAchievementBadge(
 
 export function mapDbGameToUiGame(game: DbGame): UiGame {
   const { game_achievements: gameAchievements, ...cleanGame } = game;
+  const existingAchievementBadge = (game as Partial<UiGame>)
+    .achievement_badge;
 
   return {
     ...cleanGame,
@@ -49,7 +51,8 @@ export function mapDbGameToUiGame(game: DbGame): UiGame {
     "Completion / Last Played": game.completion_last_played,
     Cover: getBestCover(game),
     "Wide Cover": game.wide_cover_url,
-    achievement_badge: getAchievementBadge(gameAchievements),
+    achievement_badge:
+      existingAchievementBadge ?? getAchievementBadge(gameAchievements),
   };
 }
 
