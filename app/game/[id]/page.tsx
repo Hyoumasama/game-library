@@ -100,7 +100,9 @@ const displayPrice =
 </div>
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
-          <div className="relative h-fit w-[264px] self-start overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+          <div className="w-[264px] self-start">
+            <div className="relative">
+            <div className="relative h-fit overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
   {steamVerticalCover || coverImage ? (
     <img
       src={steamVerticalCover || coverImage}
@@ -132,7 +134,15 @@ const displayPrice =
       {formatHours(game["Hours Played"])}h
     </span>
   )}
-</div>
+            </div>
+
+            <GameExternalIds
+              igdbId={game.igdb_id}
+              steamAppId={game.steam_appid}
+              className="absolute left-0 top-full"
+            />
+            </div>
+          </div>
 
           <div>
             <div className="mb-1">
@@ -288,6 +298,11 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
     )}
 
     <div className="p-4">
+      <GameExternalIds
+        igdbId={game.igdb_id}
+        steamAppId={game.steam_appid}
+      />
+
       <span
         style={{
           ...statusStyle,
@@ -432,6 +447,26 @@ function Info({
       <p className="text-sm border-zinc-800">{label}</p>
       <p className="mt-1 font-semibold">{value || "-"}</p>
     </div>
+  );
+}
+
+function GameExternalIds({
+  igdbId,
+  steamAppId,
+  className = "",
+}: {
+  igdbId?: number | string | null;
+  steamAppId?: number | string | null;
+  className?: string;
+}) {
+  if (!igdbId && !steamAppId) return null;
+
+  return (
+    <p className={`mt-2 text-xs leading-5 text-zinc-500 ${className}`}>
+      {igdbId ? <span>IGDB ID: {igdbId}</span> : null}
+      {igdbId && steamAppId ? <span> / </span> : null}
+      {steamAppId ? <span>Steam App ID: {steamAppId}</span> : null}
+    </p>
   );
 }
 

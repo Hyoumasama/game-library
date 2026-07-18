@@ -7,6 +7,7 @@ type IgdbCompany = {
   publisher?: boolean;
   company?: { name?: string };
 };
+type IgdbWebsite = { url?: string };
 type IgdbGame = {
   id?: number;
   name?: string;
@@ -17,6 +18,7 @@ type IgdbGame = {
   summary?: string;
   genres?: IgdbGenre[];
   involved_companies?: IgdbCompany[];
+  websites?: IgdbWebsite[];
 };
 
 let cachedToken: string | null = null;
@@ -24,6 +26,19 @@ let tokenExpiresAt = 0;
 
 function escapeIgdbString(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').trim();
+}
+
+function extractSteamAppId(websites?: IgdbWebsite[]) {
+  const steamUrl = websites
+    ?.map((site) => site.url)
+    .find((url): url is string =>
+      Boolean(url?.includes("store.steampowered.com/app/"))
+    );
+
+  const match = steamUrl?.match(/store\.steampowered\.com\/app\/(\d+)/i);
+  const appId = Number(match?.[1]);
+
+  return Number.isFinite(appId) ? appId : null;
 }
 
 async function getIgdbToken() {
@@ -98,7 +113,8 @@ artworks.image_id,
 screenshots.image_id,
   involved_companies.company.name,
   involved_companies.developer,
-  involved_companies.publisher;
+  involved_companies.publisher,
+  websites.url;
       limit 15;
     `,
       cache: "no-store",
@@ -134,7 +150,8 @@ screenshots.image_id,
           screenshots.image_id,
           involved_companies.company.name,
           involved_companies.developer,
-          involved_companies.publisher;
+          involved_companies.publisher,
+          websites.url;
         where name = "${safeQuery}";
         limit 15;
       `,
@@ -155,6 +172,7 @@ screenshots.image_id,
     const results = finalGames.map((game: IgdbGame) => ({
     source: "igdb" as const,
     igdbId: game.id,
+    steamAppId: extractSteamAppId(game.websites),
     title: game.name,
     year: game.first_release_date
   ? new Date(game.first_release_date * 1000).getFullYear()

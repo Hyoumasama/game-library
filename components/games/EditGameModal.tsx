@@ -492,6 +492,8 @@ router.refresh();
                           {game.year || "Unknown year"} ·{" "}
                           {game.source === "steam"
                             ? `Steam ID: ${game.steamAppId}`
+                            : game.steamAppId
+                            ? `IGDB ID: ${game.igdbId} / Steam ID: ${game.steamAppId}`
                             : `IGDB ID: ${game.igdbId}`}
                         </p>
                         <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
@@ -505,6 +507,26 @@ router.refresh();
             </div>
 
             <form onSubmit={updateGame} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:col-span-2 md:grid-cols-2">
+                <label className="text-sm font-bold text-zinc-300">
+                  IGDB ID
+                  <input
+                    value={igdbId ?? "null"}
+                    readOnly
+                    className="mt-2 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 font-normal text-zinc-400"
+                  />
+                </label>
+
+                <label className="text-sm font-bold text-zinc-300">
+                  Steam App ID
+                  <input
+                    value={steamAppId ?? "null"}
+                    readOnly
+                    className="mt-2 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 font-normal text-zinc-400"
+                  />
+                </label>
+              </div>
+
               <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" required className="rounded-xl border border-zinc-700 bg-black px-4 py-3 md:col-span-2" />
               <input
                 type="date"
