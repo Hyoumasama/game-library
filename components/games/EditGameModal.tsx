@@ -269,14 +269,32 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
       ? "/api/admin/steam-search"
       : "/api/admin/igdb-search";
 
-  const response = await fetch(
-    `${endpoint}?query=${encodeURIComponent(cleanQuery)}`
-  );
+  try {
+    const response = await fetch(
+      `${endpoint}?query=${encodeURIComponent(cleanQuery)}`
+    );
 
-  const data = await response.json();
+    const data = await response.json();
 
-  setResults(data.results || []);
-  setMessage("");
+    if (response.status === 401) {
+      throw new Error("Admin session expired");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Search failed");
+    }
+
+    setResults(data.results || []);
+    setMessage("");
+  } catch (error) {
+    console.error("Game search failed:", error);
+    setResults([]);
+    setMessage(
+      error instanceof Error
+        ? error.message
+        : `${searchSource.toUpperCase()} search failed`
+    );
+  }
 }
 
   async function selectGame(game: SearchResult) {
