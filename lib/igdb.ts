@@ -77,12 +77,29 @@ function cleanIgdbSearchTitle(title: string) {
     .trim();
 }
 
-async function getIgdbToken() {
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
+
+export async function getIgdbToken() {
+  if (cachedToken && Date.now() < tokenExpiresAt) {
+    return cachedToken;
+  }
+
   const clientId = process.env.IGDB_CLIENT_ID;
   const clientSecret = process.env.IGDB_CLIENT_SECRET;
 
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing IGDB credentials");
+  }
+
+  const tokenParams = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: "client_credentials",
+  });
+
   const response = await fetch(
-    `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`,
+    `https://id.twitch.tv/oauth2/token?${tokenParams.toString()}`,
     {
       method: "POST",
       cache: "no-store",
@@ -91,7 +108,14 @@ async function getIgdbToken() {
 
   const data = await response.json();
 
-  return data.access_token;
+  if (!response.ok || !data.access_token) {
+    throw new Error("Failed to get IGDB token");
+  }
+
+  cachedToken = data.access_token;
+  tokenExpiresAt = Date.now() + (Number(data.expires_in) - 60) * 1000;
+
+  return cachedToken!;
 }
 
 export async function getIgdbGame(

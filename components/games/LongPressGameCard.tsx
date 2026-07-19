@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useRef, useState } from "react";
+import SafeImage from "@/components/SafeImage";
 
 export default function LongPressGameCard({
   children,
@@ -77,9 +78,12 @@ setTimeout(() => setMenuVisible(true), 10);
 
             <div className="mb-4 flex items-center gap-3">
               {imageUrl && (
-                <img
+                <SafeImage
                   src={imageUrl}
                   alt={title || "Game cover"}
+                  width={48}
+                  height={64}
+                  sizes="48px"
                   className="h-16 w-12 rounded-xl object-cover"
                 />
               )}

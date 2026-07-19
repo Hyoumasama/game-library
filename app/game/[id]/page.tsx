@@ -11,6 +11,8 @@ import {
   getYearFromDate,
 } from "@/lib/gameHelpers";
 import { getRankFromDatabase } from "@/lib/server/gameRanking";
+import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 
 export default async function GamePage({
   params,
@@ -29,6 +31,7 @@ if (!game) {
 
 const coverImage = game.cover_url || undefined;
 const steamVerticalCover = game.steam_vertical_cover || undefined;
+const primaryCoverImage = steamVerticalCover || coverImage;
 const heroImage = game.hero_url || undefined;
 const wideCoverImage = game.wide_cover_url || undefined;
 
@@ -103,10 +106,13 @@ const displayPrice =
           <div className="w-[264px] self-start">
             <div className="relative">
             <div className="relative h-fit overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-  {steamVerticalCover || coverImage ? (
-    <img
-      src={steamVerticalCover || coverImage}
+  {primaryCoverImage ? (
+    <SafeImage
+      src={primaryCoverImage}
       alt={game.Title}
+      width={264}
+      height={396}
+      sizes="264px"
       className="aspect-[2/3] w-full object-cover"
     />
   ) : (
@@ -250,13 +256,18 @@ const displayPrice =
         .map((url: string) => url.trim())
         .filter(Boolean)
         .map((url: string) => (
-          <img
+          <div
             key={url}
-            src={url}
-            alt={`${game.Title} screenshot`}
-loading="lazy"
-className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
-          />
+            className="relative aspect-video w-full overflow-hidden rounded-xl border border-zinc-800"
+          >
+            <SafeImage
+              src={url}
+              alt={`${game.Title} screenshot`}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         ))}
     </div>
   </section>
@@ -274,21 +285,29 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
 
   <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
-  <img
+  <SafeImage
     src={wideCoverImage}
     alt={game.Title}
+    width={430}
+    height={242}
+    sizes="(max-width: 1023px) 100vw, 430px"
     className="aspect-video w-full object-cover"
   />
 ) : heroImage ? (
-  <img
+  <SafeImage
   src={wideCoverImage || heroImage}
   alt=""
+  fill
+  sizes="(max-width: 1023px) 100vw, 430px"
   className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
 />
 ) : coverImage ? (
-  <img
+  <SafeImage
     src={coverImage}
     alt={game.Title}
+    width={430}
+    height={242}
+    sizes="(max-width: 1023px) 100vw, 430px"
     className="aspect-video w-full object-cover"
   />
 ) : (
@@ -365,9 +384,12 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
 
 {getIcon(game.Platform) && (
             <span className="rounded-md bg-zinc-800 px-2 py-1">
-            <img
+            <Image
               src={getIcon(game.Platform)!}
               alt=""
+              width={16}
+              height={16}
+              sizes="16px"
               className="h-4 w-4 object-contain"
             />
           </span>
@@ -375,9 +397,12 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
 
         {getIcon(game["Hardware (1)"]) && (
           <span className="rounded-md bg-zinc-800 px-2 py-1">
-            <img
+            <Image
               src={getIcon(game["Hardware (1)"])!}
               alt=""
+              width={16}
+              height={16}
+              sizes="16px"
               className="h-4 w-4 object-contain"
             />
           </span>
@@ -418,12 +443,18 @@ className="aspect-video w-full rounded-xl border border-zinc-800 object-cover"
           .map((url: string) => url.trim())
           .filter(Boolean)
           .map((url: string) => (
-            <img
+            <div
               key={url}
-              src={url}
-              alt={`${game.Title} screenshot`}
-              className="aspect-video w-[260px] shrink-0 rounded-xl border border-zinc-800 object-cover"
-            />
+              className="relative aspect-video w-[260px] shrink-0 overflow-hidden rounded-xl border border-zinc-800"
+            >
+              <SafeImage
+                src={url}
+                alt={`${game.Title} screenshot`}
+                fill
+                sizes="260px"
+                className="object-cover"
+              />
+            </div>
           ))}
       </div>
     </section>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import SafeImage from "@/components/SafeImage";
+import { useEffect, useRef, useState } from "react";
 
 type SearchGame = {
   id: number;
@@ -17,6 +18,8 @@ export default function HomeGameSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchGame[]>([]);
   const [loading, setLoading] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -34,28 +37,47 @@ export default function HomeGameSearch() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  async function handleSearch(value: string) {
+  function handleSearch(value: string) {
     setQuery(value);
 
-    if (!value.trim()) {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchAbortRef.current?.abort();
+
+    const cleanValue = value.trim();
+
+    if (cleanValue.length < 2) {
       setResults([]);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
 
-    try {
+    searchTimeoutRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
+
+      try {
       const response = await fetch(
-        `/api/search-games?q=${encodeURIComponent(value)}`
+        `/api/search-games?q=${encodeURIComponent(cleanValue)}`,
+        { signal: controller.signal }
       );
 
       const data = await response.json();
       setResults(data);
-    } catch {
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
       setResults([]);
     } finally {
       setLoading(false);
     }
+    }, 350);
   }
 
   function closeSearch() {
@@ -63,6 +85,10 @@ export default function HomeGameSearch() {
     setQuery("");
     setResults([]);
     setLoading(false);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchAbortRef.current?.abort();
   }
 
   function goToGame(id: number) {
@@ -141,9 +167,12 @@ export default function HomeGameSearch() {
                       className="flex w-full items-center gap-4 border-b border-zinc-900 p-4 text-left last:border-b-0 hover:bg-zinc-900"
                     >
                       {cover ? (
-                        <img
+                        <SafeImage
                           src={cover}
                           alt={game.title}
+                          width={56}
+                          height={80}
+                          sizes="56px"
                           className="h-20 w-14 shrink-0 rounded-xl object-cover"
                         />
                       ) : (

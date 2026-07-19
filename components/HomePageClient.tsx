@@ -1,6 +1,7 @@
 "use client";
 
 import HomeGameSearch from "@/components/HomeGameSearch";
+import SafeImage from "@/components/SafeImage";
 import AddGameModal from "@/components/games/AddGameModal";
 import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
@@ -93,10 +94,6 @@ useEffect(() => {
   setRecentlyAddedGames(initialData.recentlyAdded);
   setRecentlyCompletedGames(initialData.recentlyCompleted);
 }, [initialData]);
-
-useEffect(() => {
-  loadGames();
-}, [loadGames]);
 
 useEffect(() => {
   async function checkAdmin() {
@@ -219,7 +216,10 @@ useEffect(() => {
                 {isAdmin && editingGame && (
           <EditGameModal
             game={editingGame}
-            onGameUpdated={loadGames}
+            onGameUpdated={() => {
+              setEditingGame(null);
+              loadGames();
+            }}
             openSignal={editSignal}
             hideButton
           />
@@ -375,10 +375,13 @@ function GameSection({
                     const [icon, value] = item.split("|||");
 
                     return (
-                      <img
+                      <Image
                         key={icon}
                         src={icon}
                         alt=""
+                        width={20}
+                        height={20}
+                        sizes="20px"
                         className="h-5 w-5 object-contain"
                         title={value}
                       />
@@ -401,7 +404,7 @@ function GameSection({
             >
               <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
                 {image ? (
-                  <Image
+                  <SafeImage
                     src={image}
                     alt={game.Title}
                     fill
@@ -467,10 +470,13 @@ function GameSection({
                       const [icon, value] = item.split("|||");
 
                       return (
-                        <img
+                        <Image
                           key={icon}
                           src={icon}
                           alt=""
+                          width={20}
+                          height={20}
+                          sizes="20px"
                           className="h-5 w-5 object-contain"
                           title={value}
                         />

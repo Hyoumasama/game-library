@@ -2,6 +2,8 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getIcon } from "@/lib/gameIcons";
 import StatsYearSelect from "./StatsYearSelect";
+import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 
 const monthNames = [
   "",
@@ -714,10 +716,11 @@ function GamePoster({
       title={game.title}
     >
       {game.cover ? (
-        <img
+        <SafeImage
           src={game.cover}
           alt={game.title}
-          loading="lazy"
+          fill
+          sizes="(min-width: 768px) 96px, 30vw"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       ) : (
@@ -773,10 +776,11 @@ function TopGameCard({
       className="group relative block aspect-[2/3] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-[0_18px_50px_rgba(0,0,0,0.35)]"
     >
       {game.cover ? (
-        <img
+        <SafeImage
           src={game.cover}
           alt={game.title}
-          loading="lazy"
+          fill
+          sizes="(min-width: 768px) 33vw, 100vw"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       ) : (
@@ -787,10 +791,13 @@ function TopGameCard({
 
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
         {platformIcon ? (
-          <img
+          <Image
             src={platformIcon}
             alt=""
             title={game.platform || ""}
+            width={20}
+            height={20}
+            sizes="20px"
             className="h-5 w-5 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]"
           />
         ) : (
@@ -844,10 +851,13 @@ function StoreBadge({ store }: { store: string | null }) {
   const icon = getIcon(store);
 
   return icon ? (
-    <img
+    <Image
       src={icon}
       alt=""
       title={store || "Unknown store"}
+      width={20}
+      height={20}
+      sizes="20px"
       className="h-5 w-5 object-contain"
     />
   ) : (
@@ -1164,10 +1174,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                         >
                           <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-zinc-900">
                             {game.wideCover ? (
-                              <img
+                              <SafeImage
                                 src={game.wideCover}
                                 alt={game.title}
-                                loading="lazy"
+                                fill
+                                sizes="116px"
                                 className="h-full w-full object-cover"
                               />
                             ) : (
@@ -1226,10 +1237,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                         >
                           <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-zinc-900">
                             {game.wideCover ? (
-                              <img
+                              <SafeImage
                                 src={game.wideCover}
                                 alt={game.title}
-                                loading="lazy"
+                                fill
+                                sizes="116px"
                                 className="h-full w-full object-cover"
                               />
                             ) : (

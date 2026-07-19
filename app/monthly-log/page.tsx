@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
 import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
 type MonthlyLog = {
@@ -237,9 +238,12 @@ const bestMonth = months
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         {getSteamVerticalCover(log) && (
-                          <img
+                          <Image
                             src={getSteamVerticalCover(log) || ""}
                             alt={log.title}
+                            width={40}
+                            height={56}
+                            sizes="40px"
                             className="h-14 w-10 shrink-0 rounded-md object-cover"
                           />
                         )}
@@ -283,9 +287,12 @@ const bestMonth = months
                       className="flex min-w-0 items-center gap-3 font-bold text-white hover:text-cyan-300"
                     >
                       {getSteamVerticalCover(log) && (
-                        <img
+                        <Image
                           src={getSteamVerticalCover(log) || ""}
                           alt={log.title}
+                          width={36}
+                          height={48}
+                          sizes="36px"
                           className="h-12 w-9 shrink-0 rounded-md object-cover"
                         />
                       )}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { UiGame } from "@/lib/gameTypes";
 
@@ -75,8 +74,6 @@ export default function EditGameModal({
   openSignal?: number;
   hideButton?: boolean;
 }) {
-  const router = useRouter();
-
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
@@ -398,7 +395,6 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
 setOpen(false);
 
 onGameUpdated?.();
-router.refresh();
   }
 
   return (

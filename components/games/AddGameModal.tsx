@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
@@ -58,8 +57,6 @@ export default function AddGameModal({
 }: {
   onGameAdded?: () => void;
 }) {
-  const router = useRouter();
-
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
@@ -338,7 +335,6 @@ completionPercentage: playStationGame
 setOpen(false);
 
 onGameAdded?.();
-router.refresh();
   }
 
   return (

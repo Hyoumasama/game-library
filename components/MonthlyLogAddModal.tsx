@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type SearchGame = {
   id: number;
@@ -17,22 +17,48 @@ export default function MonthlyLogAddModal() {
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [isSaving, setIsSaving] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
 const previousTotalHours = Number(selectedGame?.hours_played || 0);
 const currentTotal = Number(currentTotalHours || 0);
 const thisMonthHours = Math.max(currentTotal - previousTotalHours, 0);
 
-  async function searchGames(value: string) {
+  function searchGames(value: string) {
     setQuery(value);
     setSelectedGame(null);
 
-    if (!value.trim()) {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchAbortRef.current?.abort();
+
+    const cleanValue = value.trim();
+
+    if (cleanValue.length < 2) {
       setGames([]);
       return;
     }
 
-    const response = await fetch(`/api/monthly-log-games?q=${encodeURIComponent(value)}`);
-    const data = await response.json();
-    setGames(data);
+    searchTimeoutRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
+
+      try {
+        const response = await fetch(
+          `/api/monthly-log-games?q=${encodeURIComponent(cleanValue)}`,
+          { signal: controller.signal }
+        );
+        const data = await response.json();
+        setGames(data);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setGames([]);
+      }
+    }, 350);
   }
 
   async function saveLog() {
