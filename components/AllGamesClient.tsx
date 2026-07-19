@@ -131,13 +131,18 @@ function AllGamesContent({
   initialFilters,
 }: {
   initialData: GamesLiteData;
-  initialFilters: AllGamesFilters;
+  initialFilters?: AllGamesFilters;
 }) {
+  const safeInitialFilters =
+    initialFilters ||
+    (typeof window === "undefined"
+      ? DEFAULT_FILTERS
+      : readFiltersFromSearchParams(new URLSearchParams(window.location.search)));
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestAbortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
-  const [filters, setFilters] = useState<AllGamesFilters>(initialFilters);
-  const filtersRef = useRef<AllGamesFilters>(initialFilters);
+  const [filters, setFilters] = useState<AllGamesFilters>(safeInitialFilters);
+  const filtersRef = useRef<AllGamesFilters>(safeInitialFilters);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [games, setGames] = useState<UiGame[]>(
@@ -848,7 +853,7 @@ export default function AllGamesClient({
   initialFilters,
 }: {
   initialData: GamesLiteData;
-  initialFilters: AllGamesFilters;
+  initialFilters?: AllGamesFilters;
 }) {
   return <AllGamesContent initialData={initialData} initialFilters={initialFilters} />;
 }

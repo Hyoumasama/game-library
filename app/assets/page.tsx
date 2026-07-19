@@ -1,4 +1,5 @@
 import AddAssetModal from "@/components/assets/AddAssetModal";
+import SafeImage from "@/components/SafeImage";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
@@ -89,9 +90,12 @@ export default async function AssetsPage() {
       >
         <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-black">
           {asset.image_url ? (
-            <img
+            <SafeImage
   src={asset.image_url}
   alt={asset.name}
+  width={80}
+  height={80}
+  sizes="80px"
   className="h-full w-full object-cover"
 />
           ) : (
@@ -140,9 +144,12 @@ export default async function AssetsPage() {
               >
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-black">
                   {asset.image_url ? (
-                    <img
+                    <SafeImage
                       src={asset.image_url}
                       alt={asset.name}
+                      width={64}
+                      height={64}
+                      sizes="64px"
                       className="h-full w-full object-contain p-2"
                     />
                   ) : (
