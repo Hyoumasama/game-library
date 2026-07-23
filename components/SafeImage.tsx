@@ -54,11 +54,14 @@ export default function SafeImage({
         role="img"
         aria-label={alt}
         onClick={onClick}
-        className={`flex items-center justify-center bg-zinc-900 text-3xl text-zinc-600 ${
+        className={`relative flex items-center justify-center bg-zinc-900 text-3xl text-transparent ${
           fill ? `absolute inset-0 ${className || ""}` : className || ""
         }`}
       >
         🎮
+        <span className="absolute text-sm font-bold text-zinc-500">
+          No image
+        </span>
       </div>
     );
   }

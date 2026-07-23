@@ -13,6 +13,7 @@ type AllGamesPageProps = {
     release?: string;
     completion?: string;
     genre?: string;
+    steamAppId?: string;
     sort?: string;
     page?: string;
   }>;
@@ -30,6 +31,7 @@ export default async function AllGamesPage({
     release: params.release || "All",
     completion: params.completion || "All",
     genre: params.genre || "All",
+    steamAppId: params.steamAppId || "All",
   };
   const initialData = await getGamesLiteData({
     filters,

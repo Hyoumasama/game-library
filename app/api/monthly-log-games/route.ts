@@ -10,8 +10,11 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from("games")
-    .select("id, title, hours_played")
+    .select(
+      "id, title, hours_played, status, date_started, completion_last_played"
+    )
     .ilike("title", `%${q}%`)
+    .or("status.is.null,status.neq.Skipped")
     .order("title", { ascending: true })
     .limit(10);
 

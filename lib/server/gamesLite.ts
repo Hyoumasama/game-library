@@ -11,6 +11,7 @@ export type GamesLiteFilters = {
   release: string;
   completion: string;
   genre: string;
+  steamAppId: string;
 };
 
 export type GamesLiteFilterOptions = {
@@ -55,6 +56,7 @@ type GamesLiteQuery = {
   gte(column: string, value: string): GamesLiteQuery;
   lt(column: string, value: string): GamesLiteQuery;
   contains(column: string, value: string[]): GamesLiteQuery;
+  is(column: string, value: null): GamesLiteQuery;
   order(
     column: SortColumn,
     options: { ascending: boolean; nullsFirst: boolean }
@@ -111,8 +113,27 @@ const sortOptions: Record<
   },
 };
 
+function normalizeYearFilter(value: string) {
+  const trimmed = value.trim();
+
+  return /^\d{4}$/.test(trimmed) ? trimmed : "All";
+}
+
+function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters {
+  return {
+    search: filters.search.trim().slice(0, 120),
+    status: filters.status.trim() || "All",
+    store: filters.store.trim() || "All",
+    release: normalizeYearFilter(filters.release),
+    completion: normalizeYearFilter(filters.completion),
+    genre: filters.genre.trim() || "All",
+    steamAppId: filters.steamAppId.trim() || "All",
+  };
+}
+
 function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
-  const { search, status, store, release, completion, genre } = filters;
+  const { search, status, store, release, completion, genre, steamAppId } =
+    filters;
   let filteredQuery = query;
 
   if (search) {
@@ -143,6 +164,10 @@ function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
       .lt("completion_last_played", `${Number(completion) + 1}-01-01`);
   }
 
+  if (steamAppId === "missing") {
+    filteredQuery = filteredQuery.is("steam_appid", null);
+  }
+
   return filteredQuery;
 }
 
@@ -157,6 +182,7 @@ export async function getGamesLiteData({
   page: number;
   pageSize?: number;
 }): Promise<GamesLiteData> {
+  const safeFilters = normalizeGamesLiteFilters(filters);
   const selectedSort = sortOptions[sort] || sortOptions.default;
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
   const safePageSize =
@@ -196,7 +222,7 @@ export async function getGamesLiteData({
       { count: "exact" }
     ) as unknown as GamesLiteQuery;
 
-  const filteredQuery = applyGameFilters(baseQuery, filters).order(
+  const filteredQuery = applyGameFilters(baseQuery, safeFilters).order(
     selectedSort.column,
     {
       ascending: selectedSort.ascending,
@@ -207,12 +233,12 @@ export async function getGamesLiteData({
   const [gamesResult, statsResult, filtersResult] = await Promise.all([
     filteredQuery.range(from, to),
     supabase.rpc("get_games_lite_stats", {
-      p_search: filters.search,
-      p_status: filters.status,
-      p_store: filters.store,
-      p_release: filters.release,
-      p_completion: filters.completion,
-      p_genre: filters.genre,
+      p_search: safeFilters.search,
+      p_status: safeFilters.status,
+      p_store: safeFilters.store,
+      p_release: safeFilters.release,
+      p_completion: safeFilters.completion,
+      p_genre: safeFilters.genre,
     }),
     supabase.rpc("get_games_lite_filters"),
   ]);

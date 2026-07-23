@@ -1,7 +1,7 @@
 import AddAssetModal from "@/components/assets/AddAssetModal";
+import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
 import { supabase } from "@/lib/supabase";
-import Link from "next/link";
 
 type Asset = {
   id: number;
@@ -61,14 +61,10 @@ export default async function AssetsPage() {
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       <div className="mx-auto max-w-6xl">
+        <AppNav />
+
         <div className="mb-10 flex items-start justify-between gap-4">
   <div>
-    <Link
-  href="/"
-  className="mb-6 inline-block text-sm text-zinc-300 hover:text-white"
->
-  ← Back to Library
-</Link>
     <h1 className="mb-2 text-4xl font-bold">My Assets</h1>
 
     <p className="text-zinc-400">

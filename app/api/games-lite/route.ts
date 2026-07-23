@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     release: searchParams.get("release") || "",
     completion: searchParams.get("completion") || "",
     genre: searchParams.get("genre") || "",
+    steamAppId: searchParams.get("steamAppId") || "",
   };
   const sort = searchParams.get("sort") || "";
 

@@ -1,14 +1,12 @@
 "use client";
 
-import HomeGameSearch from "@/components/HomeGameSearch";
+import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
-import AddGameModal from "@/components/games/AddGameModal";
 import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import AuthButton from "@/components/admin/AuthButton";
 import {
   formatHours,
   getIcon,
@@ -30,7 +28,6 @@ export default function HomePageClient({
   initialData: HomePageData;
 }) {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [wishlistGames, setWishlistGames] = useState<Game[]>(initialData.wishlist);
 const [currentlyPlayingGames, setCurrentlyPlayingGames] = useState<Game[]>(
   initialData.currentlyPlaying
@@ -89,13 +86,6 @@ async function deleteGame(gameId: number) {
 }
 
 useEffect(() => {
-  setWishlistGames(initialData.wishlist);
-  setCurrentlyPlayingGames(initialData.currentlyPlaying);
-  setRecentlyAddedGames(initialData.recentlyAdded);
-  setRecentlyCompletedGames(initialData.recentlyCompleted);
-}, [initialData]);
-
-useEffect(() => {
   async function checkAdmin() {
     const response = await fetch("/api/admin/me");
     const data = await response.json();
@@ -109,109 +99,7 @@ useEffect(() => {
     return (
     <main className="min-h-screen bg-[#070a0f] p-4 text-white md:p-8">
       <div className="relative mx-auto max-w-7xl">
-        <div className="mb-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
-            
-            <div className="hidden flex-1 lg:flex">
-  <HomeGameSearch />
-</div>
-
-            <div className="hidden h-full items-center gap-3 sm:flex">
-              <Link href="/all-games" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
-                All Games
-              </Link>
-
-              <Link href="/stats" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
-                Stats
-              </Link>
-
-<Link href="/monthly-log" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
-  Monthly Log
-</Link>
-              <Link href="/assets" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500">
-                Assets
-              </Link>
-
-              <AuthButton />
-              {isAdmin && <AddGameModal onGameAdded={loadGames} />}
-            </div>
-
-            <div className="flex w-full items-center gap-3 sm:hidden">
-  <div className="flex-1">
-    <HomeGameSearch />
-  </div>
-
-  <button
-    onClick={() => setIsMenuOpen(true)}
-    className="flex h-[52px] w-[52px] items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 text-2xl font-bold text-white"
-  >
-    Menu
-  </button>
-</div>
-          </div>
-
-          {isMenuOpen && (
-  <div
-  className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 sm:hidden"
-  onClick={() => setIsMenuOpen(false)}
->
-    <div
-  className="rounded-2xl border border-zinc-700 bg-zinc-950 p-4"
-  onClick={(e) => e.stopPropagation()}
->
-      <div className="mb-5 flex items-center justify-between">
-        <p className="text-lg font-bold text-white">Menu</p>
-
-        <button
-          type="button"
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xl font-bold text-white"
-        >
-          x
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/all-games"
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
-        >
-          All Games
-        </Link>
-
-        <Link
-          href="/stats"
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
-        >
-          Stats
-        </Link>
-
-        <Link
-          href="/monthly-log"
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
-        >
-          Monthly Log
-        </Link>
-
-        <Link
-          href="/assets"
-          onClick={() => setIsMenuOpen(false)}
-          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white"
-        >
-          Assets
-        </Link>
-
-        {isAdmin && <AddGameModal onGameAdded={loadGames} />}
-
-        <AuthButton />
-      </div>
-    </div>
-  </div>
-)}
-        </div>
+        <AppNav onGameAdded={loadGames} />
 
                 {isAdmin && editingGame && (
           <EditGameModal
@@ -225,11 +113,8 @@ useEffect(() => {
           />
         )}
 
-                        <GameSection
-  title="Coming Soon"
+<WishlistReleaseCalendar
   games={wishlistGames}
-  href="/all-games?status=Wishlist"
-  variant="wishlist"
   isAdmin={isAdmin}
   onEdit={openEditGame}
   onDelete={deleteGame}
@@ -281,6 +166,8 @@ function getWishlistCountdown(release: string | null | undefined) {
 
   if (diffDays < 0) return "AVAILABLE NOW";
 
+  if (diffDays === 0) return "TODAY";
+
   if (diffDays < 30) return `${diffDays} DAYS LEFT`;
 
   if (diffDays < 365) {
@@ -321,6 +208,265 @@ function CurrentlyPlayingGrid({
 />
   );
 }
+
+function getReleaseDateKey(game: Game) {
+  return game.Release ? String(game.Release).slice(0, 10) : "TBA";
+}
+
+function getLocalDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getUpcomingRange() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return {
+    startKey: getLocalDateKey(today),
+  };
+}
+
+function formatReleaseColumnTitle(dateKey: string) {
+  if (dateKey === "TBA") return "TBA";
+
+  const date = new Date(`${dateKey}T00:00:00`);
+
+  return date
+    .toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+    })
+    .toUpperCase();
+}
+
+function formatMobileReleaseColumnTitle(dateKey: string) {
+  const date = new Date(`${dateKey}T00:00:00`);
+  const weekday = date
+    .toLocaleDateString("en-US", { weekday: "short" })
+    .toUpperCase();
+  const numericDate = date.toLocaleDateString("en-US", {
+    month: "numeric",
+    day: "numeric",
+  });
+
+  return { weekday, numericDate };
+}
+
+function getWishlistCalendarWideImage(game: Game) {
+  return game["Wide Cover"] || game.wide_cover_url || game.hero_url || game.Cover;
+}
+
+function getWishlistCalendarPortraitImage(game: Game) {
+  return game.steam_vertical_cover || game.cover_url || game.Cover;
+}
+
+function WishlistReleaseCalendar({
+  games,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: {
+  games: Game[];
+  isAdmin: boolean;
+  onEdit: (game: Game) => void;
+  onDelete: (gameId: number) => void;
+}) {
+  const [expandedMobileDates, setExpandedMobileDates] = useState<
+    Record<string, boolean>
+  >({});
+  const { startKey } = getUpcomingRange();
+  const groupedGames = games.reduce<Record<string, Game[]>>((groups, game) => {
+    const releaseDate = getReleaseDateKey(game);
+
+    if (releaseDate === "TBA" || releaseDate < startKey) {
+      return groups;
+    }
+
+    groups[releaseDate] = groups[releaseDate] || [];
+    groups[releaseDate].push(game);
+    return groups;
+  }, {});
+
+  const releaseDates = Object.keys(groupedGames)
+    .sort((first, second) => first.localeCompare(second))
+    .slice(0, 30);
+
+  for (const releaseDate of releaseDates) {
+    groupedGames[releaseDate].sort((first, second) =>
+      first.Title.localeCompare(second.Title)
+    );
+  }
+
+  if (releaseDates.length === 0) return null;
+
+  return (
+    <section className="mb-10">
+      <h2 className="mb-4 text-xl font-black text-white md:text-2xl">
+        Upcoming Games Calendar
+      </h2>
+
+      <div className="hidden gap-3 overflow-x-auto pb-4 md:flex">
+        {releaseDates.map((releaseDate, columnIndex) => (
+          <div
+            key={releaseDate}
+            className="w-[220px] shrink-0"
+          >
+            <div className="px-1 pb-3 text-sm font-black uppercase tracking-[0.18em] text-white">
+              {formatReleaseColumnTitle(releaseDate)}
+            </div>
+
+            <div className="space-y-2">
+              {groupedGames[releaseDate].map((game) => {
+                const image = getWishlistCalendarWideImage(game);
+                const countdown = getWishlistCountdown(game.Release);
+                const isPoster = image === game.Cover;
+
+                return (
+                  <Link
+                    key={`${releaseDate}-${game.id || game.Title}`}
+                    href={`/game/${game.id}`}
+                    className="group relative block overflow-hidden rounded bg-zinc-950 shadow-lg"
+                  >
+                    <div
+                      className={`relative w-full overflow-hidden bg-zinc-900 ${
+                        isPoster ? "aspect-[2/3]" : "aspect-[16/9]"
+                      }`}
+                    >
+                      {image ? (
+                        <SafeImage
+                          src={image}
+                          alt={game.Title}
+                          fill
+                          sizes="(min-width: 1024px) 18vw, 200px"
+                          loading={
+                            columnIndex < 4 ? "eager" : "lazy"
+                          }
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center p-4 text-center text-sm font-black text-zinc-500">
+                          {game.Title}
+                        </div>
+                      )}
+
+                      {(countdown === "TODAY" ||
+                        game.home_tag === "Available Now") && (
+                        <span className="absolute left-2 top-2 rounded bg-emerald-400 px-2 py-1 text-[10px] font-black uppercase text-black">
+                          {countdown}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl bg-zinc-950/70 p-2 md:hidden">
+        <div className="flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {releaseDates.map((releaseDate, columnIndex) => {
+            const title = formatMobileReleaseColumnTitle(releaseDate);
+            const dateGames = groupedGames[releaseDate];
+            const expanded = !!expandedMobileDates[releaseDate];
+            const visibleGames = expanded ? dateGames : dateGames.slice(0, 2);
+            const remainingCount = Math.max(dateGames.length - 2, 0);
+
+            return (
+              <div
+                key={releaseDate}
+                className="w-24 shrink-0 snap-start"
+              >
+                <div className="mb-2 rounded-lg border border-zinc-800 bg-black px-2 py-1.5 text-center">
+                  <div className="text-[10px] font-black tracking-[0.16em] text-cyan-300">
+                    {title.weekday}
+                  </div>
+                  <div className="mt-0.5 text-xs font-black text-white">
+                    {title.numericDate}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  {visibleGames.map((game) => {
+                    const image = getWishlistCalendarPortraitImage(game);
+                    const countdown = getWishlistCountdown(game.Release);
+
+                    return (
+                      <LongPressGameCard
+                        key={`${releaseDate}-${game.id || game.Title}`}
+                        disabled={!isAdmin || !game.id}
+                        title={game.Title}
+                        imageUrl={image}
+                        onEdit={() => onEdit(game)}
+                        onDelete={() => onDelete(Number(game.id))}
+                      >
+                        <Link
+                          href={`/game/${game.id}`}
+                          className="group block overflow-hidden rounded-lg"
+                          aria-label={game.Title}
+                        >
+                          <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900">
+                            {image ? (
+                              <SafeImage
+                                src={image}
+                                alt={game.Title}
+                                fill
+                                sizes="96px"
+                                loading={columnIndex < 4 ? "eager" : "lazy"}
+                                className="object-cover transition duration-500 group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-zinc-600">
+                                No image
+                              </div>
+                            )}
+
+                            {countdown === "TODAY" && (
+                              <span className="absolute left-1 top-1 rounded bg-emerald-400 px-1.5 py-0.5 text-[8px] font-black uppercase text-black">
+                                TODAY
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+                      </LongPressGameCard>
+                    );
+                  })}
+
+                  {remainingCount > 0 && (
+                    <button
+                      type="button"
+                      aria-expanded={expanded}
+                      aria-label={
+                        expanded
+                          ? `Show fewer games for ${title.weekday} ${title.numericDate}`
+                          : `Show ${remainingCount} more games for ${title.weekday} ${title.numericDate}`
+                      }
+                      onClick={() =>
+                        setExpandedMobileDates((currentDates) => ({
+                          ...currentDates,
+                          [releaseDate]: !expanded,
+                        }))
+                      }
+                      className="mx-auto mt-1 block rounded-full border border-cyan-400/25 bg-black/50 px-2.5 py-1 text-[10px] font-black text-cyan-300 backdrop-blur transition active:bg-zinc-800"
+                    >
+                      {expanded ? "Show less" : `+${remainingCount}`}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function GameSection({
   title,
   games,
@@ -409,6 +555,7 @@ function GameSection({
                     alt={game.Title}
                     fill
                     sizes="(min-width: 1024px) 14vw, (min-width: 768px) 20vw, 155px"
+                    loading={index === 0 ? "eager" : "lazy"}
                     className="object-cover transition duration-500 group-hover:scale-110"
                   />
                 ) : (
@@ -439,6 +586,7 @@ function GameSection({
                 {variant === "wishlist" && (
   <span
     className={`absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border min-w-[96px] px-3 py-1 text-center text-[10px] font-black uppercase tracking-wide whitespace-nowrap backdrop-blur-md ${
+      getWishlistCountdown(game.Release) === "TODAY" ||
       game.home_tag === "Available Now"
   ? "border-emerald-500 bg-emerald-500 text-black"
   : "border-violet-500 bg-violet-500 text-black"

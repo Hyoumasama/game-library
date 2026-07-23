@@ -22,6 +22,7 @@ type IgdbGame = {
 };
 
 let cachedToken: string | null = null;
+let cachedTokenClientId: string | null = null;
 let tokenExpiresAt = 0;
 
 function escapeIgdbString(value: string) {
@@ -41,16 +42,20 @@ function extractSteamAppId(websites?: IgdbWebsite[]) {
   return Number.isFinite(appId) ? appId : null;
 }
 
-async function getIgdbToken() {
-  if (cachedToken && Date.now() < tokenExpiresAt) {
-    return cachedToken;
-  }
-
+async function getIgdbToken(): Promise<string> {
   const clientId = process.env.IGDB_CLIENT_ID;
   const clientSecret = process.env.IGDB_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
     throw new Error("Missing IGDB credentials");
+  }
+
+  if (
+    cachedToken &&
+    cachedTokenClientId === clientId &&
+    Date.now() < tokenExpiresAt
+  ) {
+    return cachedToken;
   }
 
   const tokenParams = new URLSearchParams({
@@ -74,11 +79,31 @@ async function getIgdbToken() {
   }
 
   cachedToken = data.access_token;
+  cachedTokenClientId = clientId;
 
   tokenExpiresAt =
     Date.now() + (Number(data.expires_in) - 60) * 1000;
 
-  return cachedToken;
+  return cachedToken!;
+}
+
+function clearIgdbTokenCache() {
+  cachedToken = null;
+  cachedTokenClientId = null;
+  tokenExpiresAt = 0;
+}
+
+async function fetchIgdbGames(body: string, clientId: string, token: string) {
+  return fetch("https://api.igdb.com/v4/games", {
+    method: "POST",
+    headers: {
+      "Client-ID": clientId,
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body,
+    cache: "no-store",
+  });
 }
 
 export async function GET(request: Request) {
@@ -91,17 +116,13 @@ export async function GET(request: Request) {
 
   try {
     const clientId = process.env.IGDB_CLIENT_ID;
-    const token = await getIgdbToken();
-    const safeQuery = escapeIgdbString(query);
+    if (!clientId) {
+      throw new Error("Missing IGDB credentials");
+    }
 
-    const response = await fetch("https://api.igdb.com/v4/games", {
-      method: "POST",
-      headers: {
-        "Client-ID": clientId!,
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      body: `
+    let token = await getIgdbToken();
+    const safeQuery = escapeIgdbString(query);
+    const searchBody = `
       search "${safeQuery}";
       fields
   name,
@@ -116,12 +137,20 @@ screenshots.image_id,
   involved_companies.publisher,
   websites.url;
       limit 15;
-    `,
-      cache: "no-store",
-    });
+    `;
+
+    let response = await fetchIgdbGames(searchBody, clientId, token);
+
+    if (response.status === 401) {
+      clearIgdbTokenCache();
+      token = await getIgdbToken();
+      response = await fetchIgdbGames(searchBody, clientId, token);
+    }
 
     if (!response.ok) {
-      throw new Error(`IGDB search failed with status ${response.status}`);
+      throw new Error(
+        `IGDB search failed with status ${response.status}: ${await response.text()}`
+      );
     }
 
     const games = (await response.json()) as IgdbGame[];
@@ -132,14 +161,7 @@ screenshots.image_id,
     }
 
     if (games.length === 0) {
-      const exactResponse = await fetch("https://api.igdb.com/v4/games", {
-        method: "POST",
-        headers: {
-          "Client-ID": clientId!,
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: `
+      const exactBody = `
         fields
           name,
           first_release_date,
@@ -154,12 +176,20 @@ screenshots.image_id,
           websites.url;
         where name = "${safeQuery}";
         limit 15;
-      `,
-        cache: "no-store",
-      });
+      `;
+
+      let exactResponse = await fetchIgdbGames(exactBody, clientId, token);
+
+      if (exactResponse.status === 401) {
+        clearIgdbTokenCache();
+        token = await getIgdbToken();
+        exactResponse = await fetchIgdbGames(exactBody, clientId, token);
+      }
 
       if (!exactResponse.ok) {
-        throw new Error(`IGDB exact search failed with status ${exactResponse.status}`);
+        throw new Error(
+          `IGDB exact search failed with status ${exactResponse.status}: ${await exactResponse.text()}`
+        );
       }
 
       finalGames = (await exactResponse.json()) as IgdbGame[];

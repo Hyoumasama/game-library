@@ -1,9 +1,8 @@
 "use client";
 
-import AddGameModal from "@/components/games/AddGameModal";
+import AppNav from "@/components/AppNav";
 import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
-import AuthButton from "@/components/admin/AuthButton";
 import SafeImage from "@/components/SafeImage";
 import {
   formatHours,
@@ -37,6 +36,7 @@ type AllGamesFilters = {
   release: string;
   completion: string;
   genre: string;
+  steamAppId: string;
   sort: string;
   page: number;
 };
@@ -48,6 +48,7 @@ const DEFAULT_FILTERS: AllGamesFilters = {
   release: "All",
   completion: "All",
   genre: "All",
+  steamAppId: "All",
   sort: "default",
   page: 1,
 };
@@ -77,6 +78,7 @@ function readFiltersFromSearchParams(searchParams: {
     release: searchParams.get("release") ?? DEFAULT_FILTERS.release,
     completion: searchParams.get("completion") ?? DEFAULT_FILTERS.completion,
     genre: searchParams.get("genre") ?? DEFAULT_FILTERS.genre,
+    steamAppId: searchParams.get("steamAppId") ?? DEFAULT_FILTERS.steamAppId,
     sort: searchParams.get("sort") ?? DEFAULT_FILTERS.sort,
     page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
   };
@@ -100,6 +102,9 @@ function buildAllGamesQueryParams(
   if (filters.release !== "All") params.set("release", filters.release);
   if (filters.completion !== "All") params.set("completion", filters.completion);
   if (filters.genre !== "All") params.set("genre", filters.genre);
+  if (filters.steamAppId !== "All") {
+    params.set("steamAppId", filters.steamAppId);
+  }
   if (filters.sort !== "default") params.set("sort", filters.sort);
 
   if (!options.includePageSize && filters.page <= 1) {
@@ -164,7 +169,6 @@ function AllGamesContent({
     avg_score: initialData.stats.avg_score,
   });
   const [searchDraft, setSearchDraft] = useState(filters.search);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [editingGame, setEditingGame] = useState<UiGame | null>(null);
   const [editSignal, setEditSignal] = useState(0);
   const [openActionGameId, setOpenActionGameId] = useState<number | null>(null);
@@ -328,91 +332,7 @@ function AllGamesContent({
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
 
       <div className="relative mx-auto max-w-7xl p-4 md:p-8">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 py-3 text-sm font-black text-white hover:border-cyan-400"
-          >
-            ← Back
-          </button>
-
-          <div className="hidden items-center gap-3 md:flex">
-            <Link
-              href="/stats"
-              className="rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 py-3 text-sm font-black text-white hover:border-cyan-400"
-            >
-              Stats
-            </Link>
-
-            <Link
-              href="/monthly-log"
-              className="rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 py-3 text-sm font-black text-white hover:border-cyan-400"
-            >
-              Monthly Log
-            </Link>
-
-            <Link
-              href="/assets"
-              className="rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 py-3 text-sm font-black text-white hover:border-cyan-400"
-            >
-              Assets
-            </Link>
-
-            <AuthButton />
-            {isAdmin && <AddGameModal onGameAdded={loadGames} />}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 py-3 text-sm font-black text-white md:hidden"
-          >
-            ☰ Menu
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div
-  className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm p-4 md:hidden"
-  onClick={() => setIsMobileMenuOpen(false)}
->
-            <div
-  className="rounded-3xl border border-zinc-700 bg-zinc-950 p-4"
-  onClick={(e) => e.stopPropagation()}
->
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-lg font-black text-white">Menu</p>
-
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xl font-black text-white"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Link href="/" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                  Home
-                </Link>
-                <Link href="/stats" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                  Stats
-                </Link>
-                <Link href="/monthly-log" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                  Monthly Log
-                </Link>
-                <Link href="/assets" className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-sm font-bold text-white">
-                  Assets
-                </Link>
-
-                {isAdmin && <AddGameModal onGameAdded={loadGames} />}
-                <AuthButton />
-              </div>
-            </div>
-          </div>
-        )}
+        <AppNav onGameAdded={loadGames} />
 
         <section className="mb-6 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950/80 p-5 shadow-2xl md:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -449,7 +369,7 @@ function AllGamesContent({
         </section>
 
         <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-7">
             <select
               value={filters.status}
               onChange={(event) => updateFilters({ status: event.target.value })}
@@ -459,6 +379,7 @@ function AllGamesContent({
               <option value="Playing">Playing</option>
               <option value="Completed">Completed</option>
               <option value="Unplayed">Unplayed</option>
+              <option value="Skipped">Skipped</option>
               <option value="Dropped">Dropped</option>
               <option value="Wishlist">Wishlist</option>
             </select>
@@ -515,6 +436,17 @@ function AllGamesContent({
                   {genre}
                 </option>
               ))}
+            </select>
+
+            <select
+              value={filters.steamAppId}
+              onChange={(event) =>
+                updateFilters({ steamAppId: event.target.value })
+              }
+              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
+            >
+              <option value="All">Steam App ID</option>
+              <option value="missing">Missing</option>
             </select>
 
 <select
@@ -626,6 +558,7 @@ className="flex h-full md:block"  >
                     alt={game.Title}
                     fill
                     sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 112px"
+                    loading={index === 0 ? "eager" : "lazy"}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   />
                 ) : (
@@ -696,6 +629,8 @@ className="flex h-full md:block"  >
 className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
   game.Status === "Playing"
     ? "border-blue-400/40 bg-blue-400/10 text-blue-300"
+    : game.Status === "Skipped"
+      ? "border-zinc-500/40 bg-zinc-500/10 text-zinc-300"
     : game.Status === "Dropped"
       ? "border-red-400/40 bg-red-400/10 text-red-300"
       : game.Status === "Completed"

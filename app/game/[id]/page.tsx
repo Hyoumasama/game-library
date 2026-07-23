@@ -1,6 +1,4 @@
-import GamePageMobileMenu from "@/components/GamePageMobileMenu";
-import HomeGameSearch from "@/components/HomeGameSearch";
-import BackButton from "@/components/BackButton";
+import AppNav from "@/components/AppNav";
 import GameAdminActions from "@/components/games/GameAdminActions";
 import { getGameById } from "@/lib/games";
 import {
@@ -79,28 +77,20 @@ const displayPrice =
     ? { backgroundColor: "rgba(34, 211, 238, 0.15)", color: "#67e8f9" }
     : status === "Playing"
       ? { backgroundColor: "rgba(59, 130, 246, 0.15)", color: "#93c5fd" }
-      : status === "Dropped"
+    : status === "Dropped"
         ? { backgroundColor: "rgba(248, 113, 113, 0.15)", color: "#fca5a5" }
-        : status === "Unplayed"
-          ? { backgroundColor: "rgba(250, 204, 21, 0.15)", color: "#fde047" }
-          : { backgroundColor: "#27272a", color: "#e4e4e7" };
+        : status === "Skipped"
+          ? { backgroundColor: "rgba(113, 113, 122, 0.18)", color: "#d4d4d8" }
+          : status === "Unplayed"
+            ? { backgroundColor: "rgba(250, 204, 21, 0.15)", color: "#fde047" }
+            : { backgroundColor: "#27272a", color: "#e4e4e7" };
 
   return (
     <main className="min-h-screen bg-[#070a0f] text-white">
-  <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
   
       <div className="mx-auto hidden max-w-6xl px-6 py-12 lg:block">
-       <div className="mb-6 flex items-center justify-between">
-  <BackButton />
-
-  <div className="flex items-center gap-3">
-    <div className="w-[300px]">
-      <HomeGameSearch />
-    </div>
-
-    <GameAdminActions game={game} />
-  </div>
-</div>
+       <AppNav actions={<GameAdminActions game={game} />} />
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="w-[264px] self-start">
@@ -113,6 +103,7 @@ const displayPrice =
       width={264}
       height={396}
       sizes="264px"
+      loading="eager"
       className="aspect-[2/3] w-full object-cover"
     />
   ) : (
@@ -274,14 +265,7 @@ const displayPrice =
 ) : null}
       </div>
       <div className="mx-auto max-w-[430px] px-4 pb-10 pt-3 lg:hidden">
-  <div className="mb-3 flex items-center justify-between">
-  <BackButton />
-  <GamePageMobileMenu game={game} />
-</div>
-
-<div className="mb-3">
-  <HomeGameSearch />
-</div>
+  <AppNav actions={<GameAdminActions game={game} />} />
 
   <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
@@ -291,6 +275,7 @@ const displayPrice =
     width={430}
     height={242}
     sizes="(max-width: 1023px) 100vw, 430px"
+    loading="eager"
     className="aspect-video w-full object-cover"
   />
 ) : heroImage ? (
@@ -299,6 +284,7 @@ const displayPrice =
   alt=""
   fill
   sizes="(max-width: 1023px) 100vw, 430px"
+  loading="eager"
   className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
 />
 ) : coverImage ? (
@@ -308,6 +294,7 @@ const displayPrice =
     width={430}
     height={242}
     sizes="(max-width: 1023px) 100vw, 430px"
+    loading="eager"
     className="aspect-video w-full object-cover"
   />
 ) : (

@@ -19,6 +19,7 @@ export type DbGame = {
   date_started?: string | null;
   date_of_purchase?: string | null;
   completion_last_played?: string | null;
+  skipped_at?: string | null;
   score?: string | number | null;
   price?: string | number | null;
   hours_played?: string | number | null;

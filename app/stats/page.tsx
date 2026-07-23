@@ -4,6 +4,7 @@ import { getIcon } from "@/lib/gameIcons";
 import StatsYearSelect from "./StatsYearSelect";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
+import AppNav from "@/components/AppNav";
 
 const monthNames = [
   "",
@@ -1053,21 +1054,16 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
       <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-6 md:px-8">
-        <header className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
-          >
-            Back to Library
-          </Link>
+        <AppNav />
 
-          {availableYears.length > 0 && (
+        {availableYears.length > 0 && (
+          <div className="flex justify-end">
             <StatsYearSelect
               years={availableYears}
               selectedYear={selectedYear}
             />
-          )}
-        </header>
+          </div>
+        )}
 
         <section className="pt-14 text-center md:pt-20">
           <p className="text-sm font-black uppercase tracking-[0.36em] text-cyan-300">

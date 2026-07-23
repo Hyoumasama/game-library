@@ -17,21 +17,27 @@ const selectColumns = `
   hardware,
   genre,
   cover_url,
+  hero_url,
   wide_cover_url,
   steam_vertical_cover,
+  summary,
   game_achievements (
     platinum,
     completion_percentage
   )
 `;
 
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export async function getHomeGames() {
   const today = new Date();
-  const todayText = today.toISOString().slice(0, 10);
-
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - 7);
-  const sevenDaysAgoText = sevenDaysAgo.toISOString().slice(0, 10);
+  const todayText = toDateKey(today);
 
   const [wishlistResult, playingResult, addedResult, completedResult] =
     await Promise.all([
@@ -40,9 +46,9 @@ export async function getHomeGames() {
         .select(selectColumns)
         .eq("status", "Wishlist")
         .not("release", "is", null)
-        .gte("release", sevenDaysAgoText)
+        .gte("release", todayText)
         .order("release", { ascending: true })
-        .limit(7),
+        .order("title", { ascending: true }),
       supabase
         .from("games")
         .select(selectColumns)

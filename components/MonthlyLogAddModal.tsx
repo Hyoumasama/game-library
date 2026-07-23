@@ -6,7 +6,30 @@ type SearchGame = {
   id: number;
   title: string;
   hours_played: number | null;
+  status: string | null;
+  date_started: string | null;
+  completion_last_played: string | null;
 };
+
+const statusOptions = [
+  "Completed",
+  "Playing",
+  "Unplayed",
+  "Skipped",
+  "Dropped",
+  "Wishlist",
+];
+
+function todayInputValue() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeStatus(status: string | null) {
+  if (status === "Currently Playing") return "Playing";
+  return statusOptions.includes(status || "")
+    ? status || "Unplayed"
+    : "Unplayed";
+}
 
 export default function MonthlyLogAddModal() {
   const [open, setOpen] = useState(false);
@@ -14,18 +37,48 @@ export default function MonthlyLogAddModal() {
   const [games, setGames] = useState<SearchGame[]>([]);
   const [selectedGame, setSelectedGame] = useState<SearchGame | null>(null);
   const [currentTotalHours, setCurrentTotalHours] = useState("");
+  const [status, setStatus] = useState("Unplayed");
+  const [dateStarted, setDateStarted] = useState("");
+  const [completionLastPlayed, setCompletionLastPlayed] = useState("");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [isSaving, setIsSaving] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
-const previousTotalHours = Number(selectedGame?.hours_played || 0);
-const currentTotal = Number(currentTotalHours || 0);
-const thisMonthHours = Math.max(currentTotal - previousTotalHours, 0);
+
+  const previousTotalHours = Number(selectedGame?.hours_played || 0);
+  const currentTotal = Number(currentTotalHours || 0);
+  const thisMonthHours =
+    Number.isFinite(currentTotal) && currentTotal > previousTotalHours
+      ? currentTotal - previousTotalHours
+      : 0;
+  const cannotSaveDueToHours = thisMonthHours <= 0;
+
+  function resetSelectedGameState() {
+    setSelectedGame(null);
+    setStatus("Unplayed");
+    setDateStarted("");
+    setCompletionLastPlayed("");
+  }
+
+  function handleStatusChange(newStatus: string) {
+    setStatus(newStatus);
+
+    if (newStatus === "Playing" && !dateStarted) {
+      setDateStarted(todayInputValue());
+    }
+
+    if (
+      (newStatus === "Completed" || newStatus === "Dropped") &&
+      !completionLastPlayed
+    ) {
+      setCompletionLastPlayed(todayInputValue());
+    }
+  }
 
   function searchGames(value: string) {
     setQuery(value);
-    setSelectedGame(null);
+    resetSelectedGameState();
 
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -61,9 +114,23 @@ const thisMonthHours = Math.max(currentTotal - previousTotalHours, 0);
     }, 350);
   }
 
+  function selectGame(game: SearchGame) {
+    setSelectedGame(game);
+    setQuery(game.title);
+    setCurrentTotalHours(String(game.hours_played || ""));
+    setStatus(normalizeStatus(game.status));
+    setDateStarted(game.date_started || "");
+    setCompletionLastPlayed(game.completion_last_played || "");
+    setGames([]);
+  }
+
   async function saveLog() {
     if (!selectedGame) {
       alert("Choose a game first");
+      return;
+    }
+
+    if (thisMonthHours <= 0) {
       return;
     }
 
@@ -77,8 +144,11 @@ const thisMonthHours = Math.max(currentTotal - previousTotalHours, 0);
       body: JSON.stringify({
         game_id: selectedGame.id,
         title: selectedGame.title,
-       hours: thisMonthHours,
-currentTotalHours,
+        hours: thisMonthHours,
+        currentTotalHours,
+        status,
+        dateStarted,
+        completionLastPlayed,
         month,
         year,
       }),
@@ -119,7 +189,7 @@ currentTotalHours,
                 onClick={() => setOpen(false)}
                 className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-bold"
               >
-                ✕
+                x
               </button>
             </div>
 
@@ -141,12 +211,7 @@ currentTotalHours,
                     {games.map((game) => (
                       <button
                         key={game.id}
-                        onClick={() => {
-                          setSelectedGame(game);
-setQuery(game.title);
-setCurrentTotalHours(String(game.hours_played || ""));
-setGames([]);
-                        }}
+                        onClick={() => selectGame(game)}
                         className="block w-full px-4 py-3 text-left text-sm font-bold hover:bg-zinc-900"
                       >
                         {game.title}
@@ -157,44 +222,68 @@ setGames([]);
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-  <div>
-    <label className="mb-2 block text-sm font-bold text-zinc-400">
-      Previous Total
-    </label>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-zinc-400">
+                    Previous Total
+                  </label>
 
-    <input
-      value={previousTotalHours}
-      readOnly
-      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-400 outline-none"
-    />
-  </div>
+                  <input
+                    value={previousTotalHours}
+                    readOnly
+                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-400 outline-none"
+                  />
+                </div>
 
-  <div>
-    <label className="mb-2 block text-sm font-bold text-zinc-400">
-      Current Total
-    </label>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-zinc-400">
+                    Current Total
+                  </label>
 
-    <input
-      value={currentTotalHours}
-      onChange={(event) => setCurrentTotalHours(event.target.value)}
-      type="number"
-      step="0.01"
-      className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 text-white outline-none"
-    />
-  </div>
+                  <input
+                    value={currentTotalHours}
+                    onChange={(event) =>
+                      setCurrentTotalHours(event.target.value)
+                    }
+                    type="number"
+                    step="0.01"
+                    className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 text-white outline-none"
+                  />
+                </div>
 
-  <div>
-    <label className="mb-2 block text-sm font-bold text-zinc-400">
-      This Month
-    </label>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-zinc-400">
+                    This Month
+                  </label>
 
-    <input
-      value={thisMonthHours}
-      readOnly
-      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-cyan-300 outline-none"
-    />
-  </div>
-</div>
+                  <input
+                    value={thisMonthHours}
+                    readOnly
+                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-cyan-300 outline-none"
+                  />
+                </div>
+              </div>
+
+              {selectedGame && cannotSaveDueToHours && (
+                <p className="text-sm font-bold text-red-400">
+                  Current total must be greater than the previous total.
+                </p>
+              )}
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-zinc-400">
+                  Status
+                </label>
+
+                <select
+                  value={status}
+                  onChange={(event) => handleStatusChange(event.target.value)}
+                  className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 text-white outline-none"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -228,7 +317,7 @@ setGames([]);
 
               <button
                 onClick={saveLog}
-                disabled={isSaving}
+                disabled={isSaving || cannotSaveDueToHours}
                 className="w-full rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-black hover:bg-cyan-300 disabled:opacity-50"
               >
                 {isSaving ? "Saving..." : "Save Log"}

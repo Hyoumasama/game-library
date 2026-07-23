@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -117,28 +117,10 @@ useEffect(() => {
     .then((data) => setOptions(data));
 }, []);
 
-useEffect(() => {
-  if (!open) return;
-
-  const cleanQuery = query.trim();
-
-  if (cleanQuery.length < 3) {
-    setResults([]);
-    return;
-  }
-
-  const timeout = window.setTimeout(() => {
-    searchGames(cleanQuery);
-  }, 400);
-
-  return () => window.clearTimeout(timeout);
-}, [query, searchSource, open]);
-
-  async function searchGames(searchText = query) {
+  const searchGames = useCallback(async (searchText = query) => {
   const cleanQuery = searchText.trim();
 
   if (cleanQuery.length < 3) {
-    setResults([]);
       return;
   }
 
@@ -175,7 +157,23 @@ useEffect(() => {
         : `${searchSource.toUpperCase()} search failed`
     );
   }
-}
+}, [query, searchSource]);
+
+useEffect(() => {
+  if (!open) return;
+
+  const cleanQuery = query.trim();
+
+  if (cleanQuery.length < 3) {
+    return;
+  }
+
+  const timeout = window.setTimeout(() => {
+    searchGames(cleanQuery);
+  }, 400);
+
+  return () => window.clearTimeout(timeout);
+}, [query, searchSource, open, searchGames]);
 
   async function selectGame(game: SearchResult) {
   setSelectedGame(game);
@@ -421,7 +419,14 @@ setSteamVerticalCoverOptions([]);
 
   <input
     value={query}
-    onChange={(e) => setQuery(e.target.value)}
+    onChange={(e) => {
+      const nextQuery = e.target.value;
+      setQuery(nextQuery);
+
+      if (nextQuery.trim().length < 3) {
+        setResults([]);
+      }
+    }}
     onKeyDown={(e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -584,6 +589,7 @@ className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
                 <option>Completed</option>
                 <option>Playing</option>
                 <option>Unplayed</option>
+                <option>Skipped</option>
                 <option>Dropped</option>
                 <option>Wishlist</option>
               </select>

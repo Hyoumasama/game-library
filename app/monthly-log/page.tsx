@@ -6,6 +6,7 @@ import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
+import AppNav from "@/components/AppNav";
 type MonthlyLog = {
   log_id: number;
   game_id: number;
@@ -135,15 +136,10 @@ const bestMonth = months
   return (
     <main className="min-h-screen bg-black p-4 text-white sm:p-6">
       <div className="mx-auto max-w-6xl">
+        <AppNav />
+
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Link
-              href="/"
-              className="mb-4 inline-block text-sm font-bold text-zinc-400 hover:text-white"
-            >
-              ← Back to Library
-            </Link>
-
             <h1 className="text-4xl font-black">Monthly Log</h1>
 
             <p className="mt-2 text-zinc-400">

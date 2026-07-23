@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import type { UiGame } from "@/lib/gameTypes";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
@@ -74,6 +75,8 @@ export default function EditGameModal({
   openSignal?: number;
   hideButton?: boolean;
 }) {
+  const router = useRouter();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
@@ -204,7 +207,7 @@ setCompletionPercentage("");
     resetFormToSavedGame();
     setOpen(false);
   }
-  async function handleOpen() {
+  const handleOpen = useCallback(async () => {
     setOpen(true);
 
     try {
@@ -222,40 +225,26 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     } catch (error) {
       console.error("Failed to load achievements:", error);
     }
-  }
+  }, [game.id]);
     useEffect(() => {
     if (!openSignal) return;
 
-    handleOpen();
-  }, [openSignal]);
+    const timeout = window.setTimeout(() => {
+      handleOpen();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [openSignal, handleOpen]);
   useEffect(() => {
     fetch("/api/admin/game-options")
       .then((res) => res.json())
       .then((data) => setOptions(data));
   }, []);
 
-  useEffect(() => {
-  if (!open) return;
-
-  const cleanQuery = query.trim();
-
-  if (cleanQuery.length < 3) {
-    setResults([]);
-    return;
-  }
-
-  const timeout = window.setTimeout(() => {
-    searchGames(cleanQuery);
-  }, 400);
-
-  return () => window.clearTimeout(timeout);
-}, [query, searchSource, open]);
-
-  async function searchGames(searchText = query) {
+  const searchGames = useCallback(async (searchText = query) => {
   const cleanQuery = searchText.trim();
 
   if (cleanQuery.length < 3) {
-    setResults([]);
     return;
   }
 
@@ -292,7 +281,23 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         : `${searchSource.toUpperCase()} search failed`
     );
   }
-}
+}, [query, searchSource]);
+
+  useEffect(() => {
+  if (!open) return;
+
+  const cleanQuery = query.trim();
+
+  if (cleanQuery.length < 3) {
+    return;
+  }
+
+  const timeout = window.setTimeout(() => {
+    searchGames(cleanQuery);
+  }, 400);
+
+  return () => window.clearTimeout(timeout);
+}, [query, searchSource, open, searchGames]);
 
   async function selectGame(game: SearchResult) {
     setTitle(game.title);
@@ -395,6 +400,9 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
 setOpen(false);
 
 onGameUpdated?.();
+if (!onGameUpdated) {
+  router.refresh();
+}
   }
 
   return (
@@ -441,7 +449,14 @@ onGameUpdated?.();
 
                 <input
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    const nextQuery = e.target.value;
+                    setQuery(nextQuery);
+
+                    if (nextQuery.trim().length < 3) {
+                      setResults([]);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -579,6 +594,7 @@ onChange={(e) => {
                 <option>Completed</option>
                 <option>Playing</option>
                 <option>Unplayed</option>
+                <option>Skipped</option>
                 <option>Dropped</option>
                 <option>Wishlist</option>
               </select>
