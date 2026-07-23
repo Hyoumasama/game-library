@@ -36,7 +36,6 @@ type AllGamesFilters = {
   release: string;
   completion: string;
   genre: string;
-  steamAppId: string;
   sort: string;
   page: number;
 };
@@ -48,7 +47,6 @@ const DEFAULT_FILTERS: AllGamesFilters = {
   release: "All",
   completion: "All",
   genre: "All",
-  steamAppId: "All",
   sort: "default",
   page: 1,
 };
@@ -78,7 +76,6 @@ function readFiltersFromSearchParams(searchParams: {
     release: searchParams.get("release") ?? DEFAULT_FILTERS.release,
     completion: searchParams.get("completion") ?? DEFAULT_FILTERS.completion,
     genre: searchParams.get("genre") ?? DEFAULT_FILTERS.genre,
-    steamAppId: searchParams.get("steamAppId") ?? DEFAULT_FILTERS.steamAppId,
     sort: searchParams.get("sort") ?? DEFAULT_FILTERS.sort,
     page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
   };
@@ -102,9 +99,6 @@ function buildAllGamesQueryParams(
   if (filters.release !== "All") params.set("release", filters.release);
   if (filters.completion !== "All") params.set("completion", filters.completion);
   if (filters.genre !== "All") params.set("genre", filters.genre);
-  if (filters.steamAppId !== "All") {
-    params.set("steamAppId", filters.steamAppId);
-  }
   if (filters.sort !== "default") params.set("sort", filters.sort);
 
   if (!options.includePageSize && filters.page <= 1) {
@@ -369,7 +363,7 @@ function AllGamesContent({
         </section>
 
         <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-7">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
             <select
               value={filters.status}
               onChange={(event) => updateFilters({ status: event.target.value })}
@@ -436,17 +430,6 @@ function AllGamesContent({
                   {genre}
                 </option>
               ))}
-            </select>
-
-            <select
-              value={filters.steamAppId}
-              onChange={(event) =>
-                updateFilters({ steamAppId: event.target.value })
-              }
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
-            >
-              <option value="All">Steam App ID</option>
-              <option value="missing">Missing</option>
             </select>
 
 <select
@@ -558,6 +541,7 @@ className="flex h-full md:block"  >
                     alt={game.Title}
                     fill
                     sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 112px"
+                    preload={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   />

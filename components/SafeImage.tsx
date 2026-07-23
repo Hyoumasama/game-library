@@ -31,6 +31,7 @@ export default function SafeImage({
   fill,
   width,
   height,
+  preload,
   priority,
   loading,
   onClick,
@@ -42,6 +43,7 @@ export default function SafeImage({
   fill?: boolean;
   width?: number;
   height?: number;
+  preload?: boolean;
   priority?: boolean;
   loading?: "eager" | "lazy";
   onClick?: MouseEventHandler<HTMLImageElement | HTMLDivElement>;
@@ -75,8 +77,9 @@ export default function SafeImage({
         width={fill ? undefined : width}
         height={fill ? undefined : height}
         sizes={sizes}
+        preload={preload}
         priority={priority}
-        loading={priority ? undefined : loading}
+        loading={preload || priority ? undefined : loading}
         className={className}
         onClick={onClick}
         onError={() => setFailed(true)}
@@ -90,7 +93,7 @@ export default function SafeImage({
       alt={alt}
       width={fill ? undefined : width}
       height={fill ? undefined : height}
-      loading={loading || "lazy"}
+      loading={preload ? "eager" : loading || "lazy"}
       className={fill ? `absolute inset-0 ${className || ""}` : className}
       onClick={onClick as MouseEventHandler<HTMLImageElement>}
       onError={() => setFailed(true)}

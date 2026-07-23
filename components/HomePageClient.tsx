@@ -6,7 +6,14 @@ import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   formatHours,
   getIcon,
@@ -156,8 +163,12 @@ function getWishlistCountdown(release: string | null | undefined) {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const releaseKey = String(release).slice(0, 10);
+  const [year, month, day] = releaseKey.split("-").map(Number);
 
-  const releaseDate = new Date(release);
+  if (!year || !month || !day) return "TBA";
+
+  const releaseDate = new Date(year, month - 1, day);
   releaseDate.setHours(0, 0, 0, 0);
 
   const diffDays = Math.ceil(
@@ -221,29 +232,21 @@ function getLocalDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getUpcomingRange() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return {
-    startKey: getLocalDateKey(today),
-  };
-}
-
-function formatReleaseColumnTitle(dateKey: string) {
+function formatReleaseColumnTitle(dateKey: string, todayKey?: string) {
   if (dateKey === "TBA") return "TBA";
 
   const date = new Date(`${dateKey}T00:00:00`);
-
-  return date
+  const formattedDate = date
     .toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
     })
     .toUpperCase();
+
+  return dateKey === todayKey ? `TODAY ${formattedDate}` : formattedDate;
 }
 
-function formatMobileReleaseColumnTitle(dateKey: string) {
+function formatMobileReleaseColumnTitle(dateKey: string, todayKey?: string) {
   const date = new Date(`${dateKey}T00:00:00`);
   const weekday = date
     .toLocaleDateString("en-US", { weekday: "short" })
@@ -253,7 +256,7 @@ function formatMobileReleaseColumnTitle(dateKey: string) {
     day: "numeric",
   });
 
-  return { weekday, numericDate };
+  return { weekday: dateKey === todayKey ? "TODAY" : weekday, numericDate };
 }
 
 function getWishlistCalendarWideImage(game: Game) {
@@ -278,30 +281,92 @@ function WishlistReleaseCalendar({
   const [expandedMobileDates, setExpandedMobileDates] = useState<
     Record<string, boolean>
   >({});
-  const { startKey } = getUpcomingRange();
-  const groupedGames = games.reduce<Record<string, Game[]>>((groups, game) => {
-    const releaseDate = getReleaseDateKey(game);
+  const desktopCalendarScrollRef = useRef<HTMLDivElement | null>(null);
+  const mobileCalendarScrollRef = useRef<HTMLDivElement | null>(null);
+  const desktopInitialAnchorRef = useRef<HTMLDivElement | null>(null);
+  const mobileInitialAnchorRef = useRef<HTMLDivElement | null>(null);
+  const hasInitialScrolledRef = useRef(false);
+  const todayKey = useMemo(() => getLocalDateKey(new Date()), []);
+  const { groupedGames, initialAnchorDate, releaseDates } = useMemo(() => {
+    const groups = games.reduce<Record<string, Game[]>>((dateGroups, game) => {
+      const releaseDate = getReleaseDateKey(game);
 
-    if (releaseDate === "TBA" || releaseDate < startKey) {
-      return groups;
+      if (releaseDate === "TBA") {
+        return dateGroups;
+      }
+
+      dateGroups[releaseDate] = dateGroups[releaseDate] || [];
+      dateGroups[releaseDate].push(game);
+      return dateGroups;
+    }, {});
+
+    const groupedDates = Object.keys(groups).sort((first, second) =>
+      first.localeCompare(second)
+    );
+    const pastDates = groupedDates
+      .filter((releaseDate) => releaseDate < todayKey)
+      .slice(-30);
+    const futureDates = groupedDates
+      .filter((releaseDate) => releaseDate > todayKey)
+      .slice(0, 30);
+    const todayGroup = groupedDates.includes(todayKey) ? todayKey : null;
+    const initialAnchor =
+      todayGroup || futureDates[0] || pastDates[pastDates.length - 1] || null;
+    const calendarDates = [
+      ...pastDates,
+      ...(todayGroup ? [todayGroup] : []),
+      ...futureDates,
+    ];
+
+    for (const releaseDate of calendarDates) {
+      groups[releaseDate].sort((first, second) =>
+        first.Title.localeCompare(second.Title)
+      );
     }
 
-    groups[releaseDate] = groups[releaseDate] || [];
-    groups[releaseDate].push(game);
-    return groups;
-  }, {});
+    return {
+      groupedGames: groups,
+      initialAnchorDate: initialAnchor,
+      releaseDates: calendarDates,
+    };
+  }, [games, todayKey]);
 
-  const releaseDates = Object.keys(groupedGames)
-    .sort((first, second) => first.localeCompare(second))
-    .slice(0, 30);
+  useLayoutEffect(() => {
+    if (hasInitialScrolledRef.current) return;
 
-  for (const releaseDate of releaseDates) {
-    groupedGames[releaseDate].sort((first, second) =>
-      first.Title.localeCompare(second.Title)
-    );
-  }
+    const frame = window.requestAnimationFrame(() => {
+      const scrollContainer =
+        desktopCalendarScrollRef.current?.getClientRects().length
+          ? desktopCalendarScrollRef.current
+          : mobileCalendarScrollRef.current;
+      const initialAnchorColumn =
+        scrollContainer === desktopCalendarScrollRef.current
+          ? desktopInitialAnchorRef.current
+          : mobileInitialAnchorRef.current;
 
-  if (releaseDates.length === 0) return null;
+      if (!scrollContainer || !initialAnchorColumn) return;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const anchorRect = initialAnchorColumn.getBoundingClientRect();
+      const paddingLeft = Number.parseFloat(
+        window.getComputedStyle(scrollContainer).paddingLeft || "0"
+      );
+      const targetScrollLeft =
+        scrollContainer.scrollLeft +
+        anchorRect.left -
+        containerRect.left -
+        paddingLeft;
+
+      scrollContainer.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: "auto",
+      });
+
+      hasInitialScrolledRef.current = true;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialAnchorDate]);
 
   return (
     <section className="mb-10">
@@ -309,14 +374,22 @@ function WishlistReleaseCalendar({
         Upcoming Games Calendar
       </h2>
 
-      <div className="hidden gap-3 overflow-x-auto pb-4 md:flex">
+      <div
+        ref={desktopCalendarScrollRef}
+        className="hidden gap-3 overflow-x-auto pb-4 md:flex"
+      >
         {releaseDates.map((releaseDate, columnIndex) => (
           <div
             key={releaseDate}
+            ref={
+              releaseDate === initialAnchorDate
+                ? desktopInitialAnchorRef
+                : undefined
+            }
             className="w-[220px] shrink-0"
           >
             <div className="px-1 pb-3 text-sm font-black uppercase tracking-[0.18em] text-white">
-              {formatReleaseColumnTitle(releaseDate)}
+              {formatReleaseColumnTitle(releaseDate, todayKey)}
             </div>
 
             <div className="space-y-2">
@@ -369,9 +442,12 @@ function WishlistReleaseCalendar({
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-zinc-950/70 p-2 md:hidden">
-        <div className="flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          ref={mobileCalendarScrollRef}
+          className="flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {releaseDates.map((releaseDate, columnIndex) => {
-            const title = formatMobileReleaseColumnTitle(releaseDate);
+            const title = formatMobileReleaseColumnTitle(releaseDate, todayKey);
             const dateGames = groupedGames[releaseDate];
             const expanded = !!expandedMobileDates[releaseDate];
             const visibleGames = expanded ? dateGames : dateGames.slice(0, 2);
@@ -380,6 +456,11 @@ function WishlistReleaseCalendar({
             return (
               <div
                 key={releaseDate}
+                ref={
+                  releaseDate === initialAnchorDate
+                    ? mobileInitialAnchorRef
+                    : undefined
+                }
                 className="w-24 shrink-0 snap-start"
               >
                 <div className="mb-2 rounded-lg border border-zinc-800 bg-black px-2 py-1.5 text-center">

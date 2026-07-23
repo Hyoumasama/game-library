@@ -27,6 +27,8 @@ const selectColumns = `
   )
 `;
 
+const WISHLIST_CALENDAR_FETCH_LIMIT = 500;
+
 function toDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -39,8 +41,23 @@ export async function getHomeGames() {
   const today = new Date();
   const todayText = toDateKey(today);
 
-  const [wishlistResult, playingResult, addedResult, completedResult] =
+  const [
+    wishlistPastResult,
+    wishlistFutureResult,
+    playingResult,
+    addedResult,
+    completedResult,
+  ] =
     await Promise.all([
+      supabase
+        .from("games")
+        .select(selectColumns)
+        .eq("status", "Wishlist")
+        .not("release", "is", null)
+        .lt("release", todayText)
+        .order("release", { ascending: false })
+        .order("title", { ascending: true })
+        .limit(WISHLIST_CALENDAR_FETCH_LIMIT),
       supabase
         .from("games")
         .select(selectColumns)
@@ -48,7 +65,8 @@ export async function getHomeGames() {
         .not("release", "is", null)
         .gte("release", todayText)
         .order("release", { ascending: true })
-        .order("title", { ascending: true }),
+        .order("title", { ascending: true })
+        .limit(WISHLIST_CALENDAR_FETCH_LIMIT),
       supabase
         .from("games")
         .select(selectColumns)
@@ -70,15 +88,37 @@ export async function getHomeGames() {
     ]);
 
   const error =
-    wishlistResult.error ||
+    wishlistPastResult.error ||
+    wishlistFutureResult.error ||
     playingResult.error ||
     addedResult.error ||
     completedResult.error;
 
   if (error) throw error;
 
+  const wishlistGamesById = new Map<number | string, DbGame>();
+
+  for (const game of [
+    ...((wishlistPastResult.data || []) as DbGame[]),
+    ...((wishlistFutureResult.data || []) as DbGame[]),
+  ]) {
+    wishlistGamesById.set(game.id || `${game.title}-${game.release}`, game);
+  }
+
   return {
-    wishlist: ((wishlistResult.data || []) as DbGame[]).map((game) => {
+    wishlist: [...wishlistGamesById.values()]
+      .sort((first, second) => {
+        const releaseCompare = String(first.release || "").localeCompare(
+          String(second.release || "")
+        );
+
+        if (releaseCompare !== 0) return releaseCompare;
+
+        return String(first.title || "").localeCompare(
+          String(second.title || "")
+        );
+      })
+      .map((game) => {
       const mappedGame = mapDbGameToUiGame(game);
       const releaseText = game.release ? String(game.release).slice(0, 10) : null;
       const homeTag: UiGame["home_tag"] =

@@ -29,6 +29,14 @@ function escapeIgdbString(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').trim();
 }
 
+function parsePositiveInteger(value: string) {
+  if (!/^\d+$/.test(value)) return null;
+
+  const parsed = Number(value);
+
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 function extractSteamAppId(websites?: IgdbWebsite[]) {
   const steamUrl = websites
     ?.map((site) => site.url)
@@ -106,6 +114,20 @@ async function fetchIgdbGames(body: string, clientId: string, token: string) {
   });
 }
 
+const igdbGameFields = `
+  name,
+  first_release_date,
+  cover.image_id,
+  summary,
+  genres.name,
+  artworks.image_id,
+  screenshots.image_id,
+  involved_companies.company.name,
+  involved_companies.developer,
+  involved_companies.publisher,
+  websites.url
+`;
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query")?.trim();
@@ -122,20 +144,16 @@ export async function GET(request: Request) {
 
     let token = await getIgdbToken();
     const safeQuery = escapeIgdbString(query);
-    const searchBody = `
+    const igdbId = parsePositiveInteger(query);
+    const searchBody = igdbId
+      ? `
+      fields ${igdbGameFields};
+      where id = ${igdbId};
+      limit 1;
+    `
+      : `
       search "${safeQuery}";
-      fields
-  name,
-  first_release_date,
-  cover.image_id,
-  summary,
-genres.name,
-artworks.image_id,
-screenshots.image_id,
-  involved_companies.company.name,
-  involved_companies.developer,
-  involved_companies.publisher,
-  websites.url;
+      fields ${igdbGameFields};
       limit 15;
     `;
 
@@ -160,20 +178,9 @@ screenshots.image_id,
       throw new Error("Invalid IGDB search response");
     }
 
-    if (games.length === 0) {
+    if (!igdbId && games.length === 0) {
       const exactBody = `
-        fields
-          name,
-          first_release_date,
-          cover.image_id,
-          summary,
-          genres.name,
-          artworks.image_id,
-          screenshots.image_id,
-          involved_companies.company.name,
-          involved_companies.developer,
-          involved_companies.publisher,
-          websites.url;
+        fields ${igdbGameFields};
         where name = "${safeQuery}";
         limit 15;
       `;

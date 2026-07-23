@@ -191,8 +191,22 @@ useEffect(() => {
   setSteamAppId(game.steamAppId || null);
   setResults([]);
   try {
+  const ownedParams = new URLSearchParams();
+
+  if (game.title) {
+    ownedParams.set("title", game.title);
+  }
+
+  if (game.igdbId) {
+    ownedParams.set("igdbId", String(game.igdbId));
+  }
+
+  if (game.steamAppId) {
+    ownedParams.set("steamAppId", String(game.steamAppId));
+  }
+
   const ownedResponse = await fetch(
-    `/api/admin/owned-games?title=${encodeURIComponent(game.title)}`
+    `/api/admin/owned-games?${ownedParams.toString()}`
   );
 
   const ownedData = await ownedResponse.json();
@@ -433,7 +447,7 @@ setSteamVerticalCoverOptions([]);
     searchGames();
   }
 }}
-    placeholder={`Search ${searchSource.toUpperCase()}, example: Batman`}
+    placeholder={`Search ${searchSource.toUpperCase()} by title or ID`}
     className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
   />
 

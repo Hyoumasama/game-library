@@ -11,7 +11,6 @@ export type GamesLiteFilters = {
   release: string;
   completion: string;
   genre: string;
-  steamAppId: string;
 };
 
 export type GamesLiteFilterOptions = {
@@ -127,13 +126,11 @@ function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters 
     release: normalizeYearFilter(filters.release),
     completion: normalizeYearFilter(filters.completion),
     genre: filters.genre.trim() || "All",
-    steamAppId: filters.steamAppId.trim() || "All",
   };
 }
 
 function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
-  const { search, status, store, release, completion, genre, steamAppId } =
-    filters;
+  const { search, status, store, release, completion, genre } = filters;
   let filteredQuery = query;
 
   if (search) {
@@ -162,10 +159,6 @@ function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
     filteredQuery = filteredQuery
       .gte("completion_last_played", `${completion}-01-01`)
       .lt("completion_last_played", `${Number(completion) + 1}-01-01`);
-  }
-
-  if (steamAppId === "missing") {
-    filteredQuery = filteredQuery.is("steam_appid", null);
   }
 
   return filteredQuery;

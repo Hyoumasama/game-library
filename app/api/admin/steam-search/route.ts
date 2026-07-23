@@ -39,13 +39,77 @@ if (months[match[1]]) {
   return `${year}-${month}-${day}`;
 }
 
+function parsePositiveInteger(value: string) {
+  if (!/^\d+$/.test(value)) return null;
+
+  const parsed = Number(value);
+
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function fetchSteamAppDetails(appid: number) {
+  const detailResponse = await fetch(
+    `https://store.steampowered.com/api/appdetails?appids=${appid}&l=en&cc=US`,
+    { cache: "no-store" }
+  );
+
+  const detailData = (await detailResponse.json()) as Record<
+    string,
+    { success?: boolean; data?: SteamAppDetails }
+  >;
+
+  const app = detailData?.[appid];
+
+  return app?.success === false ? null : app?.data || null;
+}
+
+function mapSteamResult(
+  appid: number,
+  data: SteamAppDetails | null,
+  fallback?: SteamSearchItem
+) {
+  const steamDate = data?.release_date?.date || "";
+  const title = data?.name || fallback?.name;
+
+  if (!title) return null;
+
+  return {
+    source: "steam" as const,
+    steamAppId: appid,
+    igdbId: null,
+    title,
+    year: steamDate ? Number(steamDate.split(", ").pop()) : null,
+    releaseDate: formatSteamDate(steamDate),
+    steamReleaseText: steamDate,
+    coverUrl: data?.capsule_image || fallback?.tiny_image || null,
+    heroUrl: data?.header_image || data?.capsule_image || null,
+    summary: data?.short_description || "",
+    genre: data?.genres?.map((genre) => genre.description).join(", ") || "",
+    developer: data?.developers?.join(", ") || "",
+    publisher: data?.publishers?.join(", ") || "",
+    screenshots:
+      data?.screenshots
+        ?.map((screenshot) => screenshot.path_full)
+        .join(",") || "",
+  };
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("query");
+    const query = searchParams.get("query")?.trim();
 
     if (!query) {
       return Response.json({ results: [] });
+    }
+
+    const steamAppId = parsePositiveInteger(query);
+
+    if (steamAppId) {
+      const data = await fetchSteamAppDetails(steamAppId);
+      const result = mapSteamResult(steamAppId, data);
+
+      return Response.json({ results: result ? [result] : [] });
     }
 
     const searchResponse = await fetch(
@@ -63,44 +127,13 @@ export async function GET(request: Request) {
     const results = await Promise.all(
       items.slice(0, 10).map(async (item) => {
         const appid = item.id;
+        const data = await fetchSteamAppDetails(appid);
 
-        const detailResponse = await fetch(
-          `https://store.steampowered.com/api/appdetails?appids=${appid}&l=en&cc=US`,
-          { cache: "no-store" }
-        );
-
-        const detailData = (await detailResponse.json()) as Record<
-          string,
-          { data?: SteamAppDetails }
-        >;
-        const data = detailData?.[appid]?.data;
-
-        const steamDate = data?.release_date?.date || "";
-
-        return {
-          source: "steam",
-          steamAppId: appid,
-          igdbId: null,
-          title: item.name,
-          year: steamDate ? Number(steamDate.split(", ").pop()) : null,
-          releaseDate: formatSteamDate(steamDate),
-steamReleaseText: steamDate,
-          coverUrl: data?.capsule_image || item.tiny_image || null,
-          heroUrl: data?.header_image || data?.capsule_image || null,
-          summary: data?.short_description || "",
-          genre:
-            data?.genres?.map((genre) => genre.description).join(", ") || "",
-          developer: data?.developers?.join(", ") || "",
-          publisher: data?.publishers?.join(", ") || "",
-          screenshots:
-            data?.screenshots
-              ?.map((screenshot) => screenshot.path_full)
-              .join(",") || "",
-        };
+        return mapSteamResult(appid, data, item);
       })
     );
 
-    return Response.json({ results });
+    return Response.json({ results: results.filter((result) => result) });
   } catch (error) {
     console.error("Steam search error:", error);
     return Response.json({ results: [], error: "Steam search failed" });
@@ -114,6 +147,7 @@ type SteamSearchItem = {
 type SteamGenre = { description?: string };
 type SteamScreenshot = { path_full?: string };
 type SteamAppDetails = {
+  name?: string;
   release_date?: { date?: string };
   capsule_image?: string;
   header_image?: string;

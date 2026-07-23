@@ -43,6 +43,16 @@ type SearchResult = {
   publisher?: string | null;
 };
 
+type OwnedGame = {
+  id: number;
+  title: string;
+  slug: string;
+  store: string | null;
+  platform: string | null;
+  hardware: string | null;
+  status: string | null;
+};
+
 type EditableGame = UiGame & {
   coverUrl?: string | null;
   heroUrl?: string | null;
@@ -81,6 +91,7 @@ export default function EditGameModal({
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"igdb" | "steam">("igdb");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [ownedGames, setOwnedGames] = useState<OwnedGame[]>([]);
 
   const [title, setTitle] = useState(game.Title || game.title || "");
   const [release, setRelease] = useState(
@@ -154,6 +165,7 @@ const [dateStarted, setDateStarted] = useState(
     function resetFormToSavedGame() {
     setQuery("");
     setResults([]);
+    setOwnedGames([]);
     setMessage("");
 
     setTitle(game.Title || game.title || "");
@@ -299,30 +311,59 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
   return () => window.clearTimeout(timeout);
 }, [query, searchSource, open, searchGames]);
 
-  async function selectGame(game: SearchResult) {
-    setTitle(game.title);
-    setRelease(game.releaseDate || "");
+  async function selectGame(selected: SearchResult) {
+    setTitle(selected.title);
+    setRelease(selected.releaseDate || "");
 
-    setCoverUrl(game.coverUrl || "");
-    setHeroUrl(game.heroUrl || "");
-        setSummary(game.summary || "");
-    setGenre(game.genre || "");
-    setDeveloper(game.developer || "");
-    setPublisher(game.publisher || "");
-    setScreenshots(game.screenshots || "");
-    setIgdbId(game.igdbId || null);
-    setSteamAppId(game.steamAppId || null);
+    setCoverUrl(selected.coverUrl || "");
+    setHeroUrl(selected.heroUrl || "");
+        setSummary(selected.summary || "");
+    setGenre(selected.genre || "");
+    setDeveloper(selected.developer || "");
+    setPublisher(selected.publisher || "");
+    setScreenshots(selected.screenshots || "");
+    setIgdbId(selected.igdbId || null);
+    setSteamAppId(selected.steamAppId || null);
     setResults([]);
+
+    try {
+      const ownedParams = new URLSearchParams();
+
+      if (selected.title) {
+        ownedParams.set("title", selected.title);
+      }
+
+      if (selected.igdbId) {
+        ownedParams.set("igdbId", String(selected.igdbId));
+      }
+
+      if (selected.steamAppId) {
+        ownedParams.set("steamAppId", String(selected.steamAppId));
+      }
+
+      ownedParams.set("excludeId", String(game.id));
+
+      const ownedResponse = await fetch(
+        `/api/admin/owned-games?${ownedParams.toString()}`
+      );
+
+      const ownedData = await ownedResponse.json();
+
+      setOwnedGames(ownedData.games || []);
+    } catch (error) {
+      console.error("Failed to check owned games:", error);
+      setOwnedGames([]);
+    }
 
     try {
       const params = new URLSearchParams();
 
-      if (game.title) {
-        params.set("title", game.title);
+      if (selected.title) {
+        params.set("title", selected.title);
       }
 
-      if (game.steamAppId) {
-        params.set("steamAppId", String(game.steamAppId));
+      if (selected.steamAppId) {
+        params.set("steamAppId", String(selected.steamAppId));
       }
 
       const steamGridResponse = await fetch(
@@ -463,7 +504,7 @@ if (!onGameUpdated) {
                       searchGames();
                     }
                   }}
-                  placeholder={`Search ${searchSource.toUpperCase()}, example: Batman`}
+                  placeholder={`Search ${searchSource.toUpperCase()} by title or ID`}
                   className="w-full rounded-xl border border-zinc-700 bg-black px-4 py-3"
                 />
 
@@ -516,6 +557,33 @@ if (!onGameUpdated) {
                 </div>
               )}
             </div>
+
+            {ownedGames.length > 0 && (
+              <div className="mt-5 rounded-2xl border border-yellow-500/40 bg-yellow-500/10 p-4">
+                <p className="font-bold text-yellow-300">
+                  Similar game owned:
+                </p>
+
+                <div className="mt-3 grid gap-2">
+                  {ownedGames.map((owned) => (
+                    <a
+                      key={owned.id}
+                      href={`/games/${owned.slug}`}
+                      className="rounded-xl border border-yellow-500/20 bg-black/40 p-3 text-sm transition hover:border-yellow-400"
+                    >
+                      <span className="font-bold text-white">
+                        {owned.title}
+                      </span>
+
+                      <span className="mt-1 block text-zinc-300">
+                        {owned.store || "-"} / {owned.platform || "-"} /{" "}
+                        {owned.hardware || "-"} / {owned.status || "-"}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={updateGame} className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="grid grid-cols-1 gap-3 md:col-span-2 md:grid-cols-2">
