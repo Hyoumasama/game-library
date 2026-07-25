@@ -5,7 +5,9 @@ import { supabase } from "@/lib/supabase";
 const selectColumns = `
   id,
   title,
+  slug,
   release,
+  date_started,
   date_of_purchase,
   completion_last_played,
   score,
@@ -21,6 +23,11 @@ const selectColumns = `
   wide_cover_url,
   steam_vertical_cover,
   summary,
+  screenshots,
+  developer,
+  publisher,
+  igdb_id,
+  steam_appid,
   game_achievements (
     platinum,
     completion_percentage

@@ -162,42 +162,59 @@ const [dateStarted, setDateStarted] = useState(
     platforms: [] as string[],
     hardware: [] as string[],
   });
+  function applyGameFields(savedGame: EditableGame) {
+    setTitle(savedGame.Title || savedGame.title || "");
+    setRelease(toDateInput(savedGame.Release || savedGame.release || ""));
+    setStatus(savedGame.Status || savedGame.status || "Unplayed");
+    setScore(savedGame.Score || savedGame.score || "");
+    setHoursPlayed(savedGame["Hours Played"] || savedGame.hours_played || "");
+    setPrice(savedGame.Price || savedGame.price || "");
+    setStore(savedGame.Store || savedGame.store || "");
+    setPlatform(savedGame.Platform || savedGame.platform || "");
+    setHardware(savedGame["Hardware (1)"] || savedGame.hardware || "");
+
+    setCoverUrl(savedGame.Cover || savedGame.cover_url || savedGame.coverUrl || "");
+    setHeroUrl(savedGame.hero_url || savedGame.heroUrl || "");
+    setWideCoverUrl(savedGame.wide_cover_url || savedGame.wideCoverUrl || "");
+    setSteamVerticalCover(
+      savedGame.steam_vertical_cover || savedGame.steamVerticalCover || ""
+    );
+
+    setSummary(savedGame.summary || "");
+    setGenre(savedGame.genre || "");
+    setDeveloper(savedGame.developer || "");
+    setPublisher(savedGame.publisher || "");
+    setScreenshots(savedGame.screenshots || "");
+
+    setIgdbId(savedGame.igdb_id || savedGame.igdbId || null);
+    setSteamAppId(
+      savedGame.steam_appid ||
+        savedGame.steam_app_id ||
+        savedGame.steamAppId ||
+        null
+    );
+    setDateStarted(toDateInput(savedGame.date_started || savedGame.dateStarted || ""));
+    setDateOfPurchase(
+      toDateInput(savedGame["Date of Purchase"] || savedGame.date_of_purchase || "")
+    );
+    setCompletionLastPlayed(
+      toDateInput(
+        savedGame["Completion Last Played"] ||
+          savedGame.completion_last_played ||
+          ""
+      )
+    );
+  }
+
     function resetFormToSavedGame() {
     setQuery("");
     setResults([]);
     setOwnedGames([]);
     setMessage("");
 
-    setTitle(game.Title || game.title || "");
-    setRelease(toDateInput(game.Release || game.release || ""));
-    setStatus(game.Status || game.status || "Unplayed");
-    setScore(game.Score || game.score || "");
-    setHoursPlayed(game["Hours Played"] || game.hours_played || "");
-    setPrice(game.Price || game.price || "");
-    setStore(game.Store || game.store || "");
-    setPlatform(game.Platform || game.platform || "");
-    setHardware(game["Hardware (1)"] || game.hardware || "");
-
-    setCoverUrl(game.Cover || game.cover_url || game.coverUrl || "");
-    setHeroUrl(game.hero_url || game.heroUrl || "");
-    setWideCoverUrl(game.wide_cover_url || game.wideCoverUrl || "");
-    setSteamVerticalCover(
-      game.steam_vertical_cover || game.steamVerticalCover || ""
-    );
-
+    applyGameFields(game);
     setWideCoverOptions([]);
     setSteamVerticalCoverOptions([]);
-
-    setSummary(game.summary || "");
-    setGenre(game.genre || "");
-    setDeveloper(game.developer || "");
-    setPublisher(game.publisher || "");
-    setScreenshots(game.screenshots || "");
-
-    setIgdbId(game.igdb_id || game.igdbId || null);
-    setSteamAppId(
-      game.steam_appid || game.steam_app_id || game.steamAppId || null
-    );
     setBronze("");
     setSilver("");
     setGold("");
@@ -205,14 +222,6 @@ const [dateStarted, setDateStarted] = useState(
     setEarnedAwards("");
 setTotalAwards("");
 setCompletionPercentage("");
-    setDateOfPurchase(
-      toDateInput(game["Date of Purchase"] || game.date_of_purchase || "")
-    );
-    setCompletionLastPlayed(
-      toDateInput(
-        game["Completion Last Played"] || game.completion_last_played || ""
-      )
-    );
   }
 
   function handleClose() {
@@ -225,6 +234,9 @@ setCompletionPercentage("");
     try {
       const response = await fetch(`/api/admin/games/${game.id}`);
       const data = await response.json();
+      if (data.game) {
+        applyGameFields(data.game);
+      }
       const achievements = data.achievements || {};
 
       setBronze(String(achievements.bronze || ""));

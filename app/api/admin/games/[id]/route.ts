@@ -3,27 +3,36 @@ import {
   buildAchievementPayload,
   buildGamePayload,
 } from "@/lib/server/adminGamePayload";
+import { getGameById } from "@/lib/games";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const gameId = Number(id);
 
-  const { data, error } = await supabase
-    .from("game_achievements")
-    .select(
-      "bronze, silver, gold, platinum, earned_awards, total_awards, completion_percentage"
-    )
-    .eq("game_id", Number(id))
-    .maybeSingle();
+  const [game, achievementsResult] = await Promise.all([
+    getGameById(gameId),
+    supabase
+      .from("game_achievements")
+      .select(
+        "bronze, silver, gold, platinum, earned_awards, total_awards, completion_percentage"
+      )
+      .eq("game_id", gameId)
+      .maybeSingle(),
+  ]);
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  if (achievementsResult.error) {
+    return Response.json(
+      { error: achievementsResult.error.message },
+      { status: 500 }
+    );
   }
 
   return Response.json({
-    achievements: data || {
+    game,
+    achievements: achievementsResult.data || {
       bronze: 0,
       silver: 0,
       gold: 0,
