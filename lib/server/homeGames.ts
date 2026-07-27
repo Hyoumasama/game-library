@@ -17,7 +17,7 @@ const selectColumns = `
   store,
   platform,
   hardware,
-  genre,
+  genres,
   cover_url,
   hero_url,
   wide_cover_url,

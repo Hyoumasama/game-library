@@ -10,7 +10,7 @@ export type GamesLiteFilters = {
   store: string;
   release: string;
   completion: string;
-  genre: string;
+  genres: string[];
 };
 
 export type GamesLiteFilterOptions = {
@@ -49,19 +49,38 @@ type GamesLiteQueryResult = {
   count: number | null;
 };
 
-type GamesLiteQuery = {
-  ilike(column: string, pattern: string): GamesLiteQuery;
-  eq(column: string, value: string): GamesLiteQuery;
-  gte(column: string, value: string): GamesLiteQuery;
-  lt(column: string, value: string): GamesLiteQuery;
-  contains(column: string, value: string[]): GamesLiteQuery;
+type GamesLiteFilterableQuery<T> = {
+  ilike(column: string, pattern: string): T;
+  eq(column: string, value: string): T;
+  gte(column: string, value: string): T;
+  lt(column: string, value: string): T;
+  contains(column: string, value: string[]): T;
+};
+
+interface GamesLiteQuery extends GamesLiteFilterableQuery<GamesLiteQuery> {
   is(column: string, value: null): GamesLiteQuery;
   order(
     column: SortColumn,
     options: { ascending: boolean; nullsFirst: boolean }
   ): GamesLiteQuery;
   range(from: number, to: number): PromiseLike<GamesLiteQueryResult>;
+}
+
+type GamesLiteStatsRow = {
+  status?: string | null;
+  hours_played?: string | number | null;
+  score?: string | number | null;
 };
+
+type GamesLiteStatsQueryResult = {
+  data: GamesLiteStatsRow[] | null;
+  error: { message: string } | null;
+};
+
+interface GamesLiteStatsQuery
+  extends GamesLiteFilterableQuery<GamesLiteStatsQuery> {
+  range(from: number, to: number): PromiseLike<GamesLiteStatsQueryResult>;
+}
 
 const sortOptions: Record<
   string,
@@ -119,18 +138,31 @@ function normalizeYearFilter(value: string) {
 }
 
 function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters {
+  const seenGenres = new Set<string>();
+  const genres = filters.genres
+    .map((genre) => genre.trim())
+    .filter((genre) => {
+      const key = genre.toLowerCase();
+      const keep = Boolean(genre) && !seenGenres.has(key);
+      seenGenres.add(key);
+      return keep;
+    });
+
   return {
     search: filters.search.trim().slice(0, 120),
     status: filters.status.trim() || "All",
     store: filters.store.trim() || "All",
     release: normalizeYearFilter(filters.release),
     completion: normalizeYearFilter(filters.completion),
-    genre: filters.genre.trim() || "All",
+    genres,
   };
 }
 
-function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
-  const { search, status, store, release, completion, genre } = filters;
+function applyGameFilters<T extends GamesLiteFilterableQuery<T>>(
+  query: T,
+  filters: GamesLiteFilters
+) {
+  const { search, status, store, release, completion, genres } = filters;
   let filteredQuery = query;
 
   if (search) {
@@ -151,8 +183,8 @@ function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
       .lt("release", `${Number(release) + 1}-01-01`);
   }
 
-  if (genre && genre !== "All") {
-    filteredQuery = filteredQuery.contains("genres", [genre]);
+  if (genres.length > 0) {
+    filteredQuery = filteredQuery.contains("genres", genres);
   }
 
   if (completion && completion !== "All") {
@@ -162,6 +194,28 @@ function applyGameFilters(query: GamesLiteQuery, filters: GamesLiteFilters) {
   }
 
   return filteredQuery;
+}
+
+function calculateStats(games: GamesLiteStatsRow[]) {
+  const scoredGames = games
+    .map((game) => Number(game.score || 0))
+    .filter((score) => Number.isFinite(score) && score > 0);
+
+  return {
+    total_games: games.length,
+    completed_games: games.filter((game) => game.status === "Completed").length,
+    total_hours: games.reduce(
+      (total, game) => total + Number(game.hours_played || 0),
+      0
+    ),
+    avg_score:
+      scoredGames.length > 0
+        ? Math.round(
+            scoredGames.reduce((total, score) => total + score, 0) /
+              scoredGames.length
+          )
+        : 0,
+  };
 }
 
 export async function getGamesLiteData({
@@ -201,7 +255,6 @@ export async function getGamesLiteData({
         store,
         platform,
         hardware,
-        genre,
         genres,
         cover_url,
         hero_url,
@@ -220,6 +273,9 @@ export async function getGamesLiteData({
       `,
       { count: "exact" }
     ) as unknown as GamesLiteQuery;
+  const statsQuery = supabase
+    .from("games")
+    .select("status, hours_played, score") as unknown as GamesLiteStatsQuery;
 
   const filteredQuery = applyGameFilters(baseQuery, safeFilters).order(
     selectedSort.column,
@@ -231,14 +287,7 @@ export async function getGamesLiteData({
 
   const [gamesResult, statsResult, filtersResult] = await Promise.all([
     filteredQuery.range(from, to),
-    supabase.rpc("get_games_lite_stats", {
-      p_search: safeFilters.search,
-      p_status: safeFilters.status,
-      p_store: safeFilters.store,
-      p_release: safeFilters.release,
-      p_completion: safeFilters.completion,
-      p_genre: safeFilters.genre,
-    }),
+    applyGameFilters(statsQuery, safeFilters).range(0, 9999),
     supabase.rpc("get_games_lite_filters"),
   ]);
 
@@ -264,12 +313,7 @@ export async function getGamesLiteData({
     ...stripGameAchievements(game),
     achievement_badge: getAchievementBadge(game.game_achievements),
   })) as DbGame[];
-  const stats = statsResult.data?.[0] || {
-    total_games: 0,
-    completed_games: 0,
-    total_hours: 0,
-    avg_score: 0,
-  };
+  const stats = calculateStats(statsResult.data || []);
   const total = gamesResult.count || 0;
 
   return {

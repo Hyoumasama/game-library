@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     store: searchParams.get("store") || "",
     release: searchParams.get("release") || "",
     completion: searchParams.get("completion") || "",
-    genre: searchParams.get("genre") || "",
+    genres: searchParams.getAll("genre"),
   };
   const sort = searchParams.get("sort") || "";
 

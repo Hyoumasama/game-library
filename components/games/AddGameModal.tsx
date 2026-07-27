@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { formatGenres, parseGenreText } from "@/lib/genres";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -46,7 +47,7 @@ type SearchResult = {
 
   summary: string;
 
-genre?: string | null;
+genres?: string[] | null;
 screenshots?: string | null;
 developer?: string | null;
 publisher?: string | null;
@@ -183,7 +184,7 @@ useEffect(() => {
   setCoverUrl(game.coverUrl || "");
   setHeroUrl(game.heroUrl || "");
     setSummary(game.summary || "");
-  setGenre(game.genre || "");
+  setGenre(formatGenres(game.genres));
   setDeveloper(game.developer || "");
   setPublisher(game.publisher || "");
   setScreenshots(game.screenshots || "");
@@ -323,7 +324,7 @@ heroUrl,
 wideCoverUrl,
 steamVerticalCover,
 summary,
-genre,
+genres: parseGenreText(genre),
 developer,
 publisher,
 screenshots,

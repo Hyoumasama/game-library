@@ -6,7 +6,15 @@ import {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const gamePayload = buildGamePayload(body);
+  let gamePayload: ReturnType<typeof buildGamePayload>;
+
+  try {
+    gamePayload = buildGamePayload(body);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid payload";
+
+    return Response.json({ error: message }, { status: 400 });
+  }
 
   if (!gamePayload.title) {
     return Response.json({ error: "Title is required" }, { status: 400 });

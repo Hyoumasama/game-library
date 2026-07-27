@@ -23,7 +23,6 @@ export async function getGameById(id: number) {
         store,
         platform,
         hardware,
-        genre,
         genres,
         cover_url,
         hero_url,

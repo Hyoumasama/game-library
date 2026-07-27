@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { formatGenres, parseGenreText } from "@/lib/genres";
 import type { UiGame } from "@/lib/gameTypes";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
@@ -37,7 +38,7 @@ type SearchResult = {
 
   summary: string;
 
-  genre?: string | null;
+  genres?: string[] | null;
   screenshots?: string | null;
   developer?: string | null;
   publisher?: string | null;
@@ -123,7 +124,7 @@ export default function EditGameModal({
   const [wideCoverOptions, setWideCoverOptions] = useState<string[]>([]);
   const [steamVerticalCoverOptions, setSteamVerticalCoverOptions] = useState<string[]>([]);
   const [summary, setSummary] = useState(game.summary || "");
-  const [genre, setGenre] = useState(game.genre || "");
+  const [genre, setGenre] = useState(formatGenres(game.genres));
   const [developer, setDeveloper] = useState(game.developer || "");
   const [publisher, setPublisher] = useState(game.publisher || "");
   const [screenshots, setScreenshots] = useState(game.screenshots || "");
@@ -181,7 +182,7 @@ const [dateStarted, setDateStarted] = useState(
     );
 
     setSummary(savedGame.summary || "");
-    setGenre(savedGame.genre || "");
+    setGenre(formatGenres(savedGame.genres));
     setDeveloper(savedGame.developer || "");
     setPublisher(savedGame.publisher || "");
     setScreenshots(savedGame.screenshots || "");
@@ -330,7 +331,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     setCoverUrl(selected.coverUrl || "");
     setHeroUrl(selected.heroUrl || "");
         setSummary(selected.summary || "");
-    setGenre(selected.genre || "");
+    setGenre(formatGenres(selected.genres));
     setDeveloper(selected.developer || "");
     setPublisher(selected.publisher || "");
     setScreenshots(selected.screenshots || "");
@@ -428,7 +429,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         wideCoverUrl,
         steamVerticalCover,
         summary,
-        genre,
+        genres: parseGenreText(genre),
         developer,
         publisher,
         screenshots,

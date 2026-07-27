@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "backfill:genres": "node scripts/backfill-genres.mjs"
+    "watch:match-preview": "node --experimental-strip-types --experimental-transform-types --import ./scripts/watch/node-loader.mjs scripts/watch/buildMatchReview.ts",
+    "watch:build-holdings": "node --experimental-strip-types --experimental-transform-types scripts/watch/buildLocalHoldings.ts",
+    "watch:import-items": "node --experimental-strip-types --experimental-transform-types scripts/watch/importWatchItems.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

@@ -229,8 +229,8 @@ heroUrl:
 
 summary: game.summary || "",
 
-genre:
-  game.genres?.map((genre) => genre.name).join(", ") || null,
+genres:
+  game.genres?.map((genre) => genre.name).filter(Boolean) || [],
 
 screenshots:
   game.screenshots

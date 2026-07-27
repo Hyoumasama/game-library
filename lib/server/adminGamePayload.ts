@@ -1,4 +1,5 @@
 import { slugify } from "@/lib/gameHelpers";
+import { normalizeGenres } from "@/lib/genres";
 
 export type AdminGameBody = Record<string, unknown>;
 
@@ -23,17 +24,6 @@ export function toPlatinum(value: unknown) {
   return value === true || value === 1 || value === "1" ? 1 : 0;
 }
 
-export function toGenres(value: unknown) {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
-  }
-
-  return String(value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 export function calculateCompletion(
   earnedAwards: number,
   totalAwards: number,
@@ -53,7 +43,12 @@ function nullableText(value: unknown) {
 
 export function buildGamePayload(body: AdminGameBody) {
   const title = String(body.title || "").trim();
-  const genres = toGenres(body.genres || body.genre);
+
+  if (!Array.isArray(body.genres)) {
+    throw new Error("Genres must be an array");
+  }
+
+  const genres = normalizeGenres(body.genres);
 
   return {
     title,
@@ -76,7 +71,6 @@ export function buildGamePayload(body: AdminGameBody) {
     wide_cover_url: nullableText(body.wideCoverUrl),
     steam_vertical_cover: nullableText(body.steamVerticalCover),
     summary: nullableText(body.summary),
-    genre: nullableText(body.genre),
     genres: genres.length > 0 ? genres : null,
     screenshots: nullableText(body.screenshots),
     developer: nullableText(body.developer),

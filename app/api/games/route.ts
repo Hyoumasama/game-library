@@ -23,7 +23,7 @@ export async function GET() {
         store,
         platform,
         hardware,
-        genre,
+        genres,
         cover_url
       `)
       .order("id", { ascending: true })

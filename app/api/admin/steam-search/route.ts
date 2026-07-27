@@ -84,7 +84,7 @@ function mapSteamResult(
     coverUrl: data?.capsule_image || fallback?.tiny_image || null,
     heroUrl: data?.header_image || data?.capsule_image || null,
     summary: data?.short_description || "",
-    genre: data?.genres?.map((genre) => genre.description).join(", ") || "",
+    genres: data?.genres?.map((genre) => genre.description).filter(Boolean) || [],
     developer: data?.developers?.join(", ") || "",
     publisher: data?.publishers?.join(", ") || "",
     screenshots:

@@ -12,7 +12,7 @@ type AllGamesPageProps = {
     store?: string;
     release?: string;
     completion?: string;
-    genre?: string;
+    genre?: string | string[];
     sort?: string;
     page?: string;
   }>;
@@ -29,7 +29,11 @@ export default async function AllGamesPage({
     store: params.store || "All",
     release: params.release || "All",
     completion: params.completion || "All",
-    genre: params.genre || "All",
+    genres: Array.isArray(params.genre)
+      ? params.genre
+      : params.genre
+        ? [params.genre]
+        : [],
   };
   const initialData = await getGamesLiteData({
     filters,

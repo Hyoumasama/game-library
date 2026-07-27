@@ -39,7 +39,6 @@ export function mapDbGameToUiGame(game: DbGame): UiGame {
     Platform: game.platform,
     Hardware: game.hardware,
     "Hardware (1)": game.hardware,
-    Genre: game.genre,
     genres: game.genres || [],
     Score: game.score,
     Status: game.status,

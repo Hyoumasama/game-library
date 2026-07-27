@@ -51,7 +51,15 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
   const gameId = Number(id);
-  const gamePayload = buildGamePayload(body);
+  let gamePayload: ReturnType<typeof buildGamePayload>;
+
+  try {
+    gamePayload = buildGamePayload(body);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid payload";
+
+    return Response.json({ error: message }, { status: 400 });
+  }
 
   if (!gamePayload.title) {
     return Response.json({ error: "Title is required" }, { status: 400 });
@@ -61,7 +69,35 @@ export async function PATCH(
     .from("games")
     .update(gamePayload)
     .eq("id", gameId)
-    .select()
+    .select(
+      `
+        id,
+        title,
+        slug,
+        release,
+        date_started,
+        date_of_purchase,
+        completion_last_played,
+        score,
+        price,
+        hours_played,
+        status,
+        store,
+        platform,
+        hardware,
+        genres,
+        cover_url,
+        hero_url,
+        wide_cover_url,
+        steam_vertical_cover,
+        summary,
+        screenshots,
+        developer,
+        publisher,
+        igdb_id,
+        steam_appid
+      `
+    )
     .single();
 
   if (error) {

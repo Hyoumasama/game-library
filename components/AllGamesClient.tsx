@@ -35,7 +35,7 @@ type AllGamesFilters = {
   store: string;
   release: string;
   completion: string;
-  genre: string;
+  genres: string[];
   sort: string;
   page: number;
 };
@@ -46,7 +46,7 @@ const DEFAULT_FILTERS: AllGamesFilters = {
   store: "All",
   release: "All",
   completion: "All",
-  genre: "All",
+  genres: [],
   sort: "default",
   page: 1,
 };
@@ -66,6 +66,7 @@ type GamesLiteResponse = {
 
 function readFiltersFromSearchParams(searchParams: {
   get(name: string): string | null;
+  getAll(name: string): string[];
 }): AllGamesFilters {
   const page = Number(searchParams.get("page") || 1);
 
@@ -75,7 +76,7 @@ function readFiltersFromSearchParams(searchParams: {
     store: searchParams.get("store") ?? DEFAULT_FILTERS.store,
     release: searchParams.get("release") ?? DEFAULT_FILTERS.release,
     completion: searchParams.get("completion") ?? DEFAULT_FILTERS.completion,
-    genre: searchParams.get("genre") ?? DEFAULT_FILTERS.genre,
+    genres: searchParams.getAll("genre").filter(Boolean),
     sort: searchParams.get("sort") ?? DEFAULT_FILTERS.sort,
     page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
   };
@@ -98,7 +99,7 @@ function buildAllGamesQueryParams(
   if (filters.store !== "All") params.set("store", filters.store);
   if (filters.release !== "All") params.set("release", filters.release);
   if (filters.completion !== "All") params.set("completion", filters.completion);
-  if (filters.genre !== "All") params.set("genre", filters.genre);
+  filters.genres.forEach((genre) => params.append("genre", genre));
   if (filters.sort !== "default") params.set("sort", filters.sort);
 
   if (!options.includePageSize && filters.page <= 1) {
@@ -166,6 +167,7 @@ function AllGamesContent({
   const [editingGame, setEditingGame] = useState<UiGame | null>(null);
   const [editSignal, setEditSignal] = useState(0);
   const [openActionGameId, setOpenActionGameId] = useState<number | null>(null);
+  const [genreMenuOpen, setGenreMenuOpen] = useState(false);
 
   useEffect(() => {
     filtersRef.current = filters;
@@ -248,6 +250,23 @@ function AllGamesContent({
     [filters, loadGames]
   );
 
+  const toggleGenre = useCallback(
+    (genre: string) => {
+      const selected = filters.genres.some(
+        (selectedGenre) => selectedGenre.toLowerCase() === genre.toLowerCase()
+      );
+      const genres = selected
+        ? filters.genres.filter(
+            (selectedGenre) =>
+              selectedGenre.toLowerCase() !== genre.toLowerCase()
+          )
+        : [...filters.genres, genre];
+
+      updateFilters({ genres });
+    },
+    [filters.genres, updateFilters]
+  );
+
   function openEditGame(game: UiGame) {
     setEditingGame(game);
     setEditSignal((value) => value + 1);
@@ -313,6 +332,8 @@ function AllGamesContent({
   const completionYears = filterOptions.completionYears;
   const genres = filterOptions.genres;
   const visibleGames = games;
+  const genreButtonLabel =
+    filters.genres.length > 0 ? `Genres (${filters.genres.length})` : "Genre";
 
   return (
     <main
@@ -320,6 +341,9 @@ function AllGamesContent({
       onClick={() => {
         if (openActionGameId !== null) {
           setOpenActionGameId(null);
+        }
+        if (genreMenuOpen) {
+          setGenreMenuOpen(false);
         }
       }}
     >
@@ -353,6 +377,29 @@ function AllGamesContent({
               </p>
             </div>
           </div>
+
+          {filters.genres.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {filters.genres.map((genre) => (
+                <button
+                  key={genre}
+                  type="button"
+                  onClick={() => toggleGenre(genre)}
+                  className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-200"
+                >
+                  {genre} ×
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => updateFilters({ genres: [] })}
+                className="rounded-full border border-zinc-700 bg-black/50 px-3 py-1 text-xs font-black text-zinc-300 hover:border-zinc-500"
+              >
+                Clear Genres
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -419,18 +466,45 @@ function AllGamesContent({
               ))}
             </select>
 
-                        <select
-              value={filters.genre}
-              onChange={(event) => updateFilters({ genre: event.target.value })}
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
+            <div
+              className="relative"
+              onClick={(event) => event.stopPropagation()}
             >
-              <option value="All">All Genres</option>
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
-            </select>
+              <button
+                type="button"
+                onClick={() => setGenreMenuOpen((open) => !open)}
+                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-left text-sm font-bold text-white outline-none focus:border-cyan-400"
+              >
+                <span>{genreButtonLabel}</span>
+                <span className="text-zinc-500">v</span>
+              </button>
+
+              {genreMenuOpen && (
+                <div className="absolute left-0 top-full z-40 mt-2 max-h-80 w-72 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
+                  {genres.map((genre) => {
+                    const checked = filters.genres.some(
+                      (selectedGenre) =>
+                        selectedGenre.toLowerCase() === genre.toLowerCase()
+                    );
+
+                    return (
+                      <label
+                        key={genre}
+                        className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleGenre(genre)}
+                          className="h-4 w-4 accent-cyan-400"
+                        />
+                        <span>{genre}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
 <select
   value={filters.sort}

@@ -31,7 +31,6 @@ Open `http://localhost:3000`.
 ```bash
 npm run build
 npm run lint
-npm run backfill:genres
 ```
 
 ## Supabase

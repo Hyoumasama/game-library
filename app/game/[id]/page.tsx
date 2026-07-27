@@ -32,6 +32,9 @@ const steamVerticalCover = game.steam_vertical_cover || undefined;
 const primaryCoverImage = steamVerticalCover || coverImage;
 const heroImage = game.hero_url || undefined;
 const wideCoverImage = game.wide_cover_url || undefined;
+const gameGenres = Array.isArray(game.genres)
+  ? game.genres.filter(Boolean)
+  : [];
 
 const releaseYear = getYearFromDate(game.Release);
 
@@ -165,14 +168,14 @@ const displayPrice =
               {game.summary || "No description available."}
             </p>
 
-           {game.genre ? (
+           {gameGenres.length > 0 ? (
   <div className="mb-4 flex flex-wrap gap-2">
-    {game.genre.split(",").map((genre: string) => (
+    {gameGenres.map((genre: string) => (
       <span
         key={genre}
         className="rounded-md border border-zinc-600 bg-zinc-900 px-3 py-1 text-sm text-zinc-200"
       >
-        {genre.trim()}
+        {genre}
       </span>
     ))}
   </div>
@@ -349,20 +352,18 @@ const displayPrice =
         {game.summary || "No description available."}
       </p>
 
-            <>
+            {gameGenres.length > 0 ? (
   <div className="mt-4 flex flex-wrap gap-2">
-    {game.genre
-      ? game.genre.split(",").map((genre: string) => (
+    {gameGenres.map((genre: string) => (
           <span
             key={genre}
             className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200"
           >
-            {genre.trim()}
+            {genre}
           </span>
-        ))
-      : null}
+        ))}
   </div>
-</>
+) : null}
 
   <div className="mt-2 flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">

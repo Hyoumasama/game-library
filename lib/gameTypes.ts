@@ -27,7 +27,6 @@ export type DbGame = {
   store?: string | null;
   platform?: string | null;
   hardware?: string | null;
-  genre?: string | null;
   genres?: string[] | null;
   cover_url?: string | null;
   hero_url?: string | null;
@@ -48,7 +47,6 @@ export type UiGame = Omit<DbGame, "game_achievements"> & {
   Platform?: string | null;
   Hardware?: string | null;
   "Hardware (1)"?: string | null;
-  Genre?: string | null;
   Score?: string | number | null;
   Status?: string | null;
   Price?: string | number | null;
