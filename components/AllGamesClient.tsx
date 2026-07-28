@@ -31,10 +31,10 @@ type FilterOptions = {
 
 type AllGamesFilters = {
   search: string;
-  status: string;
-  store: string;
-  release: string;
-  completion: string;
+  statuses: string[];
+  stores: string[];
+  releases: string[];
+  completions: string[];
   genres: string[];
   sort: string;
   page: number;
@@ -42,14 +42,70 @@ type AllGamesFilters = {
 
 const DEFAULT_FILTERS: AllGamesFilters = {
   search: "",
-  status: "All",
-  store: "All",
-  release: "All",
-  completion: "All",
+  statuses: [],
+  stores: [],
+  releases: [],
+  completions: [],
   genres: [],
   sort: "default",
   page: 1,
 };
+
+const statusOptions = [
+  "Playing",
+  "Completed",
+  "Unplayed",
+  "Skipped",
+  "Dropped",
+  "Wishlist",
+];
+
+type MultiFilterKey =
+  | "statuses"
+  | "stores"
+  | "releases"
+  | "completions"
+  | "genres";
+
+type MultiFilterConfig = {
+  key: MultiFilterKey;
+  paramName: string;
+  label: string;
+  clearLabel: string;
+};
+
+const multiFilterConfigs: MultiFilterConfig[] = [
+  {
+    key: "statuses",
+    paramName: "status",
+    label: "Status",
+    clearLabel: "Clear Statuses",
+  },
+  {
+    key: "stores",
+    paramName: "store",
+    label: "Store",
+    clearLabel: "Clear Stores",
+  },
+  {
+    key: "releases",
+    paramName: "release",
+    label: "Release",
+    clearLabel: "Clear Releases",
+  },
+  {
+    key: "completions",
+    paramName: "completion",
+    label: "Completion",
+    clearLabel: "Clear Completions",
+  },
+  {
+    key: "genres",
+    paramName: "genre",
+    label: "Genre",
+    clearLabel: "Clear Genres",
+  },
+];
 
 type GamesLiteResponse = {
   games?: DbGame[];
@@ -72,10 +128,10 @@ function readFiltersFromSearchParams(searchParams: {
 
   return {
     search: searchParams.get("search") ?? DEFAULT_FILTERS.search,
-    status: searchParams.get("status") ?? DEFAULT_FILTERS.status,
-    store: searchParams.get("store") ?? DEFAULT_FILTERS.store,
-    release: searchParams.get("release") ?? DEFAULT_FILTERS.release,
-    completion: searchParams.get("completion") ?? DEFAULT_FILTERS.completion,
+    statuses: searchParams.getAll("status").filter(Boolean),
+    stores: searchParams.getAll("store").filter(Boolean),
+    releases: searchParams.getAll("release").filter(Boolean),
+    completions: searchParams.getAll("completion").filter(Boolean),
     genres: searchParams.getAll("genre").filter(Boolean),
     sort: searchParams.get("sort") ?? DEFAULT_FILTERS.sort,
     page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
@@ -95,11 +151,11 @@ function buildAllGamesQueryParams(
   params.set("page", String(filters.page));
 
   if (filters.search) params.set("search", filters.search);
-  if (filters.status !== "All") params.set("status", filters.status);
-  if (filters.store !== "All") params.set("store", filters.store);
-  if (filters.release !== "All") params.set("release", filters.release);
-  if (filters.completion !== "All") params.set("completion", filters.completion);
-  filters.genres.forEach((genre) => params.append("genre", genre));
+  multiFilterConfigs.forEach((config) => {
+    filters[config.key].forEach((value) =>
+      params.append(config.paramName, value)
+    );
+  });
   if (filters.sort !== "default") params.set("sort", filters.sort);
 
   if (!options.includePageSize && filters.page <= 1) {
@@ -123,6 +179,75 @@ function hasGoldenAchievement(game: UiGame) {
   return (
     game.achievement_badge === "platinum" ||
     game.achievement_badge === "100completion"
+  );
+}
+
+function hasSelectedValue(values: string[], value: string) {
+  return values.some(
+    (selectedValue) => selectedValue.toLowerCase() === value.toLowerCase()
+  );
+}
+
+function toggleSelectedValue(values: string[], value: string) {
+  return hasSelectedValue(values, value)
+    ? values.filter(
+        (selectedValue) => selectedValue.toLowerCase() !== value.toLowerCase()
+      )
+    : [...values, value];
+}
+
+function MultiSelectFilter({
+  label,
+  values,
+  selectedValues,
+  isOpen,
+  onToggleOpen,
+  onToggleValue,
+}: {
+  label: string;
+  values: string[];
+  selectedValues: string[];
+  isOpen: boolean;
+  onToggleOpen: () => void;
+  onToggleValue: (value: string) => void;
+}) {
+  const buttonLabel =
+    selectedValues.length > 0 ? `${label} (${selectedValues.length})` : label;
+
+  return (
+    <div className="relative" onClick={(event) => event.stopPropagation()}>
+      <button
+        type="button"
+        onClick={onToggleOpen}
+        className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-left text-sm font-bold text-white outline-none focus:border-cyan-400"
+      >
+        <span>{buttonLabel}</span>
+        <span className="text-zinc-500">v</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full z-40 mt-2 max-h-80 w-72 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
+          {values.map((value) => {
+            const checked = hasSelectedValue(selectedValues, value);
+
+            return (
+              <label
+                key={value}
+                className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggleValue(value)}
+                  className="h-4 w-4 accent-cyan-400"
+                />
+                <span>{value}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -167,7 +292,9 @@ function AllGamesContent({
   const [editingGame, setEditingGame] = useState<UiGame | null>(null);
   const [editSignal, setEditSignal] = useState(0);
   const [openActionGameId, setOpenActionGameId] = useState<number | null>(null);
-  const [genreMenuOpen, setGenreMenuOpen] = useState(false);
+  const [openFilterMenu, setOpenFilterMenu] = useState<MultiFilterKey | null>(
+    null
+  );
 
   useEffect(() => {
     filtersRef.current = filters;
@@ -250,21 +377,11 @@ function AllGamesContent({
     [filters, loadGames]
   );
 
-  const toggleGenre = useCallback(
-    (genre: string) => {
-      const selected = filters.genres.some(
-        (selectedGenre) => selectedGenre.toLowerCase() === genre.toLowerCase()
-      );
-      const genres = selected
-        ? filters.genres.filter(
-            (selectedGenre) =>
-              selectedGenre.toLowerCase() !== genre.toLowerCase()
-          )
-        : [...filters.genres, genre];
-
-      updateFilters({ genres });
+  const toggleMultiFilter = useCallback(
+    (key: MultiFilterKey, value: string) => {
+      updateFilters({ [key]: toggleSelectedValue(filters[key], value) });
     },
-    [filters.genres, updateFilters]
+    [filters, updateFilters]
   );
 
   function openEditGame(game: UiGame) {
@@ -327,13 +444,17 @@ function AllGamesContent({
   averageScore: dashboardStats.avg_score,
 };
 
-  const stores = filterOptions.stores;
-  const years = filterOptions.years;
-  const completionYears = filterOptions.completionYears;
-  const genres = filterOptions.genres;
+  const filterMenuOptions: Record<MultiFilterKey, string[]> = {
+    statuses: statusOptions,
+    stores: filterOptions.stores,
+    releases: filterOptions.years,
+    completions: filterOptions.completionYears,
+    genres: filterOptions.genres,
+  };
   const visibleGames = games;
-  const genreButtonLabel =
-    filters.genres.length > 0 ? `Genres (${filters.genres.length})` : "Genre";
+  const activeFilterConfigs = multiFilterConfigs.filter(
+    (config) => filters[config.key].length > 0
+  );
 
   return (
     <main
@@ -342,8 +463,8 @@ function AllGamesContent({
         if (openActionGameId !== null) {
           setOpenActionGameId(null);
         }
-        if (genreMenuOpen) {
-          setGenreMenuOpen(false);
+        if (openFilterMenu) {
+          setOpenFilterMenu(null);
         }
       }}
     >
@@ -378,26 +499,31 @@ function AllGamesContent({
             </div>
           </div>
 
-          {filters.genres.length > 0 && (
+          {activeFilterConfigs.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              {filters.genres.map((genre) => (
+              {activeFilterConfigs.flatMap((config) =>
+                filters[config.key].map((value) => (
+                  <button
+                    key={`${config.key}-${value}`}
+                    type="button"
+                    onClick={() => toggleMultiFilter(config.key, value)}
+                    className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-200"
+                  >
+                    {value} x
+                  </button>
+                ))
+              )}
+
+              {activeFilterConfigs.map((config) => (
                 <button
-                  key={genre}
+                  key={config.key}
                   type="button"
-                  onClick={() => toggleGenre(genre)}
-                  className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-200"
+                  onClick={() => updateFilters({ [config.key]: [] })}
+                  className="rounded-full border border-zinc-700 bg-black/50 px-3 py-1 text-xs font-black text-zinc-300 hover:border-zinc-500"
                 >
-                  {genre} ×
+                  {config.clearLabel}
                 </button>
               ))}
-
-              <button
-                type="button"
-                onClick={() => updateFilters({ genres: [] })}
-                className="rounded-full border border-zinc-700 bg-black/50 px-3 py-1 text-xs font-black text-zinc-300 hover:border-zinc-500"
-              >
-                Clear Genres
-              </button>
             </div>
           )}
         </section>
@@ -411,100 +537,21 @@ function AllGamesContent({
 
         <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-            <select
-              value={filters.status}
-              onChange={(event) => updateFilters({ status: event.target.value })}
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
-            >
-              <option value="All">All Status</option>
-              <option value="Playing">Playing</option>
-              <option value="Completed">Completed</option>
-              <option value="Unplayed">Unplayed</option>
-              <option value="Skipped">Skipped</option>
-              <option value="Dropped">Dropped</option>
-              <option value="Wishlist">Wishlist</option>
-            </select>
-
-            <select
-              value={filters.store}
-              onChange={(event) => updateFilters({ store: event.target.value })}
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
-            >
-              <option value="All">All Stores</option>
-              {stores.map((store) => (
-                <option key={store} value={store}>
-                  {store}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filters.release}
-              onChange={(event) => updateFilters({ release: event.target.value })}
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
-            >
-              <option value="All">Release</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filters.completion}
-              onChange={(event) =>
-                updateFilters({ completion: event.target.value })
-              }
-              className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
-            >
-              <option value="All">Completion</option>
-              {completionYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-
-            <div
-              className="relative"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <button
-                type="button"
-                onClick={() => setGenreMenuOpen((open) => !open)}
-                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-left text-sm font-bold text-white outline-none focus:border-cyan-400"
-              >
-                <span>{genreButtonLabel}</span>
-                <span className="text-zinc-500">v</span>
-              </button>
-
-              {genreMenuOpen && (
-                <div className="absolute left-0 top-full z-40 mt-2 max-h-80 w-72 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
-                  {genres.map((genre) => {
-                    const checked = filters.genres.some(
-                      (selectedGenre) =>
-                        selectedGenre.toLowerCase() === genre.toLowerCase()
-                    );
-
-                    return (
-                      <label
-                        key={genre}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleGenre(genre)}
-                          className="h-4 w-4 accent-cyan-400"
-                        />
-                        <span>{genre}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {multiFilterConfigs.map((config) => (
+              <MultiSelectFilter
+                key={config.key}
+                label={config.label}
+                values={filterMenuOptions[config.key]}
+                selectedValues={filters[config.key]}
+                isOpen={openFilterMenu === config.key}
+                onToggleOpen={() =>
+                  setOpenFilterMenu((open) =>
+                    open === config.key ? null : config.key
+                  )
+                }
+                onToggleValue={(value) => toggleMultiFilter(config.key, value)}
+              />
+            ))}
 
 <select
   value={filters.sort}

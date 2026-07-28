@@ -6,10 +6,10 @@ export const GAMES_LITE_PAGE_SIZE = 24;
 
 export type GamesLiteFilters = {
   search: string;
-  status: string;
-  store: string;
-  release: string;
-  completion: string;
+  statuses: string[];
+  stores: string[];
+  releases: string[];
+  completions: string[];
   genres: string[];
 };
 
@@ -52,9 +52,11 @@ type GamesLiteQueryResult = {
 type GamesLiteFilterableQuery<T> = {
   ilike(column: string, pattern: string): T;
   eq(column: string, value: string): T;
+  in(column: string, values: string[]): T;
   gte(column: string, value: string): T;
   lt(column: string, value: string): T;
   contains(column: string, value: string[]): T;
+  or(filters: string): T;
 };
 
 interface GamesLiteQuery extends GamesLiteFilterableQuery<GamesLiteQuery> {
@@ -131,30 +133,31 @@ const sortOptions: Record<
   },
 };
 
-function normalizeYearFilter(value: string) {
-  const trimmed = value.trim();
+function uniqueStrings(values: string[]) {
+  const seen = new Set<string>();
 
-  return /^\d{4}$/.test(trimmed) ? trimmed : "All";
+  return values
+    .map((value) => value.trim())
+    .filter((value) => {
+      const key = value.toLowerCase();
+      const keep = Boolean(value) && key !== "all" && !seen.has(key);
+      seen.add(key);
+      return keep;
+    });
+}
+
+function normalizeYearFilters(values: string[]) {
+  return uniqueStrings(values).filter((value) => /^\d{4}$/.test(value));
 }
 
 function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters {
-  const seenGenres = new Set<string>();
-  const genres = filters.genres
-    .map((genre) => genre.trim())
-    .filter((genre) => {
-      const key = genre.toLowerCase();
-      const keep = Boolean(genre) && !seenGenres.has(key);
-      seenGenres.add(key);
-      return keep;
-    });
-
   return {
     search: filters.search.trim().slice(0, 120),
-    status: filters.status.trim() || "All",
-    store: filters.store.trim() || "All",
-    release: normalizeYearFilter(filters.release),
-    completion: normalizeYearFilter(filters.completion),
-    genres,
+    statuses: uniqueStrings(filters.statuses),
+    stores: uniqueStrings(filters.stores),
+    releases: normalizeYearFilters(filters.releases),
+    completions: normalizeYearFilters(filters.completions),
+    genres: uniqueStrings(filters.genres),
   };
 }
 
@@ -162,35 +165,45 @@ function applyGameFilters<T extends GamesLiteFilterableQuery<T>>(
   query: T,
   filters: GamesLiteFilters
 ) {
-  const { search, status, store, release, completion, genres } = filters;
+  const { search, statuses, stores, releases, completions, genres } = filters;
   let filteredQuery = query;
 
   if (search) {
     filteredQuery = filteredQuery.ilike("title", `%${search}%`);
   }
 
-  if (status && status !== "All") {
-    filteredQuery = filteredQuery.eq("status", status);
+  if (statuses.length > 0) {
+    filteredQuery = filteredQuery.in("status", statuses);
   }
 
-  if (store && store !== "All") {
-    filteredQuery = filteredQuery.eq("store", store);
+  if (stores.length > 0) {
+    filteredQuery = filteredQuery.in("store", stores);
   }
 
-  if (release && release !== "All") {
-    filteredQuery = filteredQuery
-      .gte("release", `${release}-01-01`)
-      .lt("release", `${Number(release) + 1}-01-01`);
+  if (releases.length > 0) {
+    filteredQuery = filteredQuery.or(
+      releases
+        .map(
+          (release) =>
+            `and(release.gte.${release}-01-01,release.lt.${Number(release) + 1}-01-01)`
+        )
+        .join(",")
+    );
   }
 
   if (genres.length > 0) {
     filteredQuery = filteredQuery.contains("genres", genres);
   }
 
-  if (completion && completion !== "All") {
-    filteredQuery = filteredQuery
-      .gte("completion_last_played", `${completion}-01-01`)
-      .lt("completion_last_played", `${Number(completion) + 1}-01-01`);
+  if (completions.length > 0) {
+    filteredQuery = filteredQuery.or(
+      completions
+        .map(
+          (completion) =>
+            `and(completion_last_played.gte.${completion}-01-01,completion_last_played.lt.${Number(completion) + 1}-01-01)`
+        )
+        .join(",")
+    );
   }
 
   return filteredQuery;

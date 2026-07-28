@@ -8,15 +8,20 @@ import {
 type AllGamesPageProps = {
   searchParams: Promise<{
     search?: string;
-    status?: string;
-    store?: string;
-    release?: string;
-    completion?: string;
+    status?: string | string[];
+    store?: string | string[];
+    release?: string | string[];
+    completion?: string | string[];
     genre?: string | string[];
     sort?: string;
     page?: string;
   }>;
 };
+
+function asArray(value?: string | string[]) {
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
+}
 
 export default async function AllGamesPage({
   searchParams,
@@ -25,15 +30,11 @@ export default async function AllGamesPage({
   const page = Number(params.page || 1);
   const filters: GamesLiteFilters = {
     search: params.search || "",
-    status: params.status || "All",
-    store: params.store || "All",
-    release: params.release || "All",
-    completion: params.completion || "All",
-    genres: Array.isArray(params.genre)
-      ? params.genre
-      : params.genre
-        ? [params.genre]
-        : [],
+    statuses: asArray(params.status),
+    stores: asArray(params.store),
+    releases: asArray(params.release),
+    completions: asArray(params.completion),
+    genres: asArray(params.genre),
   };
   const initialData = await getGamesLiteData({
     filters,

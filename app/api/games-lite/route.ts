@@ -11,10 +11,10 @@ export async function GET(request: Request) {
   const pageSize = Number(searchParams.get("pageSize") || GAMES_LITE_PAGE_SIZE);
   const filters: GamesLiteFilters = {
     search: searchParams.get("search") || "",
-    status: searchParams.get("status") || "",
-    store: searchParams.get("store") || "",
-    release: searchParams.get("release") || "",
-    completion: searchParams.get("completion") || "",
+    statuses: searchParams.getAll("status"),
+    stores: searchParams.getAll("store"),
+    releases: searchParams.getAll("release"),
+    completions: searchParams.getAll("completion"),
     genres: searchParams.getAll("genre"),
   };
   const sort = searchParams.get("sort") || "";
