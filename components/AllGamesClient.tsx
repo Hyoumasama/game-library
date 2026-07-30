@@ -58,6 +58,8 @@ const statusOptions = [
   "Skipped",
   "Dropped",
   "Wishlist",
+  "__divider__",
+  "Never Played",
 ];
 
 type MultiFilterKey =
@@ -228,7 +230,35 @@ function MultiSelectFilter({
       {isOpen && (
         <div className="absolute left-0 top-full z-40 mt-2 max-h-80 w-72 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
           {values.map((value) => {
+            if (value === "__divider__") {
+              return <div key={value} className="my-2 h-px bg-zinc-800" />;
+            }
+
             const checked = hasSelectedValue(selectedValues, value);
+
+            // Special rendering for Never Played with small description
+            if (value === "Never Played") {
+              return (
+                <label
+                  key={value}
+                  className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => onToggleValue(value)}
+                    className="h-4 w-4 accent-cyan-400 mt-1"
+                  />
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span>{value}</span>
+                      <span className="text-xs font-normal text-zinc-400">Unplayed and not completed elsewhere</span>
+                    </div>
+                  </div>
+                </label>
+              );
+            }
 
             return (
               <label
@@ -379,6 +409,31 @@ function AllGamesContent({
 
   const toggleMultiFilter = useCallback(
     (key: MultiFilterKey, value: string) => {
+      // Special handling for 'Never Played' in statuses
+      if (key === "statuses") {
+        const isNever = value === "Never Played";
+
+        if (isNever) {
+          // toggle Never Played: when selected, clear other statuses
+          const currently = filters.statuses || [];
+          const has = hasSelectedValue(currently, "Never Played");
+          updateFilters({ statuses: has ? [] : ["Never Played"] });
+          return;
+        }
+
+        // If selecting a regular status, ensure Never Played is cleared
+        const withoutNever = (filters.statuses || []).filter(
+          (s) => s.toLowerCase() !== "never played"
+        );
+
+        const next = hasSelectedValue(withoutNever, value)
+          ? withoutNever.filter((s) => s.toLowerCase() !== value.toLowerCase())
+          : [...withoutNever, value];
+
+        updateFilters({ statuses: next });
+        return;
+      }
+
       updateFilters({ [key]: toggleSelectedValue(filters[key], value) });
     },
     [filters, updateFilters]
@@ -689,6 +744,60 @@ className="flex h-full md:block"  >
                   <div className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
                     {formatHours(game["Hours Played"] || 0)}h
                   </div>
+                )}
+
+                {game.completed_elsewhere && (game.Status === "Unplayed" || game.Status === "Dropped") && (
+                  (() => {
+                    const locs = game.completed_elsewhere_locations || [];
+                    const seen = new Set<string>();
+                    const icons: { src: string | null; label: string }[] = [];
+
+                    for (const loc of locs) {
+                      const identity = (loc.store || loc.platform || loc.hardware || "").trim();
+                      if (!identity) continue;
+                      const key = identity.toLowerCase();
+                      if (seen.has(key)) continue;
+                      seen.add(key);
+                      const icon = getIcon(identity) || null;
+                      icons.push({ src: icon, label: identity });
+                      if (icons.length >= 4) break;
+                    }
+
+                    const display = icons.slice(0, 2);
+                    const remainder = Math.max(0, icons.length - display.length);
+
+                    const title = (locs || [])
+                      .map((l) => [l.platform, l.hardware, l.store].filter(Boolean).join(" "))
+                      .filter(Boolean)
+                      .slice(0, 6)
+                      .join(" and ") || "Previously completed elsewhere";
+
+                    return (
+                      <div
+                        title={title}
+                        aria-label={title}
+                        className="absolute right-3 top-3 z-40"
+                      >
+                        <div className="flex items-center whitespace-nowrap rounded-full bg-black/60 backdrop-blur-sm border border-cyan-400/20 px-2 py-1 text-xs shadow-sm text-zinc-100" style={{height: 30}}>
+                          <span className="mr-2 text-cyan-300 font-black">✓</span>
+
+                          <div className="flex items-center gap-1">
+                            {display.map((it, idx) => (
+                              it.src ? (
+                                <img key={it.label} src={it.src} alt={it.label} title={it.label} className={idx === 1 ? "hidden md:inline-block h-4 w-4 object-contain" : "h-4 w-4 object-contain"} />
+                              ) : (
+                                <span key={it.label} className={idx === 1 ? "hidden md:inline-block text-xs text-zinc-200" : "text-xs text-zinc-200"}>{it.label}</span>
+                              )
+                            ))}
+
+                            {remainder > 0 && (
+                              <span className="ml-1 text-xs text-zinc-300">+{remainder}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()
                 )}
               </div>
 

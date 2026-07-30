@@ -15,6 +15,7 @@ type AllGamesPageProps = {
     genre?: string | string[];
     sort?: string;
     page?: string;
+    playHistory?: string;
   }>;
 };
 
@@ -35,6 +36,7 @@ export default async function AllGamesPage({
     releases: asArray(params.release),
     completions: asArray(params.completion),
     genres: asArray(params.genre),
+    playHistory: params.playHistory || null,
   };
   const initialData = await getGamesLiteData({
     filters,

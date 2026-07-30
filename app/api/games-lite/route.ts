@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     releases: searchParams.getAll("release"),
     completions: searchParams.getAll("completion"),
     genres: searchParams.getAll("genre"),
+    playHistory: searchParams.get("playHistory") || null,
   };
   const sort = searchParams.get("sort") || "";
 

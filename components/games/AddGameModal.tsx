@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 
@@ -55,8 +56,12 @@ publisher?: string | null;
 
 export default function AddGameModal({
   onGameAdded,
+  hideButton,
+  openSignal,
 }: {
   onGameAdded?: () => void;
+  hideButton?: boolean;
+  openSignal?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -175,6 +180,16 @@ useEffect(() => {
 
   return () => window.clearTimeout(timeout);
 }, [query, searchSource, open, searchGames]);
+
+  useEffect(() => {
+    if (!openSignal) return;
+
+    const timeout = window.setTimeout(() => {
+      setOpen(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [openSignal]);
 
   async function selectGame(game: SearchResult) {
   setSelectedGame(game);
@@ -352,15 +367,17 @@ onGameAdded?.();
 
   return (
     <>
-      <button
-        onClick={() => {
-  resetForm();
-  setOpen(true);
-}}
-        className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-black"
-      >
-        + Add Game
-      </button>
+      {!hideButton && (
+        <button
+          onClick={() => {
+            resetForm();
+            setOpen(true);
+          }}
+          className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-black"
+        >
+          + Add Game
+        </button>
+      )}
 
       {open && (
   <div
@@ -510,20 +527,18 @@ setSteamVerticalCoverOptions([]);
 
                   <div className="mt-3 grid gap-2">
                     {ownedGames.map((owned) => (
-                      <a
+                      <Link
                         key={owned.id}
-                        href={`/games/${owned.slug}`}
-                        className="rounded-xl border border-yellow-500/20 bg-black/40 p-3 text-sm transition hover:border-yellow-400"
+                        href={`/game/${owned.id}`}
+                        title={`Open ${owned.title}`}
+                        className="cursor-pointer rounded-xl border border-yellow-500/20 bg-black/40 p-3 text-sm transition hover:border-yellow-400"
                       >
-                        <span className="font-bold text-white">
-                          {owned.title}
-                        </span>
+                        <span className="font-bold text-white">{owned.title}</span>
 
                         <span className="mt-1 block text-zinc-300">
-                          {owned.store || "-"} • {owned.platform || "-"} •{" "}
-                          {owned.hardware || "-"} • {owned.status || "-"}
+                          {owned.store || "-"} • {owned.platform || "-"} • {owned.hardware || "-"} • {owned.status || "-"}
                         </span>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>

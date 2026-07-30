@@ -123,14 +123,27 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const { error } = await supabase
-    .from("games")
-    .delete()
-    .eq("id", Number(id));
+  const gameId = Number(id);
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  try {
+    // Attempt to remove dependent rows first to avoid FK constraint issues
+    await supabase.from("game_achievements").delete().eq("game_id", gameId);
+    await supabase.from("monthly_play_logs").delete().eq("game_id", gameId);
+
+    const { error } = await supabase
+      .from("games")
+      .delete()
+      .eq("id", gameId);
+
+    if (error) {
+      console.error("Failed to delete game", { gameId, error });
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error("Unexpected error deleting game", { id: gameId, err });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return Response.json({ error: message }, { status: 500 });
   }
-
-  return Response.json({ success: true });
 }

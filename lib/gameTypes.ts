@@ -39,6 +39,12 @@ export type DbGame = {
   steam_appid?: number | null;
   screenshots?: string | null;
   game_achievements?: GameAchievementRelation;
+  completed_elsewhere?: boolean;
+  completed_elsewhere_locations?: {
+    store?: string | null;
+    platform?: string | null;
+    hardware?: string | null;
+  }[];
 };
 
 export type UiGame = Omit<DbGame, "game_achievements"> & {
@@ -59,4 +65,10 @@ export type UiGame = Omit<DbGame, "game_achievements"> & {
   "Wide Cover"?: string | null;
   achievement_badge?: AchievementBadge;
   home_tag?: "Upcoming" | "Available Now";
+  completed_elsewhere?: boolean;
+  completed_elsewhere_locations?: {
+    store?: string | null;
+    platform?: string | null;
+    hardware?: string | null;
+  }[];
 };

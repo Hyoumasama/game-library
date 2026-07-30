@@ -1,5 +1,5 @@
 import AppNav from "@/components/AppNav";
-import GameAdminActions from "@/components/games/GameAdminActions";
+import GameHeroActions from "@/components/games/GameHeroActions";
 import { getGameById } from "@/lib/games";
 import {
   formatDisplayDate,
@@ -93,7 +93,7 @@ const displayPrice =
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
   
       <div className="mx-auto hidden max-w-6xl px-6 py-12 lg:block">
-       <AppNav actions={<GameAdminActions game={game} />} />
+      <AppNav />
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="w-[264px] self-start">
@@ -160,9 +160,12 @@ const displayPrice =
               </span>
             </div>
 
-            <h1 className="mb-1 text-5xl font-bold leading-tight">
-              {game.Title}
-            </h1>
+                  <div className="relative">
+                    <h1 className="mb-1 text-5xl font-bold leading-tight">{game.Title}</h1>
+                    <div className="absolute right-0 top-0">
+                      <GameHeroActions game={game} />
+                    </div>
+                  </div>
 
             <p className="mb-4 max-w-3xl text-lg leading-8 text-zinc-300">
               {game.summary || "No description available."}
@@ -268,7 +271,7 @@ const displayPrice =
 ) : null}
       </div>
       <div className="mx-auto max-w-[430px] px-4 pb-10 pt-3 lg:hidden">
-  <AppNav actions={<GameAdminActions game={game} />} />
+  <AppNav />
 
   <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
@@ -344,9 +347,12 @@ const displayPrice =
   </span>
 )}
 
-      <h1 className="mt-3 text-3xl font-black leading-tight">
-        {game.Title}
-      </h1>
+      <div className="relative">
+        <h1 className="mt-3 text-3xl font-black leading-tight">{game.Title}</h1>
+        <div className="absolute right-0 top-0">
+          <GameHeroActions game={game} />
+        </div>
+      </div>
 
       <p className="mt-3 line-clamp-5 text-sm leading-6 text-zinc-300">
         {game.summary || "No description available."}

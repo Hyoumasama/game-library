@@ -11,6 +11,7 @@ export type GamesLiteFilters = {
   releases: string[];
   completions: string[];
   genres: string[];
+  playHistory?: string | null;
 };
 
 export type GamesLiteFilterOptions = {
@@ -158,6 +159,7 @@ function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters 
     releases: normalizeYearFilters(filters.releases),
     completions: normalizeYearFilters(filters.completions),
     genres: uniqueStrings(filters.genres),
+    playHistory: (filters.playHistory || "").trim() || null,
   };
 }
 
@@ -298,9 +300,51 @@ export async function getGamesLiteData({
     }
   );
 
+  // Apply 'Never Played' server-side filter before pagination/stats if requested
+  const isNeverPlayed = (safeFilters.playHistory || "") === "never-played";
+
+  // Helper to apply never-played constraints to a supabase query
+  function applyNeverPlayedToQuery<T extends any>(query: T, completedIds: number[]) {
+    let q: any = query;
+    q = q.eq("status", "Unplayed");
+    if (completedIds.length > 0) {
+      // supabase-js supports .not('igdb_id', 'in', `(${ids})`)
+      const list = completedIds.join(",");
+      q = q.not("igdb_id", "in", `(${list})`);
+    }
+    return q;
+  }
+
+  // If Never Played, first collect igdb_ids that have Completed games globally
+  let completedIgdbIds: number[] = [];
+
+  if (isNeverPlayed) {
+    const { data: completedRows, error: completedError } = await supabase
+      .from("games")
+      .select("igdb_id")
+      .neq("igdb_id", null)
+      .eq("status", "Completed");
+
+    if (completedError) {
+      throw new Error(completedError.message);
+    }
+
+    completedIgdbIds = Array.from(
+      new Set((completedRows || []).map((r: any) => Number(r.igdb_id)).filter(Boolean))
+    );
+  }
+
+  const gamesPromise = isNeverPlayed
+    ? applyNeverPlayedToQuery(filteredQuery, completedIgdbIds).range(from, to)
+    : filteredQuery.range(from, to);
+
+  const statsPromise = isNeverPlayed
+    ? applyNeverPlayedToQuery(applyGameFilters(statsQuery, safeFilters), completedIgdbIds).range(0, 9999)
+    : applyGameFilters(statsQuery, safeFilters).range(0, 9999);
+
   const [gamesResult, statsResult, filtersResult] = await Promise.all([
-    filteredQuery.range(from, to),
-    applyGameFilters(statsQuery, safeFilters).range(0, 9999),
+    gamesPromise,
+    statsPromise,
     supabase.rpc("get_games_lite_filters"),
   ]);
 
@@ -326,11 +370,85 @@ export async function getGamesLiteData({
     ...stripGameAchievements(game),
     achievement_badge: getAchievementBadge(game.game_achievements),
   })) as DbGame[];
+  // Compute "completed elsewhere" metadata without causing N+1 queries.
+  // 1) Collect igdb_ids for games on this page that are Unplayed or Dropped
+  const candidateIgdbIds = new Set<number>();
+
+  games.forEach((g) => {
+    const status = String(g.status || "");
+    if (
+      (status === "Unplayed" || status === "Dropped") &&
+      g.igdb_id !== null &&
+      g.igdb_id !== undefined
+    ) {
+      candidateIgdbIds.add(Number(g.igdb_id));
+    }
+  });
+
+  let completedMap = new Map<number, { id: number; store: string | null; platform: string | null; hardware: string | null; }[]>();
+
+  if (candidateIgdbIds.size > 0) {
+    const igdbList = Array.from(candidateIgdbIds);
+
+    const { data: completedRows, error: completedError } = await supabase
+      .from("games")
+      .select("id, igdb_id, store, platform, hardware")
+      .in("igdb_id", igdbList)
+      .eq("status", "Completed");
+
+    if (completedError) {
+      throw new Error(completedError.message);
+    }
+
+    (completedRows || []).forEach((row: any) => {
+      const igdb = Number(row.igdb_id);
+      const list = completedMap.get(igdb) || [];
+      list.push({ id: Number(row.id), store: row.store || null, platform: row.platform || null, hardware: row.hardware || null });
+      completedMap.set(igdb, list);
+    });
+  }
+
+  // Attach computed fields to games
+  const enrichedGames = games.map((g) => {
+    const igdb = g.igdb_id == null ? null : Number(g.igdb_id);
+
+    const status = String(g.status || "");
+
+    if (igdb && (status === "Unplayed" || status === "Dropped")) {
+      const completed = (completedMap.get(igdb) || []).filter((r) => Number(r.id) !== Number(g.id));
+
+      // Build unique locations (case-insensitive) keyed by priority hardware > platform > store
+      const seen = new Set<string>();
+      const locations: { store?: string | null; platform?: string | null; hardware?: string | null }[] = [];
+
+      completed.forEach((row) => {
+        const key = ((row.hardware || row.platform || row.store) || "").toLowerCase();
+        if (!key) return;
+        if (seen.has(key)) return;
+        seen.add(key);
+        locations.push({ store: row.store, platform: row.platform, hardware: row.hardware });
+      });
+
+      return {
+        ...g,
+        completed_elsewhere: locations.length > 0,
+        completed_elsewhere_locations: locations,
+      } as DbGame;
+    }
+
+    return {
+      ...g,
+      completed_elsewhere: false,
+      completed_elsewhere_locations: [],
+    } as DbGame;
+  });
+
+  // Use enrichedGames for return
   const stats = calculateStats(statsResult.data || []);
   const total = gamesResult.count || 0;
 
   return {
-    games,
+    games: enrichedGames,
     total,
     page: safePage,
     pageSize: safePageSize,

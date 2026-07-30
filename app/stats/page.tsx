@@ -876,17 +876,66 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
   const availableYears = await getAvailableStatsYears();
   const selectedYear = Number(params.year || availableYears[0] || new Date().getFullYear());
-  const useArchiveTimeline = selectedYear < 2024;
-  const purchaseYearStart = `${selectedYear}-01-01`;
-  const purchaseYearEnd = `${selectedYear + 1}-01-01`;
-  const completionYearStart = `${selectedYear}-01-01`;
-  const completionYearEnd = `${selectedYear + 1}-01-01`;
+  const year = Number(selectedYear);
+  const useArchiveTimeline = year < 2024;
+  const purchaseYearStart = `${year}-01-01`;
+  const purchaseYearEnd = `${year + 1}-01-01`;
+  const completionYearStart = `${year}-01-01`;
+  const completionYearEnd = `${year + 1}-01-01`;
 
-  const [logsResult, libraryGamesResult, archiveGamesResult] = await Promise.all([
-    supabase
-      .from("monthly_play_logs")
+  // Fetch distributed hours for the selected year (if any)
+  const { data: distributedRows, error: distributedError } = await supabase.rpc(
+    "get_distributed_game_hours",
+    { p_year: year }
+  );
+
+  let distributedErrorMessage: string | null = null;
+  if (distributedError) {
+    console.error("get_distributed_game_hours error:", {
+      code: (distributedError as any).code,
+      message: (distributedError as any).message,
+      details: (distributedError as any).details,
+      hint: (distributedError as any).hint,
+    });
+    distributedErrorMessage =
+      (distributedError as any).message || "Failed to load distributed game hours";
+  }
+
+  const distRows = (distributedRows || []) as any[];
+  const distGameIds = Array.from(new Set(distRows.map((r) => Number(r.game_id)).filter(Boolean)));
+
+  // If there are distributed games, fetch their basic metadata in one shot
+  let distGamesMap: Record<number, any> = {};
+  if (distGameIds.length > 0) {
+    const { data: distGames, error: distGamesError } = await supabase
+      .from("games")
       .select(
-        `
+        `id, title, release, date_started, date_of_purchase, completion_last_played, steam_vertical_cover, cover_url, wide_cover_url, platform, hardware, store, status, score, price, genres, hours_played`
+      )
+      .in("id", distGameIds as any[]);
+
+    if (distGamesError) {
+      console.error("Failed to fetch distributed games metadata:", {
+        code: (distGamesError as any).code,
+        message: (distGamesError as any).message,
+        details: (distGamesError as any).details,
+        hint: (distGamesError as any).hint,
+      });
+      throw new Error(
+        (distGamesError as any).message || "Failed to load distributed games metadata"
+      );
+    }
+
+    (distGames || []).forEach((g: any) => {
+      distGamesMap[Number(g.id)] = g;
+    });
+  }
+
+  // Fetch monthly logs and relevant games, excluding distributed game_ids from monthly_play_logs
+  const logsQuery = supabase
+    .from("monthly_play_logs")
+    .select(
+      `
           log_id,
           game_id,
           title,
@@ -912,10 +961,17 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
             genres
           )
         `
-      )
-      .eq("year", selectedYear)
-      .order("month", { ascending: true })
-      .order("hours", { ascending: false }),
+    )
+    .eq("year", year)
+    .order("month", { ascending: true })
+    .order("hours", { ascending: false });
+
+  if (distGameIds.length > 0) {
+    logsQuery.not("game_id", "in", `(${distGameIds.join(",")})`);
+  }
+
+  const [logsResult, libraryGamesResult, archiveGamesResult] = await Promise.all([
+    logsQuery,
     supabase
       .from("games")
       .select(
@@ -976,7 +1032,15 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
   const logs = (logsResult.data || []) as unknown as PlayLog[];
   const archiveGames = (archiveGamesResult.data || []) as ArchiveGame[];
-  const archiveMonthHours = archiveGames.reduce<Record<number, number>>(
+  // Zero out hours_played for archive games that are distributed (they will be counted via distributedRows)
+  const distGameIdSet = new Set(distGameIds);
+  const adjustedArchiveGames = archiveGames.map((game) => {
+    if (distGameIdSet.has(Number(game.id))) {
+      return { ...game, hours_played: 0 } as ArchiveGame;
+    }
+    return game;
+  });
+  const archiveMonthHours = adjustedArchiveGames.reduce<Record<number, number>>(
     (totals, game) => {
       const month = getMonth(game.completion_last_played) || 1;
       totals[month] = (totals[month] || 0) + Number(game.hours_played || 0);
@@ -988,9 +1052,119 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     totals[log.month] = (totals[log.month] || 0) + Number(log.hours || 0);
     return totals;
   }, {});
-  const timelineGames = useArchiveTimeline
-    ? buildArchiveTimelineGames(archiveGames, archiveMonthHours, selectedYear)
-    : buildTimelineGames(logs, logMonthHours, selectedYear);
+  // Build distributed logs for this year from distRows and distGamesMap
+  const distributedLogs: PlayLog[] = (distRows || [])
+    .filter((r) => Number(r.year) === year)
+    .map((r, idx) => {
+      const gid = Number(r.game_id);
+      const g = distGamesMap[gid] || {};
+      return {
+        log_id: -1 - idx,
+        game_id: gid,
+        title: r.title || g.title || "",
+        hours: Number(r.estimated_hours || 0),
+        month: Number(r.month),
+        year: Number(r.year),
+        games: g || null,
+      } as PlayLog;
+    });
+
+  // Build logs from archiveGames (using adjustedArchiveGames which zeroes distributed games' hours)
+  const archiveLogsFromGames: PlayLog[] = adjustedArchiveGames.map((g, idx) => ({
+    log_id: Number(g.id) * 1000 + idx,
+    game_id: Number(g.id),
+    title: g.title || "",
+    hours: Number(g.hours_played || 0),
+    month: getMonth(g.completion_last_played) || 1,
+    year: year,
+    games: g as any,
+  }));
+
+  // Merge logs by key `${gameId}-${year}-${month}` to avoid duplicates
+  const mergedMap = new Map<string, PlayLog>();
+
+  const makeKey = (gameId: number, yr: number, month: number) => `${gameId}-${yr}-${month}`;
+
+  // Helper to clone a PlayLog-like object
+  const cloneLog = (log: PlayLog) => ({ ...log, games: log.games });
+
+  // 1) Base: add monthly play logs
+  for (const log of logs) {
+    const key = makeKey(Number(log.game_id), Number(log.year), Number(log.month));
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, cloneLog(log));
+    }
+  }
+
+  // 2) Archive completion entries: ensure completion metadata and priority
+  for (const a of archiveLogsFromGames) {
+    const key = makeKey(Number(a.game_id), Number(a.year), Number(a.month));
+    const existing = mergedMap.get(key);
+    const archiveLike: PlayLog = {
+      log_id: a.log_id,
+      game_id: a.game_id,
+      title: a.title,
+      hours: a.hours,
+      month: a.month,
+      year: a.year,
+      games: a.games ? a.games : null,
+    };
+
+    if (!existing) {
+      mergedMap.set(key, archiveLike);
+      continue;
+    }
+
+    // If existing entry is not a completion, promote to completion using archive metadata
+    // Preserve existing hours unless a distributed entry will override later
+    mergedMap.set(key, {
+      ...existing,
+      // keep the archive metadata (title/games) to preserve achievement pct and completion date
+      title: archiveLike.title || existing.title,
+      games: archiveLike.games || existing.games,
+      // keep hours for now; distributed rows processed after will replace if present
+      hours: existing.hours || archiveLike.hours,
+    });
+  }
+
+  // 3) Distributed entries: set hours to estimated_hours and prefer existing completion metadata
+  for (const d of distributedLogs) {
+    const key = makeKey(Number(d.game_id), Number(d.year), Number(d.month));
+    const existing = mergedMap.get(key);
+    const distHours = Number(d.hours || 0);
+
+    if (existing) {
+      // If existing has completion metadata (completionDate inside games), keep it and replace hours
+      mergedMap.set(key, {
+        ...existing,
+        hours: distHours,
+        // ensure we don't overwrite richer metadata with sparse distributed metadata
+        games: existing.games || d.games || null,
+        title: existing.title || d.title,
+      });
+    } else {
+      // No existing entry: create a returning-style entry using distributed metadata when available
+      mergedMap.set(key, {
+        log_id: d.log_id,
+        game_id: d.game_id,
+        title: d.title,
+        hours: distHours,
+        month: d.month,
+        year: d.year,
+        games: d.games || null,
+      });
+    }
+  }
+
+  const mergedLogs = Array.from(mergedMap.values());
+
+  // Recompute month totals from merged logs to ensure percent calculations reflect merged hours
+  const mergedMonthHours = mergedLogs.reduce<Record<number, number>>((totals, lg) => {
+    totals[lg.month] = (totals[lg.month] || 0) + Number(lg.hours || 0);
+    return totals;
+  }, {});
+
+  const timelineGames = buildTimelineGames(mergedLogs, mergedMonthHours, year);
   const totalHours = timelineGames.reduce((sum, game) => sum + game.hours, 0);
   const gamesByMonth = groupByMonth(timelineGames);
   const months = Object.keys(gamesByMonth).map(Number).sort((a, b) => a - b);
@@ -1062,6 +1236,12 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               years={availableYears}
               selectedYear={selectedYear}
             />
+          </div>
+        )}
+
+        {distributedErrorMessage && (
+          <div className="mx-auto mt-6 max-w-4xl rounded-2xl border border-amber-700 bg-amber-900/10 p-4 text-center text-amber-300">
+            Could not load estimated distributions: {distributedErrorMessage}
           </div>
         )}
 
