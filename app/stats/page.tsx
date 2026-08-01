@@ -49,6 +49,8 @@ const palette = [
   "#a855f7",
 ];
 
+const MONTHLY_LOG_START_YEAR = 2024;
+
 type GameRelation =
   | {
       id: number;
@@ -96,6 +98,8 @@ type PlayLog = {
   month: number;
   year: number;
   games: GameRelation;
+  isMonthlyLog?: boolean;
+  isEstimated?: boolean;
 };
 
 type LibraryGame = {
@@ -162,6 +166,8 @@ type TimelineGame = {
   startedDate: string | null;
   purchaseDate: string | null;
   completionDate: string | null;
+  completedThisMonth: boolean;
+  isEstimated: boolean;
 };
 
 type TopGame = {
@@ -194,6 +200,41 @@ type StatsPageProps = {
 type StatsYearRow = {
   year: number | string | null;
 };
+
+type DistributedHoursRow = {
+  game_id: number | string;
+  title: string | null;
+  year: number | string;
+  month: number | string;
+  estimated_hours: number | string | null;
+};
+
+type DistributionRangeRow = {
+  start_month: string | null;
+  end_month: string | null;
+};
+
+function addDistributionYears(
+  years: Set<number>,
+  distributions: DistributionRangeRow[]
+) {
+  for (const distribution of distributions) {
+    const startYear = getYear(distribution.start_month);
+    const endYear = getYear(
+      distribution.end_month || new Date().toISOString()
+    );
+
+    if (!startYear || !endYear || endYear < startYear) continue;
+
+    for (
+      let distributionYear = startYear;
+      distributionYear <= Math.min(endYear, MONTHLY_LOG_START_YEAR - 1);
+      distributionYear += 1
+    ) {
+      years.add(distributionYear);
+    }
+  }
+}
 
 function getGame(log: PlayLog) {
   if (!log.games) return null;
@@ -357,6 +398,13 @@ function buildTimelineGames(
     const hours = Number(log.hours || 0);
     const monthTotal = monthHours[log.month] || 0;
     const startedYear = getYear(getStartedDate(log));
+    const completionDate = getCompletionDate(log);
+    const completionYear = getYear(completionDate);
+    const completionMonth = getMonth(completionDate);
+    const completedThisMonth =
+      getStatus(log) === "Completed" &&
+      completionYear === year &&
+      completionMonth === log.month;
 
     return {
       id: log.game_id,
@@ -378,7 +426,9 @@ function buildTimelineGames(
       genres: getGenres(log),
       startedDate: getStartedDate(log),
       purchaseDate: getPurchaseDate(log),
-      completionDate: getCompletionDate(log),
+      completionDate,
+      completedThisMonth,
+      isEstimated: log.isEstimated === true,
     };
   });
 }
@@ -608,27 +658,67 @@ function getPaidPurchasesFromLibrary(
 }
 
 async function getAvailableStatsYears() {
-  const { data: statsYears, error: statsYearsError } =
-    await supabase.rpc("get_stats_years");
+  const [statsYearsResult, distributionYearsResult] = await Promise.all([
+    supabase.rpc("get_stats_years"),
+    supabase
+      .from("game_hour_distributions")
+      .select("start_month, end_month"),
+  ]);
 
-  if (!statsYearsError) {
-    return ((statsYears || []) as StatsYearRow[])
+  const years = new Set<number>();
+
+  if (!statsYearsResult.error) {
+    ((statsYearsResult.data || []) as StatsYearRow[])
       .map((item) => Number(item.year))
-      .filter(Boolean);
+      .filter(Boolean)
+      .forEach((year) => years.add(year));
   }
 
-  const { data: yearsData, error: yearsError } = await supabase
-    .from("monthly_play_logs")
-    .select("year")
-    .order("year", { ascending: false });
-
-  if (yearsError) {
-    throw yearsError;
+  if (!distributionYearsResult.error) {
+    addDistributionYears(
+      years,
+      (distributionYearsResult.data || []) as DistributionRangeRow[]
+    );
   }
 
-  return Array.from(
-    new Set((yearsData || []).map((item) => Number(item.year)).filter(Boolean))
-  ).sort((a, b) => b - a);
+  if (!statsYearsResult.error && years.size > 0) {
+    return Array.from(years).sort((a, b) => b - a);
+  }
+
+  const [monthlyYearsResult, completionYearsResult] = await Promise.all([
+    supabase
+      .from("monthly_play_logs")
+      .select("year")
+      .order("year", { ascending: false }),
+    supabase
+      .from("games")
+      .select("completion_last_played")
+      .not("completion_last_played", "is", null),
+  ]);
+
+  if (monthlyYearsResult.error) {
+    throw new Error(
+      monthlyYearsResult.error.message || "Failed to load stats years"
+    );
+  }
+
+  if (completionYearsResult.error) {
+    throw new Error(
+      completionYearsResult.error.message || "Failed to load completion years"
+    );
+  }
+
+  (monthlyYearsResult.data || [])
+    .map((item) => Number(item.year))
+    .filter(Boolean)
+    .forEach((year) => years.add(year));
+
+  (completionYearsResult.data || [])
+    .map((item) => getYear(item.completion_last_played))
+    .filter((year): year is number => Boolean(year))
+    .forEach((year) => years.add(year));
+
+  return Array.from(years).sort((a, b) => b - a);
 }
 
 function getTopRatedCompletions(games: TimelineGame[], selectedYear: number) {
@@ -712,6 +802,8 @@ function GamePoster({
       className={`group relative block aspect-[2/3] min-h-[150px] overflow-hidden rounded-lg bg-zinc-950 shadow-[0_18px_32px_rgba(0,0,0,0.42)] ${
         isDropped
           ? "border-2 border-red-500/80 shadow-[0_0_26px_rgba(239,68,68,0.28),0_18px_32px_rgba(0,0,0,0.42)]"
+          : game.completedThisMonth
+          ? "border-2 border-cyan-500/80 shadow-[0_0_26px_rgba(34,211,238,0.28),0_18px_32px_rgba(0,0,0,0.42)]"
           : "border border-zinc-800"
       }`}
       title={game.title}
@@ -740,9 +832,17 @@ function GamePoster({
         </div>
       ) : null}
 
-      {isDropped && (
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-red-500/10 via-transparent to-red-950/25" />
+      {game.isEstimated && (
+        <div className="absolute right-0 top-0 bg-amber-300 px-2 py-1 text-[9px] font-black uppercase leading-none text-black">
+          Estimate
+        </div>
       )}
+
+      {isDropped ? (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-red-500/10 via-transparent to-red-950/25" />
+      ) : game.completedThisMonth ? (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-cyan-400/10 via-transparent to-black/0" />
+      ) : null}
 
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-md bg-zinc-100 px-2 py-0.5 text-[11px] font-black text-zinc-950">
         {formatPercent(game.percent)}
@@ -756,6 +856,11 @@ function GamePoster({
           {game.hours.toFixed(1)}h in {monthShortNames[game.month]} -{" "}
           {formatPercent(game.percent)} of month
         </p>
+        {game.isEstimated && (
+          <p className="mt-1 text-[10px] font-semibold text-amber-300">
+            Historical estimate
+          </p>
+        )}
         <p className="mt-1 text-[10px] font-semibold text-zinc-500">
           {game.hardware}
         </p>
@@ -883,59 +988,72 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
   const completionYearStart = `${year}-01-01`;
   const completionYearEnd = `${year + 1}-01-01`;
 
-  // Fetch distributed hours for the selected year (if any)
-  const { data: distributedRows, error: distributedError } = await supabase.rpc(
-    "get_distributed_game_hours",
-    { p_year: year }
-  );
-
+  const distRows: DistributedHoursRow[] = [];
+  let distGameIds: number[] = [];
   let distributedErrorMessage: string | null = null;
-  if (distributedError) {
-    console.error("get_distributed_game_hours error:", {
-      code: (distributedError as any).code,
-      message: (distributedError as any).message,
-      details: (distributedError as any).details,
-      hint: (distributedError as any).hint,
-    });
-    distributedErrorMessage =
-      (distributedError as any).message || "Failed to load distributed game hours";
-  }
-
-  const distRows = (distributedRows || []) as any[];
-  const distGameIds = Array.from(new Set(distRows.map((r) => Number(r.game_id)).filter(Boolean)));
-
-  // If there are distributed games, fetch their basic metadata in one shot
   let distGamesMap: Record<number, any> = {};
-  if (distGameIds.length > 0) {
-    const { data: distGames, error: distGamesError } = await supabase
-      .from("games")
-      .select(
-        `id, title, release, date_started, date_of_purchase, completion_last_played, steam_vertical_cover, cover_url, wide_cover_url, platform, hardware, store, status, score, price, genres, hours_played`
-      )
-      .in("id", distGameIds as any[]);
 
-    if (distGamesError) {
-      console.error("Failed to fetch distributed games metadata:", {
-        code: (distGamesError as any).code,
-        message: (distGamesError as any).message,
-        details: (distGamesError as any).details,
-        hint: (distGamesError as any).hint,
+  if (useArchiveTimeline && Number.isInteger(year)) {
+    // Fetch distributed hours for historical years only.
+    const { data: distributedRows, error: distributedError } = await supabase.rpc(
+      "get_distributed_game_hours",
+      { p_year: year }
+    );
+
+    if (distributedError) {
+      console.error("get_distributed_game_hours error:", {
+        code: (distributedError as any).code,
+        message: (distributedError as any).message,
+        details: (distributedError as any).details,
+        hint: (distributedError as any).hint,
       });
       throw new Error(
-        (distGamesError as any).message || "Failed to load distributed games metadata"
+        (distributedError as any).message || "Failed to load distributed game hours"
       );
     }
 
-    (distGames || []).forEach((g: any) => {
-      distGamesMap[Number(g.id)] = g;
-    });
+    const rows = ((distributedRows || []) as DistributedHoursRow[]).filter(
+      (row) => Number(row.year) < MONTHLY_LOG_START_YEAR
+    );
+    distGameIds = Array.from(
+      new Set(rows.map((r) => Number(r.game_id)).filter(Boolean))
+    );
+
+    if (distGameIds.length > 0) {
+      const { data: distGames, error: distGamesError } = await supabase
+        .from("games")
+        .select(
+          `id, title, release, date_started, date_of_purchase, completion_last_played, steam_vertical_cover, cover_url, wide_cover_url, platform, hardware, store, status, score, price, genres, hours_played`
+        )
+        .in("id", distGameIds as any[]);
+
+      if (distGamesError) {
+        console.error("Failed to fetch distributed games metadata:", {
+          code: (distGamesError as any).code,
+          message: (distGamesError as any).message,
+          details: (distGamesError as any).details,
+          hint: (distGamesError as any).hint,
+        });
+        throw new Error(
+          (distGamesError as any).message || "Failed to load distributed games metadata"
+        );
+      }
+
+      (distGames || []).forEach((g: any) => {
+        distGamesMap[Number(g.id)] = g;
+      });
+    }
+
+    distRows.push(...rows);
   }
 
-  // Fetch monthly logs and relevant games, excluding distributed game_ids from monthly_play_logs
-  const logsQuery = supabase
-    .from("monthly_play_logs")
-    .select(
-      `
+  // Fetch monthly logs and relevant games. For 2024+ we rely only on monthly logs.
+  const logsQuery = useArchiveTimeline
+    ? Promise.resolve({ data: [], error: null })
+    : supabase
+        .from("monthly_play_logs")
+        .select(
+          `
           log_id,
           game_id,
           title,
@@ -961,16 +1079,40 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
             genres
           )
         `
+        )
+        .eq("year", year)
+        .order("month", { ascending: true })
+        .order("hours", { ascending: false });
+
+  const completionGamesPromise = supabase
+    .from("games")
+    .select(
+      `
+            id,
+            title,
+            release,
+            date_started,
+            date_of_purchase,
+            completion_last_played,
+            steam_vertical_cover,
+            cover_url,
+            wide_cover_url,
+            platform,
+            hardware,
+            store,
+            status,
+            score,
+            price,
+            hours_played,
+            genres
+          `
     )
-    .eq("year", year)
-    .order("month", { ascending: true })
-    .order("hours", { ascending: false });
+    .gte("completion_last_played", completionYearStart)
+    .lt("completion_last_played", completionYearEnd)
+    .order("completion_last_played", { ascending: true })
+    .order("hours_played", { ascending: false });
 
-  if (distGameIds.length > 0) {
-    logsQuery.not("game_id", "in", `(${distGameIds.join(",")})`);
-  }
-
-  const [logsResult, libraryGamesResult, archiveGamesResult] = await Promise.all([
+  const [logsResult, libraryGamesResult, completionGamesResult] = await Promise.all([
     logsQuery,
     supabase
       .from("games")
@@ -989,72 +1131,39 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
       )
       .gte("date_of_purchase", purchaseYearStart)
       .lt("date_of_purchase", purchaseYearEnd),
-    supabase
-      .from("games")
-      .select(
-        `
-          id,
-          title,
-          release,
-          date_started,
-          date_of_purchase,
-          completion_last_played,
-          steam_vertical_cover,
-          cover_url,
-          wide_cover_url,
-          platform,
-          hardware,
-          store,
-          status,
-          score,
-          price,
-          hours_played,
-          genres
-        `
-      )
-      .gte("completion_last_played", completionYearStart)
-      .lt("completion_last_played", completionYearEnd)
-      .order("completion_last_played", { ascending: true })
-      .order("hours_played", { ascending: false }),
+    completionGamesPromise,
   ]);
 
   if (logsResult.error) {
-    throw logsResult.error;
+    throw new Error(logsResult.error.message || "Failed to load monthly logs");
   }
 
   if (libraryGamesResult.error) {
-    throw libraryGamesResult.error;
+    throw new Error(libraryGamesResult.error.message || "Failed to load library games");
   }
 
-  if (archiveGamesResult.error) {
-    throw archiveGamesResult.error;
+  if (completionGamesResult.error) {
+    throw new Error(
+      completionGamesResult.error.message || "Failed to load completed games"
+    );
   }
 
   const logs = (logsResult.data || []) as unknown as PlayLog[];
-  const archiveGames = (archiveGamesResult.data || []) as ArchiveGame[];
+  const archiveGames = (completionGamesResult.data || []) as ArchiveGame[];
   // Zero out hours_played for archive games that are distributed (they will be counted via distributedRows)
   const distGameIdSet = new Set(distGameIds);
   const adjustedArchiveGames = archiveGames.map((game) => {
-    if (distGameIdSet.has(Number(game.id))) {
+    if (!useArchiveTimeline || distGameIdSet.has(Number(game.id))) {
       return { ...game, hours_played: 0 } as ArchiveGame;
     }
     return game;
   });
-  const archiveMonthHours = adjustedArchiveGames.reduce<Record<number, number>>(
-    (totals, game) => {
-      const month = getMonth(game.completion_last_played) || 1;
-      totals[month] = (totals[month] || 0) + Number(game.hours_played || 0);
-      return totals;
-    },
-    {}
-  );
-  const logMonthHours = logs.reduce<Record<number, number>>((totals, log) => {
-    totals[log.month] = (totals[log.month] || 0) + Number(log.hours || 0);
-    return totals;
-  }, {});
   // Build distributed logs for this year from distRows and distGamesMap
   const distributedLogs: PlayLog[] = (distRows || [])
-    .filter((r) => Number(r.year) === year)
+    .filter(
+      (r) =>
+        Number(r.year) === year && Number(r.year) < MONTHLY_LOG_START_YEAR
+    )
     .map((r, idx) => {
       const gid = Number(r.game_id);
       const g = distGamesMap[gid] || {};
@@ -1066,10 +1175,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
         month: Number(r.month),
         year: Number(r.year),
         games: g || null,
+        isEstimated: true,
       } as PlayLog;
     });
 
-  // Build logs from archiveGames (using adjustedArchiveGames which zeroes distributed games' hours)
+  // Completion entries preserve completion metadata. Modern years never receive hours_played here.
   const archiveLogsFromGames: PlayLog[] = adjustedArchiveGames.map((g, idx) => ({
     log_id: Number(g.id) * 1000 + idx,
     game_id: Number(g.id),
@@ -1078,6 +1188,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     month: getMonth(g.completion_last_played) || 1,
     year: year,
     games: g as any,
+    isEstimated: useArchiveTimeline,
   }));
 
   // Merge logs by key `${gameId}-${year}-${month}` to avoid duplicates
@@ -1092,7 +1203,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
   for (const log of logs) {
     const key = makeKey(Number(log.game_id), Number(log.year), Number(log.month));
     if (!mergedMap.has(key)) {
-      mergedMap.set(key, cloneLog(log));
+      mergedMap.set(key, {
+        ...cloneLog(log),
+        isMonthlyLog: true,
+        isEstimated: false,
+      });
     }
   }
 
@@ -1124,6 +1239,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
       games: archiveLike.games || existing.games,
       // keep hours for now; distributed rows processed after will replace if present
       hours: existing.hours || archiveLike.hours,
+      isEstimated: existing.isEstimated || archiveLike.isEstimated,
     });
   }
 
@@ -1141,6 +1257,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
         // ensure we don't overwrite richer metadata with sparse distributed metadata
         games: existing.games || d.games || null,
         title: existing.title || d.title,
+        isEstimated: true,
       });
     } else {
       // No existing entry: create a returning-style entry using distributed metadata when available
@@ -1255,7 +1372,11 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
           <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-3 md:grid-cols-4">
             <StatTile value={uniqueGameIds.size} label="Games Played" />
-            <StatTile value={Math.round(totalHours)} label="Hours Played" />
+            <StatTile
+              value={Math.round(totalHours)}
+              label="Hours Played"
+              sublabel={useArchiveTimeline ? "Historical estimate" : "Monthly logs"}
+            />
             <StatTile value={newGames.length} label="New Games" />
             <StatTile
               value={bestMonth?.total ? monthShortNames[bestMonth.month] : "-"}
@@ -1657,11 +1778,12 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
             </section>
 
             <section className="relative mx-auto mt-16 max-w-6xl border-t border-zinc-800 pt-8">
-              <div className="absolute left-1/2 top-0 hidden h-full -translate-x-1/2 border-l-4 border-dotted border-zinc-700 md:block" />
+              <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-300/45 to-transparent md:block" />
+              <div className="absolute left-1/2 top-0 hidden h-full w-8 -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.16)_1px,transparent_2px)] bg-[size:8px_18px] opacity-70 md:block" />
 
               <div className="space-y-12 md:space-y-0">
                 {months.map((month, index) => {
-                  const games = gamesByMonth[month].slice(0, 8);
+                  const games = gamesByMonth[month];
                   const isRight = index % 2 === 0;
 
                   return (
@@ -1669,10 +1791,14 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                       key={month}
                       className="relative grid gap-4 md:grid-cols-2 md:gap-8"
                     >
-                      <div className="absolute left-1/2 top-7 hidden h-4 w-4 -translate-x-1/2 rounded-full border-4 border-[#070a0f] bg-cyan-300 shadow-[0_0_0_1px_rgba(34,211,238,0.45)] md:block" />
+                      <div className="absolute left-1/2 top-7 hidden h-5 w-5 -translate-x-1/2 rounded-full border-[5px] border-[#070a0f] bg-cyan-300 shadow-[0_0_0_1px_rgba(34,211,238,0.7),0_0_22px_rgba(34,211,238,0.28)] md:block" />
                       <div
-                        className={`absolute top-9 hidden w-8 border-t border-zinc-700 md:block ${
+                        className={`absolute top-[37px] hidden h-px w-9 bg-gradient-to-r md:block ${
                           isRight ? "left-1/2" : "right-1/2"
+                        } ${
+                          isRight
+                            ? "from-cyan-300/65 to-transparent"
+                            : "from-transparent to-cyan-300/65"
                         }`}
                       />
 
@@ -1867,8 +1993,10 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                   </p>
                   <h3 className="mt-3 text-xl font-black">Total Playtime</h3>
                   <p className="mt-3 max-w-md text-sm font-semibold text-zinc-300">
-                    Your logged playtime across {uniqueGameIds.size} games in{" "}
-                    {selectedYear}.
+                    {useArchiveTimeline
+                      ? "Historical estimated playtime"
+                      : "Your logged playtime"}{" "}
+                    across {uniqueGameIds.size} games in {selectedYear}.
                   </p>
                 </div>
               </div>
