@@ -2,6 +2,8 @@
 
 A personal game library built with Next.js, Supabase, and Tailwind CSS. It tracks purchases, completion dates, playtime, scores, platforms, covers, achievements, monthly logs, and yearly stats.
 
+For the detailed project guide, see [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).
+
 ## Setup
 
 Create `.env.local` with:

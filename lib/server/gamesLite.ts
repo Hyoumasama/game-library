@@ -3,6 +3,7 @@ import type { DbGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
 
 export const GAMES_LITE_PAGE_SIZE = 24;
+const SUPABASE_PAGE_SIZE = 1000;
 
 export type GamesLiteFilters = {
   search: string;
@@ -233,6 +234,89 @@ function calculateStats(games: GamesLiteStatsRow[]) {
   };
 }
 
+async function fetchAllStatsRows(
+  filters: GamesLiteFilters,
+  options: { isNeverPlayed: boolean; completedIgdbIds: number[] }
+) {
+  const rows: GamesLiteStatsRow[] = [];
+  let from = 0;
+
+  while (true) {
+    let query = applyGameFilters(
+      supabase
+        .from("games")
+        .select("status, hours_played, score") as unknown as GamesLiteStatsQuery,
+      filters
+    );
+
+    if (options.isNeverPlayed) {
+      query = applyNeverPlayedToQuery(query, options.completedIgdbIds);
+    }
+
+    const { data, error } = await query.range(
+      from,
+      from + SUPABASE_PAGE_SIZE - 1
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const pageRows = data || [];
+    rows.push(...pageRows);
+
+    if (pageRows.length < SUPABASE_PAGE_SIZE) break;
+
+    from += SUPABASE_PAGE_SIZE;
+  }
+
+  return rows;
+}
+
+async function fetchCompletedIgdbIds() {
+  const ids = new Set<number>();
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("games")
+      .select("igdb_id")
+      .neq("igdb_id", null)
+      .eq("status", "Completed")
+      .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const rows = data || [];
+
+    rows
+      .map((row) => Number(row.igdb_id))
+      .filter(Boolean)
+      .forEach((id) => ids.add(id));
+
+    if (rows.length < SUPABASE_PAGE_SIZE) break;
+
+    from += SUPABASE_PAGE_SIZE;
+  }
+
+  return Array.from(ids);
+}
+
+function applyNeverPlayedToQuery<T>(
+  query: T,
+  completedIds: number[]
+) {
+  let q: any = query;
+  q = q.eq("status", "Unplayed");
+  if (completedIds.length > 0) {
+    const list = completedIds.join(",");
+    q = q.not("igdb_id", "in", `(${list})`);
+  }
+  return q;
+}
+
 export async function getGamesLiteData({
   filters,
   sort,
@@ -288,10 +372,6 @@ export async function getGamesLiteData({
       `,
       { count: "exact" }
     ) as unknown as GamesLiteQuery;
-  const statsQuery = supabase
-    .from("games")
-    .select("status, hours_played, score") as unknown as GamesLiteStatsQuery;
-
   const filteredQuery = applyGameFilters(baseQuery, safeFilters).order(
     selectedSort.column,
     {
@@ -303,44 +383,21 @@ export async function getGamesLiteData({
   // Apply 'Never Played' server-side filter before pagination/stats if requested
   const isNeverPlayed = (safeFilters.playHistory || "") === "never-played";
 
-  // Helper to apply never-played constraints to a supabase query
-  function applyNeverPlayedToQuery<T extends any>(query: T, completedIds: number[]) {
-    let q: any = query;
-    q = q.eq("status", "Unplayed");
-    if (completedIds.length > 0) {
-      // supabase-js supports .not('igdb_id', 'in', `(${ids})`)
-      const list = completedIds.join(",");
-      q = q.not("igdb_id", "in", `(${list})`);
-    }
-    return q;
-  }
-
   // If Never Played, first collect igdb_ids that have Completed games globally
   let completedIgdbIds: number[] = [];
 
   if (isNeverPlayed) {
-    const { data: completedRows, error: completedError } = await supabase
-      .from("games")
-      .select("igdb_id")
-      .neq("igdb_id", null)
-      .eq("status", "Completed");
-
-    if (completedError) {
-      throw new Error(completedError.message);
-    }
-
-    completedIgdbIds = Array.from(
-      new Set((completedRows || []).map((r: any) => Number(r.igdb_id)).filter(Boolean))
-    );
+    completedIgdbIds = await fetchCompletedIgdbIds();
   }
 
   const gamesPromise = isNeverPlayed
     ? applyNeverPlayedToQuery(filteredQuery, completedIgdbIds).range(from, to)
     : filteredQuery.range(from, to);
 
-  const statsPromise = isNeverPlayed
-    ? applyNeverPlayedToQuery(applyGameFilters(statsQuery, safeFilters), completedIgdbIds).range(0, 9999)
-    : applyGameFilters(statsQuery, safeFilters).range(0, 9999);
+  const statsPromise = fetchAllStatsRows(safeFilters, {
+    isNeverPlayed,
+    completedIgdbIds,
+  });
 
   const [gamesResult, statsResult, filtersResult] = await Promise.all([
     gamesPromise,
@@ -350,10 +407,6 @@ export async function getGamesLiteData({
 
   if (gamesResult.error) {
     throw new Error(gamesResult.error.message);
-  }
-
-  if (statsResult.error) {
-    throw new Error(statsResult.error.message);
   }
 
   if (filtersResult.error) {
@@ -385,7 +438,7 @@ export async function getGamesLiteData({
     }
   });
 
-  let completedMap = new Map<number, { id: number; store: string | null; platform: string | null; hardware: string | null; }[]>();
+  const completedMap = new Map<number, { id: number; store: string | null; platform: string | null; hardware: string | null; }[]>();
 
   if (candidateIgdbIds.size > 0) {
     const igdbList = Array.from(candidateIgdbIds);
@@ -444,7 +497,7 @@ export async function getGamesLiteData({
   });
 
   // Use enrichedGames for return
-  const stats = calculateStats(statsResult.data || []);
+  const stats = calculateStats(statsResult);
   const total = gamesResult.count || 0;
 
   return {
