@@ -388,6 +388,14 @@ function formatPercent(value: number) {
   return `${Math.round(value)}%`;
 }
 
+function scoreClass(score: number) {
+  if (score >= 76) return "bg-emerald-400 text-black";
+  if (score >= 60) return "bg-yellow-400 text-black";
+  if (score > 0) return "bg-red-400 text-black";
+
+  return "bg-zinc-800 text-zinc-400";
+}
+
 function buildTimelineGames(
   logs: PlayLog[],
   monthHours: Record<number, number>,
@@ -543,6 +551,33 @@ function getTopGames(
       months: Array.from(game.months).sort((a, b) => a - b),
     }))
     .sort((a, b) => b.hours - a.hours)
+    .slice(0, limit);
+}
+
+function getTopDroppedGames(games: TimelineGame[], limit = 5) {
+  const droppedGames = games
+    .filter((game) => game.status === "Dropped")
+    .reduce<Record<number, TimelineGame>>((groups, game) => {
+      const existing = groups[game.id];
+
+      if (!existing) {
+        groups[game.id] = { ...game };
+        return groups;
+      }
+
+      existing.hours += game.hours;
+      if (!existing.cover && game.cover) existing.cover = game.cover;
+
+      return groups;
+    }, {});
+
+  return Object.values(droppedGames)
+    .sort(
+      (first, second) =>
+        second.score - first.score ||
+        second.hours - first.hours ||
+        first.title.localeCompare(second.title)
+    )
     .slice(0, limit);
 }
 
@@ -1297,14 +1332,13 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     (libraryGamesResult.data || []) as LibraryGame[],
     selectedYear
   );
+  const gamesAdded = (libraryGamesResult.data || []) as LibraryGame[];
   const topRatedCompletions = getTopRatedCompletions(
     timelineGames,
     selectedYear
   );
   const uniqueGameIds = new Set(timelineGames.map((game) => game.id));
-  const newGames = timelineGames.filter((game) => game.firstPlayedThisYear);
-  const newDiscoveryHours = newGames.reduce((sum, game) => sum + game.hours, 0);
-  const newDiscoveries = getTopGames(newGames, newDiscoveryHours).slice(0, 5);
+  const topDroppedGames = getTopDroppedGames(timelineGames);
   const completedPurchaseImpact = getCompletedPurchaseImpact(
     timelineGames,
     selectedYear
@@ -1377,7 +1411,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               label="Hours Played"
               sublabel={useArchiveTimeline ? "Historical estimate" : "Monthly logs"}
             />
-            <StatTile value={newGames.length} label="New Games" />
+            <StatTile value={gamesAdded.length} label="Games Added" />
             <StatTile
               value={bestMonth?.total ? monthShortNames[bestMonth.month] : "-"}
               label="Top Month"
@@ -1691,30 +1725,46 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-5">
                   <p className="text-xs font-black uppercase text-zinc-500">
-                    New Discoveries
+                    Dropped Games
                   </p>
-                  <div className="mt-4 grid gap-3">
-                    {newDiscoveries.length > 0 ? (
-                      newDiscoveries.map((game, index) => (
+                  <p className="mt-2 text-sm font-semibold text-zinc-400">
+                    Highest-rated games played in {selectedYear} that are now dropped.
+                  </p>
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                    {topDroppedGames.length > 0 ? (
+                      topDroppedGames.map((game) => (
                         <Link
                           key={game.id}
                           href={`/game/${game.id}`}
-                          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg bg-zinc-950 p-3 hover:bg-zinc-900"
+                          className="group relative block aspect-[2/3] overflow-hidden rounded-lg border border-red-500/50 bg-zinc-950 shadow-[0_0_20px_rgba(239,68,68,0.14)]"
+                          title={game.title}
                         >
-                          <span className="text-sm font-black text-cyan-300">
-                            #{index + 1}
+                          {game.cover ? (
+                            <SafeImage
+                              src={game.cover}
+                              alt={game.title}
+                              fill
+                              sizes="(min-width: 1024px) 120px, 40vw"
+                              className="object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center p-2 text-center text-sm font-black text-zinc-500">
+                              {game.title}
+                            </div>
+                          )}
+                          <span className="absolute left-0 top-0 bg-red-500 px-2 py-1 text-[9px] font-black uppercase text-white">
+                            Dropped
                           </span>
-                          <span className="line-clamp-1 text-sm font-black">
-                            {game.title}
-                          </span>
-                          <span className="text-sm font-black text-zinc-300">
-                            {Math.round(game.hours)}h
+                          <span
+                            className={`absolute bottom-0 right-0 px-2 py-1 text-xs font-black ${scoreClass(game.score)}`}
+                          >
+                            {game.score || "-"}
                           </span>
                         </Link>
                       ))
                     ) : (
                       <p className="text-sm font-semibold text-zinc-500">
-                        No first-played games found for {selectedYear}.
+                        No dropped games played in {selectedYear}.
                       </p>
                     )}
                   </div>
@@ -1921,6 +1971,13 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               <div className="mt-10 flex h-80 items-end gap-3 border-b border-zinc-800">
                 {monthTotals.map((month) => {
                   const height = Math.max((month.total / maxMonthTotal) * 100, month.total > 0 ? 2 : 0);
+                  const featuredHours = month.games.reduce(
+                    (sum, game) => sum + game.hours,
+                    0
+                  );
+                  const otherHours = Math.max(month.total - featuredHours, 0);
+                  const otherPercent =
+                    month.total > 0 ? (otherHours / month.total) * 100 : 0;
 
                   return (
                     <div
@@ -1930,13 +1987,14 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                     >
                       <div className="flex flex-1 items-end">
                         <div
-                          className="w-full overflow-hidden rounded-t-md bg-cyan-400/80"
+                          className="w-full rounded-t-md bg-cyan-400/80"
                           style={{ height: `${height}%` }}
                         >
                           {month.games.map((game, index) => (
                             <div
                               key={`${month.month}-${game.id}-${index}`}
-                              className="w-full"
+                              className="group/segment relative w-full first:rounded-t-md"
+                              aria-label={`${game.title}: ${game.hours.toFixed(1)} hours, ${formatPercent(game.percent)} of ${monthShortNames[month.month]}`}
                               style={{
                                 height: `${Math.max(
                                   (game.hours / Math.max(month.total, 1)) * 100,
@@ -1944,8 +2002,29 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                                 )}%`,
                                 backgroundColor: palette[index % palette.length],
                               }}
-                            />
+                            >
+                              <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-max max-w-52 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-zinc-700 bg-zinc-950 px-2.5 py-2 text-center text-[11px] font-bold text-white opacity-0 shadow-xl transition-opacity group-hover/segment:opacity-100">
+                                <span className="block line-clamp-2">{game.title}</span>
+                                <span className="mt-0.5 block text-cyan-300">
+                                  {game.hours.toFixed(1)}h · {formatPercent(game.percent)}
+                                </span>
+                              </span>
+                            </div>
                           ))}
+                          {otherHours > 0 && (
+                            <div
+                              className="group/segment relative w-full bg-cyan-600 first:rounded-t-md"
+                              aria-label={`Other games: ${otherHours.toFixed(1)} hours, ${formatPercent(otherPercent)} of ${monthShortNames[month.month]}`}
+                              style={{ height: `${otherPercent}%` }}
+                            >
+                              <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-max max-w-52 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-zinc-700 bg-zinc-950 px-2.5 py-2 text-center text-[11px] font-bold text-white opacity-0 shadow-xl transition-opacity group-hover/segment:opacity-100">
+                                <span className="block">Other games</span>
+                                <span className="mt-0.5 block text-cyan-300">
+                                  {otherHours.toFixed(1)}h · {formatPercent(otherPercent)}
+                                </span>
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <p className="-rotate-45 pb-2 text-[10px] font-black uppercase text-zinc-400">

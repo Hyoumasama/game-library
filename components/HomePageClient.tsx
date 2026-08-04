@@ -267,6 +267,17 @@ function getWishlistCalendarPortraitImage(game: Game) {
   return game.steam_vertical_cover || game.cover_url || game.Cover;
 }
 
+function formatPastReleaseDate(release: string | null | undefined) {
+  const dateKey = release ? String(release).slice(0, 10) : null;
+
+  if (!dateKey) return "";
+
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function WishlistReleaseCalendar({
   games,
   isAdmin,
@@ -287,7 +298,7 @@ function WishlistReleaseCalendar({
   const mobileInitialAnchorRef = useRef<HTMLDivElement | null>(null);
   const hasInitialScrolledRef = useRef(false);
   const todayKey = useMemo(() => getLocalDateKey(new Date()), []);
-  const { groupedGames, initialAnchorDate, releaseDates } = useMemo(() => {
+  const { groupedGames, initialAnchorKey, pastYears, releaseDates } = useMemo(() => {
     const groups = games.reduce<Record<string, Game[]>>((dateGroups, game) => {
       const releaseDate = getReleaseDateKey(game);
 
@@ -303,17 +314,37 @@ function WishlistReleaseCalendar({
     const groupedDates = Object.keys(groups).sort((first, second) =>
       first.localeCompare(second)
     );
-    const pastDates = groupedDates
-      .filter((releaseDate) => releaseDate < todayKey)
-      .slice(-30);
+    const pastDates = groupedDates.filter(
+      (releaseDate) => releaseDate < todayKey
+    );
     const futureDates = groupedDates
       .filter((releaseDate) => releaseDate > todayKey)
       .slice(0, 30);
     const todayGroup = groupedDates.includes(todayKey) ? todayKey : null;
-    const initialAnchor =
-      todayGroup || futureDates[0] || pastDates[pastDates.length - 1] || null;
+    const years = new Map<string, Game[]>();
+
+    for (const releaseDate of pastDates) {
+      const year = releaseDate.slice(0, 4);
+      years.set(year, [...(years.get(year) || []), ...groups[releaseDate]]);
+    }
+
+    const groupedPastYears = [...years.entries()].map(([year, yearGames]) => ({
+      year,
+      games: yearGames.sort((first, second) => {
+        const releaseCompare = getReleaseDateKey(first).localeCompare(
+          getReleaseDateKey(second)
+        );
+
+        return releaseCompare || first.Title.localeCompare(second.Title);
+      }),
+    }));
+    const initialAnchor = todayGroup || futureDates[0] || null;
+    const initialKey = initialAnchor
+      ? `date-${initialAnchor}`
+      : groupedPastYears.length
+        ? `year-${groupedPastYears[groupedPastYears.length - 1].year}`
+        : null;
     const calendarDates = [
-      ...pastDates,
       ...(todayGroup ? [todayGroup] : []),
       ...futureDates,
     ];
@@ -326,7 +357,8 @@ function WishlistReleaseCalendar({
 
     return {
       groupedGames: groups,
-      initialAnchorDate: initialAnchor,
+      initialAnchorKey: initialKey,
+      pastYears: groupedPastYears,
       releaseDates: calendarDates,
     };
   }, [games, todayKey]);
@@ -366,7 +398,7 @@ function WishlistReleaseCalendar({
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [initialAnchorDate]);
+  }, [initialAnchorKey]);
 
   return (
     <section className="mb-10">
@@ -378,11 +410,63 @@ function WishlistReleaseCalendar({
         ref={desktopCalendarScrollRef}
         className="hidden gap-3 overflow-x-auto pb-4 md:flex"
       >
+        {pastYears.map(({ year, games: yearGames }) => (
+          <div
+            key={year}
+            ref={
+              `year-${year}` === initialAnchorKey
+                ? desktopInitialAnchorRef
+                : undefined
+            }
+            className="w-[220px] shrink-0"
+          >
+            <div className="px-1 pb-3 text-sm font-black uppercase tracking-[0.18em] text-zinc-400">
+              {year}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {yearGames.map((game) => {
+                const image = getWishlistCalendarPortraitImage(game);
+
+                return (
+                  <Link
+                    key={`${year}-${game.id || game.Title}`}
+                    href={`/game/${game.id}`}
+                    className="group relative block overflow-hidden rounded bg-zinc-950 shadow-lg"
+                    aria-label={`${game.Title} — ${formatPastReleaseDate(game.Release)}`}
+                  >
+                    <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
+                      {image ? (
+                        <SafeImage
+                          src={image}
+                          alt={game.Title}
+                          fill
+                          sizes="110px"
+                          loading="lazy"
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center p-2 text-center text-xs font-black text-zinc-500">
+                          {game.Title}
+                        </div>
+                      )}
+
+                      <span className="absolute inset-x-0 bottom-0 bg-emerald-400 px-1.5 py-1 text-center text-[9px] font-black uppercase text-black">
+                        {formatPastReleaseDate(game.Release)}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
         {releaseDates.map((releaseDate, columnIndex) => (
           <div
             key={releaseDate}
             ref={
-              releaseDate === initialAnchorDate
+              `date-${releaseDate}` === initialAnchorKey
                 ? desktopInitialAnchorRef
                 : undefined
             }
@@ -446,6 +530,66 @@ function WishlistReleaseCalendar({
           ref={mobileCalendarScrollRef}
           className="flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
+          {pastYears.map(({ year, games: yearGames }) => (
+            <div
+              key={year}
+              ref={
+                `year-${year}` === initialAnchorKey
+                  ? mobileInitialAnchorRef
+                  : undefined
+              }
+              className="w-24 shrink-0 snap-start"
+            >
+              <div className="mb-2 rounded-lg border border-zinc-800 bg-black px-2 py-1.5 text-center text-xs font-black tracking-[0.16em] text-zinc-400">
+                {year}
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5">
+                {yearGames.map((game) => {
+                  const image = getWishlistCalendarPortraitImage(game);
+
+                  return (
+                    <LongPressGameCard
+                      key={`${year}-${game.id || game.Title}`}
+                      disabled={!isAdmin || !game.id}
+                      title={game.Title}
+                      imageUrl={image}
+                      onEdit={() => onEdit(game)}
+                      onDelete={() => onDelete(Number(game.id))}
+                    >
+                      <Link
+                        href={`/game/${game.id}`}
+                        className="group relative block overflow-hidden rounded-lg"
+                        aria-label={`${game.Title} — ${formatPastReleaseDate(game.Release)}`}
+                      >
+                        <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900">
+                          {image ? (
+                            <SafeImage
+                              src={image}
+                              alt={game.Title}
+                              fill
+                              sizes="44px"
+                              loading="lazy"
+                              className="object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-[8px] font-black text-zinc-600">
+                              No image
+                            </div>
+                          )}
+
+                          <span className="absolute inset-x-0 bottom-0 bg-emerald-400 px-0.5 py-0.5 text-center text-[7px] font-black uppercase text-black">
+                            {formatPastReleaseDate(game.Release)}
+                          </span>
+                        </div>
+                      </Link>
+                    </LongPressGameCard>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
           {releaseDates.map((releaseDate, columnIndex) => {
             const title = formatMobileReleaseColumnTitle(releaseDate, todayKey);
             const dateGames = groupedGames[releaseDate];
@@ -457,7 +601,7 @@ function WishlistReleaseCalendar({
               <div
                 key={releaseDate}
                 ref={
-                  releaseDate === initialAnchorDate
+                  `date-${releaseDate}` === initialAnchorKey
                     ? mobileInitialAnchorRef
                     : undefined
                 }
