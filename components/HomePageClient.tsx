@@ -292,6 +292,9 @@ function WishlistReleaseCalendar({
   const [expandedMobileDates, setExpandedMobileDates] = useState<
     Record<string, boolean>
   >({});
+  const [expandedDesktopGroups, setExpandedDesktopGroups] = useState<
+    Record<string, boolean>
+  >({});
   const desktopCalendarScrollRef = useRef<HTMLDivElement | null>(null);
   const mobileCalendarScrollRef = useRef<HTMLDivElement | null>(null);
   const desktopInitialAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -410,7 +413,13 @@ function WishlistReleaseCalendar({
         ref={desktopCalendarScrollRef}
         className="hidden gap-3 overflow-x-auto pb-4 md:flex"
       >
-        {pastYears.map(({ year, games: yearGames }) => (
+        {pastYears.map(({ year, games: yearGames }) => {
+          const groupKey = `year-${year}`;
+          const expanded = !!expandedDesktopGroups[groupKey];
+          const visibleGames = expanded ? yearGames : yearGames.slice(0, 4);
+          const remainingCount = Math.max(yearGames.length - 4, 0);
+
+          return (
           <div
             key={year}
             ref={
@@ -424,8 +433,8 @@ function WishlistReleaseCalendar({
               {year}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {yearGames.map((game) => {
+            <div className="relative grid grid-cols-2 gap-2">
+              {visibleGames.map((game) => {
                 const image = getWishlistCalendarPortraitImage(game);
 
                 return (
@@ -458,11 +467,38 @@ function WishlistReleaseCalendar({
                   </Link>
                 );
               })}
+              {remainingCount > 0 && (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-label={
+                    expanded
+                      ? `Show fewer games from ${year}`
+                      : `Show ${remainingCount} more games from ${year}`
+                  }
+                  onClick={() =>
+                    setExpandedDesktopGroups((currentGroups) => ({
+                      ...currentGroups,
+                      [groupKey]: !expanded,
+                    }))
+                  }
+                  className="absolute bottom-1 left-1/2 z-10 flex min-h-9 min-w-9 -translate-x-1/2 items-center justify-center rounded-full border border-cyan-300/60 bg-zinc-950/95 px-2 text-xs font-black text-cyan-200 shadow-lg transition hover:scale-110 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+                >
+                  {expanded ? "−" : `+${remainingCount}`}
+                </button>
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
-        {releaseDates.map((releaseDate, columnIndex) => (
+        {releaseDates.map((releaseDate, columnIndex) => {
+          const dateGames = groupedGames[releaseDate];
+          const expanded = !!expandedDesktopGroups[releaseDate];
+          const visibleGames = expanded ? dateGames : dateGames.slice(0, 2);
+          const remainingCount = Math.max(dateGames.length - 2, 0);
+
+          return (
           <div
             key={releaseDate}
             ref={
@@ -476,8 +512,8 @@ function WishlistReleaseCalendar({
               {formatReleaseColumnTitle(releaseDate, todayKey)}
             </div>
 
-            <div className="space-y-2">
-              {groupedGames[releaseDate].map((game) => {
+            <div className="relative space-y-2">
+              {visibleGames.map((game) => {
                 const image = getWishlistCalendarWideImage(game);
                 const countdown = getWishlistCountdown(game.Release);
                 const isPoster = image === game.Cover;
@@ -520,9 +556,30 @@ function WishlistReleaseCalendar({
                   </Link>
                 );
               })}
+              {remainingCount > 0 && (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-label={
+                    expanded
+                      ? `Show fewer games for ${formatReleaseColumnTitle(releaseDate, todayKey)}`
+                      : `Show ${remainingCount} more games for ${formatReleaseColumnTitle(releaseDate, todayKey)}`
+                  }
+                  onClick={() =>
+                    setExpandedDesktopGroups((currentGroups) => ({
+                      ...currentGroups,
+                      [releaseDate]: !expanded,
+                    }))
+                  }
+                  className="absolute bottom-2 right-2 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-full border border-cyan-300/60 bg-zinc-950/95 px-2 text-xs font-black text-cyan-200 shadow-lg transition hover:scale-110 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+                >
+                  {expanded ? "−" : `+${remainingCount}`}
+                </button>
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-zinc-950/70 p-2 md:hidden">
@@ -723,6 +780,17 @@ function GameSection({
         {games.map((game, index) => {
           const image = variant === "wishlist" ? game.Cover : game.Cover;
           const hasGoldenAchievementBadge = hasGoldenAchievement(game);
+          const gameIcons = Array.from(
+            new Set(
+              [game.Store, game.Platform, game.Hardware]
+                .filter((value): value is string => Boolean(value))
+                .map((value) => {
+                  const icon = getIcon(value);
+                  return icon ? `${icon}|||${value}` : null;
+                })
+                .filter((item): item is string => Boolean(item))
+            )
+          );
 
           return (
             <LongPressGameCard
@@ -732,17 +800,7 @@ function GameSection({
               imageUrl={image}
               footer={
                 <>
-                  {Array.from(
-                    new Set(
-                      [game.Store, game.Platform, game.Hardware]
-                        .filter((value): value is string => Boolean(value))
-                        .map((value) => {
-                          const icon = getIcon(value);
-                          return icon ? `${icon}|||${value}` : null;
-                        })
-                        .filter((item): item is string => Boolean(item))
-                    )
-                  ).map((item) => {
+                  {gameIcons.map((item) => {
                     const [icon, value] = item.split("|||");
 
                     return (
@@ -829,17 +887,7 @@ function GameSection({
 
                 {variant === "wishlist" ? null : (
                   <div className="mt-2 flex h-5 items-center gap-2">
-                    {Array.from(
-                      new Set(
-                        [game.Store, game.Platform, game.Hardware]
-                          .filter((value): value is string => Boolean(value))
-                          .map((value) => {
-                            const icon = getIcon(value);
-                            return icon ? `${icon}|||${value}` : null;
-                          })
-                          .filter((item): item is string => Boolean(item))
-                      )
-                    ).map((item) => {
+                    {gameIcons.map((item) => {
                       const [icon, value] = item.split("|||");
 
                       return (
@@ -858,6 +906,7 @@ function GameSection({
                   </div>
                 )}
               </div>
+
                           </Link>
             </LongPressGameCard>
           );
