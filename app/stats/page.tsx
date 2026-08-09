@@ -167,6 +167,7 @@ type TimelineGame = {
   purchaseDate: string | null;
   completionDate: string | null;
   completedThisMonth: boolean;
+  droppedThisMonth: boolean;
   isEstimated: boolean;
 };
 
@@ -413,6 +414,10 @@ function buildTimelineGames(
       getStatus(log) === "Completed" &&
       completionYear === year &&
       completionMonth === log.month;
+    const droppedThisMonth =
+      getStatus(log) === "Dropped" &&
+      completionYear === year &&
+      completionMonth === log.month;
 
     return {
       id: log.game_id,
@@ -436,6 +441,7 @@ function buildTimelineGames(
       purchaseDate: getPurchaseDate(log),
       completionDate,
       completedThisMonth,
+      droppedThisMonth,
       isEstimated: log.isEstimated === true,
     };
   });
@@ -829,7 +835,7 @@ function GamePoster({
   game: TimelineGame;
   isMonthlyChampion?: boolean;
 }) {
-  const isDropped = game.status?.toLowerCase() === "dropped";
+  const isDropped = game.droppedThisMonth;
 
   return (
     <Link
