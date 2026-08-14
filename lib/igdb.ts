@@ -109,7 +109,9 @@ export async function getIgdbToken() {
   const data = await response.json();
 
   if (!response.ok || !data.access_token) {
-    throw new Error("Failed to get IGDB token");
+    const detail = data?.message || data?.error || `HTTP ${response.status}`;
+
+    throw new Error(`Failed to get IGDB token: ${detail}`);
   }
 
   cachedToken = data.access_token;

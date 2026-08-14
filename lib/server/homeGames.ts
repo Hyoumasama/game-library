@@ -51,6 +51,7 @@ export async function getHomeGames() {
   const [
     wishlistPastResult,
     wishlistFutureResult,
+    wishlistTbaResult,
     playingResult,
     addedResult,
     completedResult,
@@ -77,6 +78,13 @@ export async function getHomeGames() {
       supabase
         .from("games")
         .select(selectColumns)
+        .eq("status", "Wishlist")
+        .is("release", null)
+        .order("title", { ascending: true })
+        .limit(WISHLIST_CALENDAR_FETCH_LIMIT),
+      supabase
+        .from("games")
+        .select(selectColumns)
         .in("status", ["Playing", "Currently Playing"])
         .order("date_of_purchase", { ascending: false }),
       supabase
@@ -97,6 +105,7 @@ export async function getHomeGames() {
   const error =
     wishlistPastResult.error ||
     wishlistFutureResult.error ||
+    wishlistTbaResult.error ||
     playingResult.error ||
     addedResult.error ||
     completedResult.error;
@@ -108,6 +117,7 @@ export async function getHomeGames() {
   for (const game of [
     ...((wishlistPastResult.data || []) as DbGame[]),
     ...((wishlistFutureResult.data || []) as DbGame[]),
+    ...((wishlistTbaResult.data || []) as DbGame[]),
   ]) {
     wishlistGamesById.set(game.id || `${game.title}-${game.release}`, game);
   }

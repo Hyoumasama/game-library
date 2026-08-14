@@ -48,6 +48,8 @@ const [recentlyCompletedGames, setRecentlyCompletedGames] = useState<Game[]>(
 
 const [editingGame, setEditingGame] = useState<Game | null>(null);
 const [editSignal, setEditSignal] = useState(0);
+const [isRefreshingMetadata, setIsRefreshingMetadata] = useState(false);
+const [metadataRefreshMessage, setMetadataRefreshMessage] = useState("");
 
 function openEditGame(game: Game) {
   setEditingGame(game);
@@ -92,6 +94,33 @@ async function deleteGame(gameId: number) {
   await loadGames();
 }
 
+async function refreshWishlistMetadata() {
+  setIsRefreshingMetadata(true);
+  setMetadataRefreshMessage("");
+
+  try {
+    const response = await fetch("/api/admin/wishlist-release-refresh", {
+      method: "POST",
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMetadataRefreshMessage(data.error || "Refresh failed");
+      return;
+    }
+
+    await loadGames();
+    setMetadataRefreshMessage(
+      `Updated ${data.updated || 0}, TBA ${data.stillTba || 0}`
+    );
+  } catch (error) {
+    console.error("Wishlist metadata refresh failed:", error);
+    setMetadataRefreshMessage("Refresh failed");
+  } finally {
+    setIsRefreshingMetadata(false);
+  }
+}
+
 useEffect(() => {
   async function checkAdmin() {
     const response = await fetch("/api/admin/me");
@@ -123,6 +152,9 @@ useEffect(() => {
 <WishlistReleaseCalendar
   games={wishlistGames}
   isAdmin={isAdmin}
+  isRefreshingMetadata={isRefreshingMetadata}
+  metadataRefreshMessage={metadataRefreshMessage}
+  onRefreshMetadata={refreshWishlistMetadata}
   onEdit={openEditGame}
   onDelete={deleteGame}
 />
@@ -281,11 +313,17 @@ function formatPastReleaseDate(release: string | null | undefined) {
 function WishlistReleaseCalendar({
   games,
   isAdmin,
+  isRefreshingMetadata,
+  metadataRefreshMessage,
+  onRefreshMetadata,
   onEdit,
   onDelete,
 }: {
   games: Game[];
   isAdmin: boolean;
+  isRefreshingMetadata: boolean;
+  metadataRefreshMessage: string;
+  onRefreshMetadata: () => void;
   onEdit: (game: Game) => void;
   onDelete: (gameId: number) => void;
 }) {
@@ -301,7 +339,7 @@ function WishlistReleaseCalendar({
   const mobileInitialAnchorRef = useRef<HTMLDivElement | null>(null);
   const hasInitialScrolledRef = useRef(false);
   const todayKey = useMemo(() => getLocalDateKey(new Date()), []);
-  const { groupedGames, initialAnchorKey, pastYears, releaseDates } = useMemo(() => {
+  const { groupedGames, initialAnchorKey, pastYears, releaseDates, tbaGames } = useMemo(() => {
     const groups = games.reduce<Record<string, Game[]>>((dateGroups, game) => {
       const releaseDate = getReleaseDateKey(game);
 
@@ -324,6 +362,9 @@ function WishlistReleaseCalendar({
       .filter((releaseDate) => releaseDate > todayKey)
       .slice(0, 30);
     const todayGroup = groupedDates.includes(todayKey) ? todayKey : null;
+    const tba = games
+      .filter((game) => getReleaseDateKey(game) === "TBA")
+      .sort((first, second) => first.Title.localeCompare(second.Title));
     const years = new Map<string, Game[]>();
 
     for (const releaseDate of pastDates) {
@@ -346,7 +387,9 @@ function WishlistReleaseCalendar({
       ? `date-${initialAnchor}`
       : groupedPastYears.length
         ? `year-${groupedPastYears[groupedPastYears.length - 1].year}`
-        : null;
+        : tba.length
+          ? "tba"
+          : null;
     const calendarDates = [
       ...(todayGroup ? [todayGroup] : []),
       ...futureDates,
@@ -363,6 +406,7 @@ function WishlistReleaseCalendar({
       initialAnchorKey: initialKey,
       pastYears: groupedPastYears,
       releaseDates: calendarDates,
+      tbaGames: tba,
     };
   }, [games, todayKey]);
 
@@ -405,9 +449,30 @@ function WishlistReleaseCalendar({
 
   return (
     <section className="mb-10">
-      <h2 className="mb-4 text-xl font-black text-white md:text-2xl">
-        Upcoming Games Calendar
-      </h2>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h2 className="text-xl font-black text-white md:text-2xl">
+          Upcoming Games Calendar
+        </h2>
+
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={onRefreshMetadata}
+            disabled={isRefreshingMetadata}
+            aria-label="Refresh wishlist release dates"
+            title="Refresh release dates"
+            className="flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isRefreshingMetadata ? "..." : "↻"}
+          </button>
+        )}
+
+        {metadataRefreshMessage && (
+          <span className="text-xs font-black uppercase text-zinc-400">
+            {metadataRefreshMessage}
+          </span>
+        )}
+      </div>
 
       <div
         ref={desktopCalendarScrollRef}
@@ -580,6 +645,81 @@ function WishlistReleaseCalendar({
           </div>
           );
         })}
+
+        {tbaGames.length > 0 && (
+          (() => {
+            const expanded = !!expandedDesktopGroups.tba;
+            const visibleGames = expanded ? tbaGames : tbaGames.slice(0, 4);
+            const remainingCount = Math.max(tbaGames.length - 4, 0);
+
+            return (
+          <div
+            ref={initialAnchorKey === "tba" ? desktopInitialAnchorRef : undefined}
+            className="w-[220px] shrink-0"
+          >
+            <div className="px-1 pb-3 text-sm font-black uppercase tracking-[0.18em] text-zinc-400">
+              TBA
+            </div>
+
+            <div className="relative grid grid-cols-2 gap-2">
+              {visibleGames.map((game) => {
+                const image = getWishlistCalendarPortraitImage(game);
+
+                return (
+                  <Link
+                    key={`tba-${game.id || game.Title}`}
+                    href={`/game/${game.id}`}
+                    className="group relative block overflow-hidden rounded bg-zinc-950 shadow-lg"
+                    aria-label={`${game.Title} - TBA`}
+                  >
+                    <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
+                      {image ? (
+                        <SafeImage
+                          src={image}
+                          alt={game.Title}
+                          fill
+                          sizes="110px"
+                          loading="lazy"
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center p-2 text-center text-xs font-black text-zinc-500">
+                          {game.Title}
+                        </div>
+                      )}
+
+                      <span className="absolute inset-x-0 bottom-0 bg-zinc-800 px-1.5 py-1 text-center text-[9px] font-black uppercase text-zinc-200">
+                        TBA
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+              {remainingCount > 0 && (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-label={
+                    expanded
+                      ? "Show fewer TBA games"
+                      : `Show ${remainingCount} more TBA games`
+                  }
+                  onClick={() =>
+                    setExpandedDesktopGroups((currentGroups) => ({
+                      ...currentGroups,
+                      tba: !expanded,
+                    }))
+                  }
+                  className="absolute bottom-1 left-1/2 z-10 flex min-h-9 min-w-9 -translate-x-1/2 items-center justify-center rounded-full border border-cyan-300/60 bg-zinc-950/95 px-2 text-xs font-black text-cyan-200 shadow-lg transition hover:scale-110 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+                >
+                  {expanded ? "−" : `+${remainingCount}`}
+                </button>
+              )}
+            </div>
+          </div>
+            );
+          })()
+        )}
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-zinc-950/70 p-2 md:hidden">
@@ -743,6 +883,61 @@ function WishlistReleaseCalendar({
               </div>
             );
           })}
+
+          {tbaGames.length > 0 && (
+            <div
+              ref={initialAnchorKey === "tba" ? mobileInitialAnchorRef : undefined}
+              className="w-24 shrink-0 snap-start"
+            >
+              <div className="mb-2 rounded-lg border border-zinc-800 bg-black px-2 py-1.5 text-center text-xs font-black tracking-[0.16em] text-zinc-400">
+                TBA
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5">
+                {tbaGames.map((game) => {
+                  const image = getWishlistCalendarPortraitImage(game);
+
+                  return (
+                    <LongPressGameCard
+                      key={`tba-${game.id || game.Title}`}
+                      disabled={!isAdmin || !game.id}
+                      title={game.Title}
+                      imageUrl={image}
+                      onEdit={() => onEdit(game)}
+                      onDelete={() => onDelete(Number(game.id))}
+                    >
+                      <Link
+                        href={`/game/${game.id}`}
+                        className="group relative block overflow-hidden rounded-lg"
+                        aria-label={`${game.Title} - TBA`}
+                      >
+                        <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900">
+                          {image ? (
+                            <SafeImage
+                              src={image}
+                              alt={game.Title}
+                              fill
+                              sizes="44px"
+                              loading="lazy"
+                              className="object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-[8px] font-black text-zinc-600">
+                              No image
+                            </div>
+                          )}
+
+                          <span className="absolute inset-x-0 bottom-0 bg-zinc-800 px-0.5 py-0.5 text-center text-[7px] font-black uppercase text-zinc-200">
+                            TBA
+                          </span>
+                        </div>
+                      </Link>
+                    </LongPressGameCard>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
