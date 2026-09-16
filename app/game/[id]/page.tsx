@@ -1,4 +1,5 @@
-import GameRelationships from "@/components/games/GameRelationships";
+import GameRelationships from "@/components/games/GameRelationshipsServer";
+import { Suspense } from "react";
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
 import { getGameById } from "@/lib/games";
@@ -455,7 +456,7 @@ const displayPrice =
     </section>
   ) : null}
 </div>
-      <GameRelationships gameId={Number(id)} />
+      <Suspense fallback={null}><GameRelationships gameId={Number(id)} /></Suspense>
     </main>
     
   );

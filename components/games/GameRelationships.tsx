@@ -1,6 +1,7 @@
 "use client";
 import { relationshipRequest } from "@/lib/relationships/client";
 import Link from "next/link";
+import GameRelationshipSections from "./GameRelationshipSections";
 import { useCallback, useEffect, useState } from "react";
 import {
   labels,
@@ -439,18 +440,26 @@ function MembershipEditor({
 export default function GameRelationships({
   gameId,
   canonicalId,
+  initialDetail,
+  initialError = "",
 }: {
   gameId?: number;
   canonicalId?: string;
+  initialDetail?: RelationshipDetail | null;
+  initialError?: string;
 }) {
-  const [detail, setDetail] = useState<RelationshipDetail | null>(null),
-    [loading, setLoading] = useState(true),
-    [error, setError] = useState(""),
+  const [detail, setDetail] = useState<RelationshipDetail | null>(
+      initialDetail || null,
+    ),
+    [loading, setLoading] = useState(
+      initialDetail === undefined && !initialError,
+    ),
+    [error, setError] = useState(initialError),
     [isAdmin, setAdmin] = useState(false),
     [form, setForm] = useState<Relationship | "new" | null>(null),
     [busy, setBusy] = useState(false),
     [linkTarget, setLinkTarget] = useState(""),
-    [title, setTitle] = useState("");
+    [title, setTitle] = useState(initialDetail?.canonical.title || "");
   const load = useCallback(
     async (signal?: AbortSignal) => {
       try {
@@ -478,7 +487,12 @@ export default function GameRelationships({
   useEffect(() => {
     const controller = new AbortController();
     void Promise.resolve().then(() => {
-      if (!controller.signal.aborted) return load(controller.signal);
+      if (
+        !controller.signal.aborted &&
+        initialDetail === undefined &&
+        !initialError
+      )
+        return load(controller.signal);
     });
     fetch("/api/admin/me", { signal: controller.signal })
       .then((r) => r.json())
@@ -489,7 +503,7 @@ export default function GameRelationships({
         if (!controller.signal.aborted) setAdmin(false);
       });
     return () => controller.abort();
-  }, [load]);
+  }, [load, initialDetail, initialError]);
   async function mutate(body: Record<string, unknown>, method = "POST") {
     setBusy(true);
     setError("");
@@ -502,6 +516,19 @@ export default function GameRelationships({
       setBusy(false);
     }
   }
+  if (
+    !loading &&
+    !error &&
+    !isAdmin &&
+    (!detail ||
+      !(
+        detail.copies.length ||
+        detail.series.length ||
+        detail.franchises.length ||
+        detail.relationships.length
+      ))
+  )
+    return null;
   return (
     <section
       className="relative mx-auto my-8 max-w-6xl rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5 text-white sm:p-8"
@@ -510,10 +537,12 @@ export default function GameRelationships({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-cyan-300">
-            Identity & connections
+            Explore this game
           </p>
           <h2 id="relationships-heading" className="mt-2 text-2xl font-bold">
-            Game relationships
+            {canonicalId && detail
+              ? detail.canonical.title
+              : "Game relationships"}
           </h2>
         </div>
         {isAdmin && (
@@ -541,137 +570,81 @@ export default function GameRelationships({
         </p>
       ) : (
         <div className="space-y-6">
-          <div className="rounded-xl bg-zinc-900 p-4">
-            <p className="text-xs text-zinc-400">Canonical game identity</p>
-            <Link
-              className="mt-1 block text-xl font-bold text-cyan-200"
-              href={`/canonical/${detail.canonical.id}`}
-            >
-              {detail.canonical.title}
-            </Link>
-            <p className="mt-2 text-xs text-zinc-400">
-              IGDB {detail.canonical.igdb_id || "Unknown"} / Steam{" "}
-              {detail.canonical.steam_appid || "Unknown"}
-              {detail.version ? ` / ${detail.version.name}` : ""}
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <h3 className="mb-3 font-bold">
-                Library copies / {detail.copies.length}
-              </h3>
-              <ul className="space-y-2">
-                {detail.copies.map((c) => (
-                  <li key={c.id}>
-                    <Link
-                      className="block rounded-lg border border-zinc-800 p-3 hover:border-cyan-300/50"
-                      href={`/game/${c.id}`}
-                    >
-                      <span className="font-bold">
-                        {c.store || "Unknown store"}
-                      </span>
-                      <span className="ml-2 text-sm text-zinc-400">
-                        {c.platform || "Unknown platform"} /{" "}
-                        {c.status || "No status"}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {!detail.copies.length && (
-                <p className="text-sm text-zinc-400">
-                  No library copies linked.
-                </p>
-              )}
-            </div>
-            <div>
-              <h3 className="mb-3 font-bold">Series & franchises</h3>
-              {detail.series.map((s) => (
-                <p key={s.id} className="mb-2 text-sm">
-                  <span className="text-zinc-400">Part of series: </span>
-                  {s.name}
-                </p>
-              ))}
-              {detail.franchises.map((f) => (
-                <p key={f.id} className="mb-2 text-sm">
-                  <span className="text-zinc-400">Franchise: </span>
-                  {f.name}
-                </p>
-              ))}
-              {!detail.series.length && !detail.franchises.length && (
-                <p className="text-sm text-zinc-400">
-                  No series or franchise assigned.
-                </p>
-              )}
-            </div>
-          </div>
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-bold">Related games</h3>
-              {isAdmin && (
-                <button className={button} onClick={() => setForm("new")}>
-                  Add relationship
-                </button>
-              )}
-            </div>
-            {!detail.relationships.length && (
-              <p className="text-sm text-zinc-400">
-                No verified relationships yet.
-              </p>
-            )}
-            <ul className="space-y-3">
-              {detail.relationships.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-800 p-4"
-                >
-                  <div>
-                    <Link
-                      href={`/canonical/${r.other.id}`}
-                      className="font-bold hover:text-cyan-200"
-                    >
-                      <span className="mr-2 text-zinc-400">
-                        {relationshipLabel(r, detail.canonical.id)}:
-                      </span>
-                      {r.other.title}
-                    </Link>
-                    {isAdmin && (
-                      <p className="mt-1 text-xs text-zinc-500">
-                        Confidence {Number(r.confidence).toFixed(2)} /{" "}
-                        {r.source}
-                        {r.notes ? ` / ${r.notes}` : ""}
-                      </p>
-                    )}
-                  </div>
+          <GameRelationshipSections detail={detail} />
+          {isAdmin && (
+            <details className="rounded-xl border border-zinc-800 p-4">
+              <summary className="cursor-pointer font-bold">
+                Manage relationships
+              </summary>
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-bold">Related games</h3>
                   {isAdmin && (
-                    <div className="flex gap-2">
-                      <button
-                        disabled={busy}
-                        className={button}
-                        onClick={() => setForm(r)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        disabled={busy}
-                        className={`${button} text-red-300`}
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Delete this relationship with ${r.other.title}? Library copies will remain.`,
-                            )
-                          )
-                            void mutate({ id: r.id }, "DELETE");
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
+                    <button className={button} onClick={() => setForm("new")}>
+                      Add relationship
+                    </button>
                   )}
-                </li>
-              ))}
-            </ul>
-          </div>
+                </div>
+                {!detail.relationships.length && (
+                  <p className="text-sm text-zinc-400">
+                    No verified relationships yet.
+                  </p>
+                )}
+                <ul className="space-y-3">
+                  {detail.relationships.map((r) => (
+                    <li
+                      key={r.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-800 p-4"
+                    >
+                      <div>
+                        <Link
+                          href={`/canonical/${r.other.id}`}
+                          className="font-bold hover:text-cyan-200"
+                        >
+                          <span className="mr-2 text-zinc-400">
+                            {relationshipLabel(r, detail.canonical.id)}:
+                          </span>
+                          {r.other.title}
+                        </Link>
+                        {isAdmin && (
+                          <p className="mt-1 text-xs text-zinc-500">
+                            Confidence {Number(r.confidence).toFixed(2)} /{" "}
+                            {r.source}
+                            {r.notes ? ` / ${r.notes}` : ""}
+                          </p>
+                        )}
+                      </div>
+                      {isAdmin && (
+                        <div className="flex gap-2">
+                          <button
+                            disabled={busy}
+                            className={button}
+                            onClick={() => setForm(r)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            disabled={busy}
+                            className={`${button} text-red-300`}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Delete this relationship with ${r.other.title}? Library copies will remain.`,
+                                )
+                              )
+                                void mutate({ id: r.id }, "DELETE");
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          )}
           {isAdmin && form && (
             <RelationForm
               key={form === "new" ? "new" : form.id}

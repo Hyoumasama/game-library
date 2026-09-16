@@ -32,6 +32,13 @@ export type CanonicalGame = {
   created_at: string;
   updated_at: string;
 };
+export type MembershipRole =
+  "primary" | "crossover" | "appearance" | "hierarchy" | "unspecified";
+export type RelatedGame = CanonicalGame & {
+  cover_url?: string | null;
+  library_game_id?: number | null;
+  owned_count?: number;
+};
 export type GameVersion = {
   id: string;
   canonical_game_id: string;
@@ -62,6 +69,7 @@ export type Relationship = {
   updated_at: string;
 };
 export type Franchise = {
+  membership_role?: MembershipRole;
   id: string;
   name: string;
   slug: string;
@@ -70,6 +78,8 @@ export type Franchise = {
   updated_at: string;
 };
 export type Series = {
+  sort_order?: number | null;
+  membership_role?: MembershipRole;
   id: string;
   franchise_id: string | null;
   name: string;
@@ -84,6 +94,7 @@ export type SeriesMembership = {
   created_at: string;
 };
 export type FranchiseMembership = {
+  membership_role?: MembershipRole;
   canonical_game_id: string;
   franchise_id: string;
   created_at: string;
@@ -107,6 +118,11 @@ export type Review = {
   updated_at: string;
 };
 export type OwnedCopy = {
+  hardware?: string | null;
+  date_of_purchase?: string | null;
+  version_label?: string | null;
+  cover_url?: string | null;
+  steam_vertical_cover?: string | null;
   id: number;
   title: string;
   store: string | null;
@@ -119,7 +135,7 @@ export type RelationshipDetail = {
   copies: OwnedCopy[];
   series: Series[];
   franchises: Franchise[];
-  relationships: (Relationship & { other: CanonicalGame })[];
+  relationships: (Relationship & { other: RelatedGame })[];
 };
 // Source is the derived title; target is the original. Incoming labels require no reverse DB rows.
 export const labels: Record<RelationType, [string, string]> = {
