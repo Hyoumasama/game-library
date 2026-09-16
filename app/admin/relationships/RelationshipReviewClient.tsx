@@ -115,6 +115,7 @@ export default function RelationshipReviewClient() {
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
+            <option value="resolved">Resolved / already exists</option>
           </select>
         </label>
       </div>
@@ -150,15 +151,20 @@ export default function RelationshipReviewClient() {
               <div className="flex flex-wrap justify-between gap-3">
                 <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold text-cyan-200">
                   {item.kind === "identity"
-                    ? "Same identity?"
+                    ? "Same identity"
                     : item.proposed_relation
-                      ? labels[item.proposed_relation][0]
+                      ? `Relationship: ${labels[item.proposed_relation][0]}`
                       : "Relationship"}
                 </span>
                 <span className="text-xs text-zinc-400">
                   Confidence {Number(item.confidence).toFixed(2)}
                 </span>
               </div>
+              {item.decision_notes && (
+                <p className="mt-3 text-sm text-zinc-400">
+                  {item.decision_notes}
+                </p>
+              )}
               <div className="my-4 grid gap-4 sm:grid-cols-2">
                 {[item.source_game, item.target_game].map((g, i) => (
                   <div

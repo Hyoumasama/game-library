@@ -72,7 +72,7 @@ export async function GET(request: Request) {
       });
     }
     const status = url.searchParams.get("status") || "pending";
-    if (!["pending", "approved", "rejected"].includes(status))
+    if (!["pending", "approved", "rejected", "resolved"].includes(status))
       throw new Error("Invalid review status");
     const page = Math.max(
       0,

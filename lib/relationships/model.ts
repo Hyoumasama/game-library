@@ -14,6 +14,10 @@ export const relationTypes = [
   "reboot_of",
   "successor_to",
   "related_to",
+  "demo_of",
+  "playtest_of",
+  "beta_of",
+  "prologue_of",
 ] as const;
 export type RelationType = (typeof relationTypes)[number];
 export type CanonicalGame = {
@@ -87,6 +91,8 @@ export type FranchiseMembership = {
 export type Review = {
   id: string;
   candidate_key: string;
+  semantic_key: string;
+  identifier_fingerprint: string;
   kind: "identity" | "relationship";
   source_game_id: string;
   target_game_id: string;
@@ -94,7 +100,7 @@ export type Review = {
   confidence: number;
   reason: string;
   identifiers: Record<string, unknown>;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "resolved";
   decision_notes: string | null;
   resolved_at: string | null;
   created_at: string;
@@ -132,6 +138,10 @@ export const labels: Record<RelationType, [string, string]> = {
   reboot_of: ["Reboot of", "Reboot"],
   successor_to: ["Successor to", "Successor"],
   related_to: ["Related to", "Related to"],
+  demo_of: ["Demo of", "Demo"],
+  playtest_of: ["Playtest of", "Playtest"],
+  beta_of: ["Beta of", "Beta"],
+  prologue_of: ["Prologue of", "Prologue"],
 };
 export function relationshipLabel(
   r: Pick<Relationship, "source_game_id" | "relation_type">,
