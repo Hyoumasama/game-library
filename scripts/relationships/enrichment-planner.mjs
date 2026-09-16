@@ -99,6 +99,7 @@ export function buildEnrichmentPlan(canonical, metadata) {
         }
         for (const s of g.collections || []) {
           if (!s.name) continue;
+          if ((c.metadata?.excluded_series_names || []).includes(s.name)) continue;
           const id = uuid(`igdb-series:${s.id}`);
           series.set(id, {
             id,

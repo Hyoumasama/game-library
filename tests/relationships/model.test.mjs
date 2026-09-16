@@ -82,13 +82,12 @@ test("remaster and edition candidates are never accepted from a suffix alone", (
     "edition_of",
   );
 });
-test("numbered sequel candidates require review", () => {
+test("numbered titles alone never propose sequels", () => {
   const p = buildPlan([
-    game(1, "The Evil Within", 1),
-    game(2, "The Evil Within 2", 2),
+    game(1, "Unverified Numbered Game", 1),
+    game(2, "Unverified Numbered Game 2", 2),
   ]);
-  assert.equal(p.reviews[0].proposed_relation, "sequel_of");
-  assert.ok(p.reviews[0].confidence >= 0.65);
+  assert.equal(p.reviews.filter((r) => r.proposed_relation === "sequel_of").length, 0);
 });
 for (const [type, forward, inverse] of [
   ["sequel_of", "Sequel to", "Sequel"],

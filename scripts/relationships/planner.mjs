@@ -40,8 +40,14 @@ export function releaseMarkers(title) {
     .join(",");
 }
 export function canReuseIdentity(game, canonical) {
+  const aliases = canonical.metadata?.verified_ownership_aliases || [];
+  if (aliases.some((a) => normalize(a.title) === normalize(game.title) &&
+    String(a.release_year || "") === String(game.release || "").slice(0, 4) &&
+    game.igdb_id > 0 && a.igdb_id === game.igdb_id && canonical.igdb_id === game.igdb_id &&
+    (game.steam_appid || null) === (a.steam_appid || null))) return true;
   return (
-    normalize(game.title) === normalize(canonical.title) &&
+    (normalize(game.title) === normalize(canonical.title) ||
+      (canonical.metadata?.verified_identity_names || []).includes(normalize(game.title))) &&
     releaseMarkers(game.title) === releaseMarkers(canonical.title) &&
     String(game.release || "").slice(0, 4) ===
       String(canonical.release_date || "").slice(0, 4) &&
@@ -218,7 +224,9 @@ export function buildPlan(games, existingLinks = [], existingCanonical = []) {
   for (const c of allCanonical.values()) {
     const v = versionCandidate(c.title);
     if (v)
-      for (const base of byTitle.get(v.base) || [])
+      for (const base of byTitle.get(v.base) || []) {
+        if (c.metadata?.generation_key && base.metadata?.generation_key &&
+          c.metadata.generation_key !== base.metadata.generation_key) continue;
         review(
           "relationship",
           c.id,
@@ -228,22 +236,8 @@ export function buildPlan(games, existingLinks = [], existingCanonical = []) {
           "Edition suffix suggests a relationship; title alone cannot verify identity or remake vs edition.",
           { source_igdb_id: c.igdb_id, target_igdb_id: base.igdb_id },
         );
-    const sequel = c.normalized_title.match(/^(.*) (2|3|ii|iii)$/);
-    if (sequel) {
-      const previous =
-        sequel[2] === "3" ? "2" : sequel[2] === "iii" ? "ii" : "";
-      const baseTitle = previous ? `${sequel[1]} ${previous}` : sequel[1];
-      for (const base of byTitle.get(baseTitle) || [])
-        review(
-          "relationship",
-          c.id,
-          base.id,
-          "sequel_of",
-          0.65,
-          "Numbered title suggests a sequel; narrative order requires review.",
-          { source_igdb_id: c.igdb_id, target_igdb_id: base.igdb_id },
-        );
-    }
+      }
+    // Numbers, shared names and franchises never establish a direct sequel.
   }
   for (const [sourceTitle, targetTitle, type] of referenceCandidates) {
     for (const source of byTitle.get(normalize(sourceTitle)) || [])
