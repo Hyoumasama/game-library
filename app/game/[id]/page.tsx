@@ -1,3 +1,4 @@
+import GameRelationships from "@/components/games/GameRelationships";
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
 import { getGameById } from "@/lib/games";
@@ -454,6 +455,7 @@ const displayPrice =
     </section>
   ) : null}
 </div>
+      <GameRelationships gameId={Number(id)} />
     </main>
     
   );
