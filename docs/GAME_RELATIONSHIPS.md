@@ -11,7 +11,7 @@ The live Supabase schema was audited before implementation: 2,234 ownership rows
 - `game_series`: a series, optionally belonging to a franchise. Membership supports manual sort order and multiple series per game.
 - `game_franchises`: broad franchises, with independent many-to-many game membership. Franchise membership also displays through a series' parent franchise.
 - `game_relationships`: directed canonical-to-canonical facts. Never ownership-copy endpoints and never a `same_game` edge.
-- `game_relationship_reviews`: private pending/approved/rejected proposals with reasons, identifiers, confidence, and resolution timestamps.
+- `game_relationship_reviews`: private pending/approved/rejected/resolved proposals with reasons, identifiers, confidence, and resolution timestamps.
 - `game_relationship_backfill_runs`: private historical execution reports.
 
 Ownership deletion cascades only its identity link. Canonical identities can outlive ownership. Relationships restrict endpoint deletion. Memberships and version descriptors cascade when their canonical identity is deliberately removed. Franchise deletion is restricted while series reference it. Deleting a relationship never deletes games.
@@ -22,7 +22,7 @@ The source is the derived release and the target is the original: Requiem `seque
 
 One row produces both displays through `relationshipLabel`: Requiem shows "Sequel to: Innocence" and Innocence shows "Sequel: Requiem". A unique expression index also rejects `A sequel_of B` plus `B prequel_of A`, and reversed duplicate `related_to` edges, including concurrent inserts. Unique source/target/type constraints reject all identical edges. Self references and unknown relationship types are rejected by the database and API.
 
-All 15 supported types are defined in `lib/relationships/model.ts`. No redundant reverse rows are created.
+All 19 supported types are defined in `lib/relationships/model.ts`. No redundant reverse rows are created.
 
 ## Security and application access
 
@@ -36,11 +36,11 @@ Open a game detail page to see its canonical identity, library copies, edition d
 
 "Manage series & franchises" creates taxonomies, adds/removes memberships, sets sort order, and assigns an existing series to a parent franchise. IGDB collections populate series, IGDB franchises populate franchise memberships. A shared franchise does not imply a sequel relationship. Parent franchise hierarchy is assigned explicitly in the admin interface rather than inferred from names.
 
-`/admin/relationships` is the authenticated review queue, also linked in admin navigation. Review the identifiers and full evidence before approving an identity consolidation. Approving identity review moves library mappings only; canonical metadata is retained, and consolidation is blocked if the source already has relationships or memberships so no graph facts are lost. Historical unused canonical records remain available. When two releases are actually editions/remakes or belong to a bundle, reject the identity proposal and add the appropriate relationship instead. Approval/rejection is atomic with the resulting relationship/mapping changes and locks the review row, preventing double decisions.
+`/admin/relationships` is the authenticated review queue, also linked in admin navigation. Review the identifiers and full evidence before approving an identity consolidation. Approving identity review moves library mappings only; canonical metadata is retained, and consolidation is blocked if the source already has relationships or memberships so no graph facts are lost. Historical unused canonical records remain available. When two releases are actually editions/remakes or belong to a bundle, reject the identity proposal and add the appropriate relationship instead. Approval/rejection is atomic with the resulting relationship/mapping changes and locks the review row, making repeated decisions idempotent.
 
 ## Backfill and enrichment
 
-The four new migration files beginning `2026091609` have already been applied to the current project in order. On another deployment, apply these migration files after its existing games schema. The legacy repository migrations were originally applied outside recorded migration history; do not blindly replay them on the live project.
+The relationship migrations beginning `20260916` have been applied to the current project in order. On another deployment, apply these migration files after its existing games schema. The legacy repository migrations were originally applied outside recorded migration history; do not blindly replay them on the live project.
 
 ```powershell
 npm.cmd run relationships:preview
@@ -48,6 +48,7 @@ npm.cmd run relationships:backfill
 npm.cmd run relationships:enrich-preview
 npm.cmd run relationships:enrich
 npm.cmd run relationships:report
+npm.cmd run relationships:audit
 ```
 
 Preview commands write local plans under ignored `data/relationships/`. They make no database changes. Apply commands regenerate the plan, then apply it atomically through service-only RPCs. Reads paginate past Supabase's default row limit. Game snapshots are checked before identity backfill; metadata changes abort stale plans. An advisory transaction lock serializes identity backfills and new ownership matching. Reruns preserve manual links, existing identities, and accepted/rejected review decisions, with deterministic IDs/candidate keys and conflict handling. Future ownership inserts receive identity links atomically: a single exact identifier/title/year match is reused; otherwise a separate identity is created. Rerun preview/backfill periodically to surface new ambiguous groups for review.
@@ -79,4 +80,18 @@ The unit suite covers identity creation, duplicate ownership mapping, Steam matc
 
 Typecheck, unit tests, SQL integration tests, HTTP smoke tests, and production build were executed successfully. Repository lint passes with existing warnings; all new relationship files lint cleanly. Browser automation is unavailable in this environment, so interactive visual checks on mobile/desktop were not performed. Existing security advisor warnings outside the new schema remain outside this change; the queue/report RLS-with-no-policy informational findings are intentional.
 
-The current counts and all 34 ambiguous identity pairs are in [RELATIONSHIP_BACKFILL_REPORT.md](RELATIONSHIP_BACKFILL_REPORT.md). All 155 pending decisions are in [RELATIONSHIP_REVIEW_CANDIDATES.json](RELATIONSHIP_REVIEW_CANDIDATES.json). Refresh the report command after review decisions to update these snapshots.
+Current counts are in [RELATIONSHIP_BACKFILL_REPORT.md](RELATIONSHIP_BACKFILL_REPORT.md). Pending decisions are in [RELATIONSHIP_REVIEW_CANDIDATES.json](RELATIONSHIP_REVIEW_CANDIDATES.json). The final integrity findings and full evidence are in [RELATIONSHIP_INTEGRITY_AUDIT.md](RELATIONSHIP_INTEGRITY_AUDIT.md) and [RELATIONSHIP_INTEGRITY_AUDIT.json](RELATIONSHIP_INTEGRITY_AUDIT.json). Refresh both report commands after review decisions.
+
+## Finalization rules
+
+Demo, playtest, beta and prologue releases use `demo_of`, `playtest_of`, `beta_of` and `prologue_of` directed toward the full game. Owner-verified Stellar Blade demos (both dated canonical variants), Hell Is Us demo and Valor Mortis playtest have explicit relationships; no ownership mapping was changed.
+
+The database calculates each review's semantic key independently of importer keys. Identity endpoints are unordered, prequel/sequel inverses normalize to one fact, and related-to endpoints are unordered. A unique semantic-key/external-identifier-fingerprint index prevents duplicate reviews across importers and reruns. Existing duplicates retain historical records with resolved status.
+
+The fingerprint includes both canonical IGDB/Steam identifiers and the distinct identifier pairs of their linked library copies. Display titles, evidence text, platform, timestamps and duplicate copies with unchanged identifiers do not reopen a rejected proposal. Changed external identifiers permit a fresh candidate while retaining the rejected history. Backfill RPCs enforce suppression atomically, including inverse relationship proposals from enrichment.
+
+Already-existing relationships, already-shared ownership identities, and identity proposals superseded by a relationship resolve automatically. Decision RPCs also check for newly existing facts before applying a decision. Repeated decisions preserve the first outcome. Pending reviews based on stale identifiers resolve with an instruction to regenerate evidence. The queue labels Same identity versus Relationship and includes a Resolved filter and decision explanation.
+
+`relationships:audit` is read-only and writes reproducible local Markdown/JSON reports. It checks missing mappings, unused canonical identities, mapping/semantic-edge/review duplicates, self edges, potential opposing or competing release classifications, release-class/IGDB mismatches, mixed edition/demo/playtest release years, stale pending evidence and pending already-existing facts. Competing edition/remaster labels are potential conflicts, not proof that either is wrong; inspect their provenance before deciding. Audit findings are retained for manual inspection rather than corrected automatically.
+
+Final validation: 23 unit tests, rollback-only SQL integration assertions (including all four new types, inverse review deduplication, existing identity/relationship resolution, rejection suppression and changed identifiers), authenticated HTTP smoke tests, typecheck and production build passed. Lint has zero errors and 42 pre-existing warnings. A full identity backfill rerun created zero identities and zero ownership links, preserved all eight rejected reviews and left zero pending reviews. Ownership row-content checksum before and after integration tests, backfill and HTTP tests was identical: `7895409b9f210c42f80dfc80d85f8c26` across 2,234 rows. This checksum excludes no ownership columns. No original game rows were changed.

@@ -17,7 +17,8 @@
     "relationships:enrich-preview": "node scripts/relationships/enrich.mjs",
     "relationships:enrich": "node scripts/relationships/enrich.mjs --apply",
     "relationships:report": "node scripts/relationships/report.mjs",
-    "test:relationships:smoke": "node --experimental-strip-types --import ./scripts/watch/node-loader.mjs tests/relationships/smoke.mjs"
+    "test:relationships:smoke": "node --experimental-strip-types --import ./scripts/watch/node-loader.mjs tests/relationships/smoke.mjs",
+    "relationships:audit": "node scripts/relationships/audit.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

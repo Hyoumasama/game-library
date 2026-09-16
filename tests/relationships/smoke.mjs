@@ -233,6 +233,61 @@ try {
     ).status,
     200,
   );
+  assert.equal(
+    (
+      await request(
+        "/api/admin/relationships",
+        { action: "review", id: reviewid, approve: true },
+        "POST",
+      )
+    ).status,
+    200,
+  );
+  for (const type of ["demo_of", "playtest_of", "beta_of", "prologue_of"]) {
+    assert.equal(
+      (
+        await request(
+          "/api/admin/relationships",
+          { ...edge, relation_type: type },
+          "POST",
+        )
+      ).status,
+      200,
+    );
+    const existingId = randomUUID();
+    await db(
+      await client
+        .from("game_relationship_reviews")
+        .insert({
+          id: existingId,
+          candidate_key: existingId,
+          kind: "relationship",
+          source_game_id: b,
+          target_game_id: a,
+          proposed_relation: type,
+          confidence: 1,
+          reason: "Already exists smoke test",
+        }),
+    );
+    assert.equal(
+      (
+        await request(
+          "/api/admin/relationships",
+          { action: "review", id: existingId, approve: true },
+          "POST",
+        )
+      ).status,
+      200,
+    );
+    const row = await db(
+      await client
+        .from("game_relationship_reviews")
+        .select("status")
+        .eq("id", existingId)
+        .single(),
+    );
+    assert.equal(row.status, "resolved");
+  }
   const final = await request(
     `/api/game-relationships?canonical=${a}`,
     null,
@@ -240,7 +295,9 @@ try {
     false,
   );
   assert.equal(
-    final.data.detail.relationships[0].relation_type,
+    final.data.detail.relationships.find(
+      (r) => r.relation_type === "expansion_of",
+    ).relation_type,
     "expansion_of",
   );
   assert.equal(

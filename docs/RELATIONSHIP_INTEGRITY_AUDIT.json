@@ -1,0 +1,544 @@
+{
+  "counts": {
+    "relationships": 199,
+    "canonical_games": 2027,
+    "library_entries": 2234,
+    "pending_reviews": 0,
+    "rejected_reviews": 8,
+    "resolved_reviews": 2,
+    "duplicate_mappings": 0,
+    "self_relationships": 0,
+    "stale_pending_reviews": 0,
+    "duplicate_relationships": 0,
+    "suspicious_merge_groups": 12,
+    "pending_already_resolved": 0,
+    "pending_identity_reviews": 0,
+    "duplicate_review_candidates": 0,
+    "owner_verified_relationships": 4,
+    "pending_relationship_reviews": 0,
+    "conflicting_relationship_pairs": 6,
+    "library_entries_without_identity": 0,
+    "canonical_games_without_library_entries": 25
+  },
+  "snapshot_at": "2026-09-16T11:20:29.777187+00:00",
+  "pending_reviews": [],
+  "missing_identity": [],
+  "unused_canonical": [
+    {
+      "id": "78d5a35e-2769-4175-a886-83905105a8e1",
+      "title": "Dishonored: Definitive Edition",
+      "igdb_id": 533,
+      "release_date": "2012-10-09"
+    },
+    {
+      "id": "11b2cd36-ac1e-4960-a058-f0ee261530d1",
+      "title": "The Talos Principle: Gold Edition",
+      "igdb_id": 7386,
+      "release_date": "2014-12-11"
+    },
+    {
+      "id": "951e5ecd-429c-4747-a3ff-254c69acf917",
+      "title": "Star Wars Battlefront II: Celebration Edition",
+      "igdb_id": 26401,
+      "release_date": "2017-11-17"
+    },
+    {
+      "id": "cdef623a-3ab9-48e0-aa45-60ffa53986e0",
+      "title": "Kingdom Come: Deliverance Royal Edition",
+      "igdb_id": 4843,
+      "release_date": "2018-02-13"
+    },
+    {
+      "id": "ae767440-f488-4d35-aa26-9776ae55bd72",
+      "title": "Disco Elysium: The Final Cut",
+      "igdb_id": 141540,
+      "release_date": null
+    },
+    {
+      "id": "a151eb8b-c49e-4432-af33-4d8177482640",
+      "title": "Bloodstained: Ritual of the Night",
+      "igdb_id": 10760,
+      "release_date": null
+    },
+    {
+      "id": "01f89355-86a2-4067-aa80-7882b1593e4d",
+      "title": "Middle-earth: Shadow of War",
+      "igdb_id": 27421,
+      "release_date": "2017-10-10"
+    },
+    {
+      "id": "9a6d23a1-4025-477a-a4f3-a121f3080455",
+      "title": "Elite Dangerous",
+      "igdb_id": 2955,
+      "release_date": "2015-04-02"
+    },
+    {
+      "id": "604851d7-2039-4d06-a456-9f23ffb063b8",
+      "title": "Enslaved: Odyssey to the West Premium Edition",
+      "igdb_id": 24192,
+      "release_date": "2013-10-24"
+    },
+    {
+      "id": "d113419d-be1e-48b3-a57f-482794159144",
+      "title": "Trek to Yomi",
+      "igdb_id": 152203,
+      "release_date": null
+    },
+    {
+      "id": "6f17a6b3-a047-4868-a3bf-c3bb0a56626e",
+      "title": "Supraland",
+      "igdb_id": 89354,
+      "release_date": "2019-04-05"
+    },
+    {
+      "id": "a22411ea-83b8-42b6-aaa7-71e74194c311",
+      "title": "Loop Hero",
+      "igdb_id": 141533,
+      "release_date": null
+    },
+    {
+      "id": "08ed51c9-f170-4801-a7c0-0aeed4e564ef",
+      "title": "Sundered",
+      "igdb_id": 24428,
+      "release_date": "2017-07-28"
+    },
+    {
+      "id": "cdf33c48-030b-4972-ad94-f5fb7a20b7d0",
+      "title": "Dark Deity: Complete Edition",
+      "igdb_id": 147215,
+      "release_date": "2021-06-15"
+    },
+    {
+      "id": "596719c7-9c37-4e57-a347-4aa84276cf42",
+      "title": "Sid Meier's Civilization VI: Platinum Edition",
+      "igdb_id": 19130,
+      "release_date": "2016-10-20"
+    },
+    {
+      "id": "2df3b9cc-b64d-4478-ab51-dbc58a89807d",
+      "title": "Styx: Shards of Darkness - Deluxe Edition",
+      "igdb_id": 13554,
+      "release_date": "2017-03-14"
+    },
+    {
+      "id": "f93032c8-d5d3-4b61-a698-5977d3b9f3cb",
+      "title": "Ghostwire Tokyo",
+      "igdb_id": 119308,
+      "release_date": null
+    },
+    {
+      "id": "5a878d88-6bf4-42aa-ae5d-808e49ca7631",
+      "title": "Stellar Blade (DEMO)",
+      "igdb_id": 117170,
+      "release_date": "2025-05-30"
+    },
+    {
+      "id": "df8f2092-8764-4a4f-a513-b36451533075",
+      "title": "Gravity Circuit",
+      "igdb_id": 106534,
+      "release_date": "2023-07-13"
+    },
+    {
+      "id": "77c9f6f2-bfa5-42a4-a7e3-f9d81a9557f9",
+      "title": "Brotato",
+      "igdb_id": 199116,
+      "release_date": null
+    },
+    {
+      "id": "3c9c2b8d-ebc5-4f04-a2d0-777eaf56f381",
+      "title": "SCARF",
+      "igdb_id": 106836,
+      "release_date": "2021-12-23"
+    },
+    {
+      "id": "9644767f-ff7c-4023-aae9-340e940e86c3",
+      "title": "Ori and the Blind Forest",
+      "igdb_id": 7344,
+      "release_date": "2015-03-11"
+    },
+    {
+      "id": "b5ab0ba0-c517-4130-a970-477b453955d3",
+      "title": "Naheulbeuk's Dungeon Master",
+      "igdb_id": 252851,
+      "release_date": null
+    },
+    {
+      "id": "525e77ad-ade5-437f-af66-a63d64331ac7",
+      "title": "Havendock",
+      "igdb_id": 208652,
+      "release_date": null
+    },
+    {
+      "id": "14b6b8b1-0351-4a9f-acd1-fccbf915c64e",
+      "title": "Agony",
+      "igdb_id": 19453,
+      "release_date": "2018-05-29"
+    }
+  ],
+  "suspicious_merges": [
+    {
+      "id": "14ac509b-c6ed-45bd-aa49-b6c1c9db2c99",
+      "title": "Kingdom Come: Deliverance",
+      "copies": [
+        {
+          "title": "Kingdom Come: Deliverance",
+          "game_id": 206,
+          "igdb_id": 4843,
+          "release": "2018-02-13",
+          "platform": "EPIC",
+          "steam_appid": 379430
+        },
+        {
+          "title": "Kingdom Come: Deliverance Royal Edition",
+          "game_id": 1488,
+          "igdb_id": 4843,
+          "release": "2018-02-13",
+          "platform": "Steam",
+          "steam_appid": 379430
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "1db19308-ed32-4228-a1d5-4515f977696e",
+      "title": "Sundered: Eldritch Edition",
+      "copies": [
+        {
+          "title": "Sundered: Eldritch Edition",
+          "game_id": 196,
+          "igdb_id": 113102,
+          "release": "2017-07-28",
+          "platform": "EPIC",
+          "steam_appid": 535480
+        },
+        {
+          "title": "Sundered",
+          "game_id": 756,
+          "igdb_id": 24428,
+          "release": "2017-07-28",
+          "platform": "Steam",
+          "steam_appid": 535480
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "2b6825c6-3b67-40a9-a01e-d7c0b489356b",
+      "title": "Star Wars Battlefront II",
+      "copies": [
+        {
+          "title": "Star Wars Battlefront II",
+          "game_id": 193,
+          "igdb_id": 26401,
+          "release": "2017-11-17",
+          "platform": "EA Desktop",
+          "steam_appid": 1237950
+        },
+        {
+          "title": "Star Wars Battlefront II: Celebration Edition",
+          "game_id": 370,
+          "igdb_id": 26401,
+          "release": "2017-11-17",
+          "platform": "EPIC",
+          "steam_appid": 1237950
+        },
+        {
+          "title": "Star Wars Battlefront II: Celebration Edition",
+          "game_id": 1465,
+          "igdb_id": 26401,
+          "release": "2017-11-17",
+          "platform": "Xbox",
+          "steam_appid": 1237950
+        },
+        {
+          "title": "Star Wars Battlefront II: Celebration Edition",
+          "game_id": 1473,
+          "igdb_id": 26401,
+          "release": "2017-11-17",
+          "platform": "Xbox",
+          "steam_appid": 1237950
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "2d5c0532-54fc-47ff-ac66-daff2ceabd2b",
+      "title": "Ori and the Blind Forest: Definitive Edition",
+      "copies": [
+        {
+          "title": "Ori and the Blind Forest: Definitive Edition",
+          "game_id": 1500,
+          "igdb_id": 7344,
+          "release": "2015-03-11",
+          "platform": "Steam",
+          "steam_appid": 261570
+        },
+        {
+          "title": "Ori and the Blind Forest",
+          "game_id": 1501,
+          "igdb_id": 7344,
+          "release": "2015-03-11",
+          "platform": "Steam",
+          "steam_appid": 261570
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "4456332e-5f08-4f6a-abd8-b02cc06540d6",
+      "title": "Styx: Shards of Darkness",
+      "copies": [
+        {
+          "title": "Styx: Shards of Darkness",
+          "game_id": 965,
+          "igdb_id": 13554,
+          "release": "2017-03-14",
+          "platform": "GOG",
+          "steam_appid": 355790
+        },
+        {
+          "title": "Styx: Shards of Darkness - Deluxe Edition",
+          "game_id": 1980,
+          "igdb_id": 13554,
+          "release": "2017-03-14",
+          "platform": "EPIC",
+          "steam_appid": 355790
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "5505356c-b297-44be-ab4a-91d6521fecdb",
+      "title": "The Talos Principle",
+      "copies": [
+        {
+          "title": "The Talos Principle",
+          "game_id": 191,
+          "igdb_id": 7386,
+          "release": "2014-12-11",
+          "platform": "EPIC",
+          "steam_appid": 257510
+        },
+        {
+          "title": "The Talos Principle",
+          "game_id": 856,
+          "igdb_id": 7386,
+          "release": "2014-12-11",
+          "platform": "Steam",
+          "steam_appid": 257510
+        },
+        {
+          "title": "The Talos Principle: Gold Edition",
+          "game_id": 1543,
+          "igdb_id": 7386,
+          "release": "2014-12-11",
+          "platform": "GOG",
+          "steam_appid": 257510
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "7c4e4e1d-61ce-448f-a911-97b9779c126b",
+      "title": "Stellar Blade (DEMO)",
+      "copies": [
+        {
+          "title": "Stellar Blade (DEMO)",
+          "game_id": 1145,
+          "igdb_id": 117170,
+          "release": "2024-03-08",
+          "platform": "PSN",
+          "steam_appid": 3489700
+        },
+        {
+          "title": "Stellar Blade (DEMO)",
+          "game_id": 1703,
+          "igdb_id": 117170,
+          "release": "2025-05-30",
+          "platform": "Steam",
+          "steam_appid": 3489700
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "8e2b6427-fbd3-4f90-aec1-4ceecc6ec994",
+      "title": "Sid Meier's Civilization VI",
+      "copies": [
+        {
+          "title": "Sid Meier's Civilization VI",
+          "game_id": 782,
+          "igdb_id": 19130,
+          "release": "2016-10-20",
+          "platform": "Steam",
+          "steam_appid": 289070
+        },
+        {
+          "title": "Sid Meier's Civilization VI: Platinum Edition",
+          "game_id": 1762,
+          "igdb_id": 19130,
+          "release": "2016-10-20",
+          "platform": "EPIC",
+          "steam_appid": 289070
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "9d311a45-6646-4543-a4ed-fad2aec8f83e",
+      "title": "ENSLAVED: Odyssey to the West ",
+      "copies": [
+        {
+          "title": "ENSLAVED: Odyssey to the West ",
+          "game_id": 28,
+          "igdb_id": 2538,
+          "release": "2010-10-05",
+          "platform": "PSN",
+          "steam_appid": 245280
+        },
+        {
+          "title": "Enslaved: Odyssey to the West Premium Edition",
+          "game_id": 468,
+          "igdb_id": 24192,
+          "release": "2013-10-24",
+          "platform": "Steam",
+          "steam_appid": 245280
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "d0d2ddf3-ee6b-4358-abac-293a4655e26f",
+      "title": "Dark Deity",
+      "copies": [
+        {
+          "title": "Dark Deity",
+          "game_id": 781,
+          "igdb_id": 147215,
+          "release": "2021-06-15",
+          "platform": "EPIC",
+          "steam_appid": 1374840
+        },
+        {
+          "title": "Dark Deity: Complete Edition",
+          "game_id": 1591,
+          "igdb_id": 147215,
+          "release": "2021-06-15",
+          "platform": "GOG",
+          "steam_appid": 1374840
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "d4973355-99a2-4d3c-af06-1fbea68c3de4",
+      "title": "Middle-earth: Shadow of War - Definitive Edition",
+      "copies": [
+        {
+          "title": "Middle-earth: Shadow of War - Definitive Edition",
+          "game_id": 313,
+          "igdb_id": 27421,
+          "release": "2017-10-10",
+          "platform": "Steam",
+          "steam_appid": 356190
+        },
+        {
+          "title": "Middle-earth: Shadow of War",
+          "game_id": 727,
+          "igdb_id": 27421,
+          "release": "2017-10-10",
+          "platform": "GOG",
+          "steam_appid": 356190
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    },
+    {
+      "id": "fe68a1d9-4f0a-4c76-a911-f0b30a5e25db",
+      "title": "Dishonored",
+      "copies": [
+        {
+          "title": "Dishonored",
+          "game_id": 70,
+          "igdb_id": 533,
+          "release": "2012-10-09",
+          "platform": "PSN",
+          "steam_appid": 205100
+        },
+        {
+          "title": "Dishonored: Definitive Edition",
+          "game_id": 807,
+          "igdb_id": 533,
+          "release": "2012-10-09",
+          "platform": "EPIC",
+          "steam_appid": 205100
+        },
+        {
+          "title": "Dishonored: Definitive Edition",
+          "game_id": 1403,
+          "igdb_id": 533,
+          "release": "2012-10-09",
+          "platform": "GOG",
+          "steam_appid": 205100
+        }
+      ],
+      "reason": "Release-class mismatch, conflicting IGDB identifiers or mixed variant release years; investigate mapping without merging ownership"
+    }
+  ],
+  "conflicting_relationships": [
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "Mafia: Definitive Edition",
+      "target": "Mafia",
+      "first_id": "24b0429d-a2b9-4e5c-a1d3-e215d0605770",
+      "second_id": "52ac6c63-6d23-4791-a7e0-f55d2d0d6a55",
+      "first_type": "remake_of",
+      "second_type": "edition_of"
+    },
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "Little Nightmares Enhanced Edition",
+      "target": "Little Nightmares",
+      "first_id": "5649d42d-630e-43d2-9aa0-a5f2593a08a8",
+      "second_id": "9ea81b28-6ed7-404b-b8ef-fff5e1ef1921",
+      "first_type": "remaster_of",
+      "second_type": "enhanced_edition_of"
+    },
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "The Outer Worlds: Spacer's Choice Edition",
+      "target": "The Outer Worlds",
+      "first_id": "2255e2ae-145e-4d6d-bb4a-38bda02be0f6",
+      "second_id": "96cd7223-e856-450e-985a-993fdb657f73",
+      "first_type": "remaster_of",
+      "second_type": "edition_of"
+    },
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "Mafia II: Definitive Edition",
+      "target": "Mafia II",
+      "first_id": "51814a74-014f-4756-85e0-658599440fc9",
+      "second_id": "58fe9781-6183-4165-9cb4-5860799799ee",
+      "first_type": "edition_of",
+      "second_type": "remaster_of"
+    },
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "Hard Reset Redux",
+      "target": "Hard Reset",
+      "first_id": "52abc544-9c4c-4df1-b011-bb2fa8e97f6a",
+      "second_id": "c4f53078-39ea-4ad1-898d-b4f066dacaea",
+      "first_type": "edition_of",
+      "second_type": "remaster_of"
+    },
+    {
+      "reason": "Multiple release classifications for the same pair",
+      "source": "Metro Last Light Redux",
+      "target": "Metro: Last Light",
+      "first_id": "3ea0918c-ffdf-45e9-b514-703cfa4720e9",
+      "second_id": "8c42c7dd-5cf7-456d-a940-feed38036894",
+      "first_type": "remaster_of",
+      "second_type": "edition_of"
+    }
+  ]
+}

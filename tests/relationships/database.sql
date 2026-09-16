@@ -13,7 +13,8 @@ do $$ declare a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); rid uuid; re
  if exists(select 1 from public.game_relationships where source_game_id=b and target_game_id=a)then raise exception 'candidate auto inserted';end if;
  perform public.resolve_game_relationship_review(reviewid,true,'verified');
  if not exists(select 1 from public.game_relationships where source_game_id=b and target_game_id=a and relation_type='remaster_of')then raise exception 'approval failed';end if;
- begin perform public.resolve_game_relationship_review(reviewid,false);raise exception 'second decision allowed';exception when raise_exception then if sqlerrm='second decision allowed' then raise;end if;end;
+ perform public.resolve_game_relationship_review(reviewid,false);
+ if (select status from public.game_relationship_reviews where id=reviewid)<>'approved' then raise exception 'repeat decision changed history';end if;
  insert into public.game_relationships(source_game_id,target_game_id,relation_type,confidence,source) values(b,a,'expansion_of',0.95,'integration_test'),(b,a,'edition_of',0.95,'integration_test');
  insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,proposed_relation,confidence,reason) values(b::text,'relationship',a,b,'related_to',0.5,'test rejection') returning id into reviewid;
  perform public.resolve_game_relationship_review(reviewid,false);
@@ -38,5 +39,32 @@ do $$ declare g1 bigint; g2 bigint; c uuid; v uuid; reviewid uuid; other uuid:=g
  perform public.resolve_game_relationship_review(reviewid,true,'Confirmed same identity');
  if not exists(select 1 from public.game_identity_links where game_id=g2 and canonical_game_id=c and version_id is null and match_type='manual')then raise exception 'identity review approval did not remap ownership';end if;
  if not exists(select 1 from public.games where id=g2)then raise exception 'identity approval removed ownership';end if;
+ update public.canonical_games set metadata=jsonb_build_object('ownership_ids',jsonb_build_array(g2)) where id=other;
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,confidence,reason)values('already consolidated','identity',c,other,0.7,'inverse existing identity')on conflict(candidate_key)do nothing;
+ if public.game_review_resolution('identity',other,c,null)is null then raise exception 'already shared identity was not detected';end if;
+end $$;
+do $$ declare a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); r uuid; fingerprint text; t text; begin
+ insert into public.canonical_games(id,title,normalized_title)values(a,'Finalization base','finalization base'),(b,'Finalization derived','finalization derived');
+ foreach t in array array['demo_of','playtest_of','beta_of','prologue_of'] loop
+ insert into public.game_relationships(source_game_id,target_game_id,relation_type,confidence,source)values(b,a,t,1,'integration_test');
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,proposed_relation,confidence,reason)values(gen_random_uuid()::text,'relationship',b,a,t,1,'existing fact')returning id into r;
+ if(select status from public.game_relationship_reviews where id=r)<>'resolved'then raise exception 'existing fact did not resolve: %',t;end if;
+ perform public.resolve_game_relationship_review(r,true);
+ end loop;
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,confidence,reason)values(gen_random_uuid()::text,'identity',a,b,0.5,'distinct release') returning id into r;
+ if(select status from public.game_relationship_reviews where id=r)<>'resolved'then raise exception 'distinct identity fact not resolved';end if;
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,proposed_relation,confidence,reason)values('first','relationship',b,a,'sequel_of',0.5,'reject me')returning id,identifier_fingerprint into r,fingerprint;
+ perform public.resolve_game_relationship_review(r,false,'Not verified');
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,proposed_relation,confidence,reason)values('different importer key','relationship',a,b,'prequel_of',0.7,'inverse duplicate')on conflict(candidate_key)do nothing;
+ if(select count(*)from public.game_relationship_reviews where semantic_key=public.game_review_fact_key('relationship',b,a,'sequel_of'))<>1 then raise exception 'inverse candidate duplicated';end if;
+ update public.canonical_games set title='Changed display title' where id=a;
+ if public.game_review_identifiers(a,b)<>fingerprint then raise exception 'display edit changed identifier evidence';end if;
+ perform public.apply_game_relationship_enrichment(jsonb_build_object('franchises','[]'::jsonb,'series','[]'::jsonb,'franchise_memberships','[]'::jsonb,'series_memberships','[]'::jsonb,'reviews','[]'::jsonb,'report','{}'::jsonb,'relationships',jsonb_build_array(jsonb_build_object('source_game_id',a,'target_game_id',b,'relation_type','prequel_of'))));
+ if exists(select 1 from public.game_relationships where relation_type in('prequel_of','sequel_of')and source_game_id in(a,b))then raise exception 'enrichment ignored rejection';end if;
+ update public.canonical_games set steam_appid=999999997 where id=a;
+ if public.game_review_identifiers(a,b)=fingerprint then raise exception 'material identifier change ignored';end if;
+ insert into public.game_relationship_reviews(candidate_key,kind,source_game_id,target_game_id,proposed_relation,confidence,reason)values('new evidence','relationship',b,a,'sequel_of',0.8,'changed identifiers');
+ if(select count(*)from public.game_relationship_reviews where semantic_key=public.game_review_fact_key('relationship',b,a,'sequel_of'))<>2 then raise exception 'new evidence not eligible';end if;
+ if(select status from public.game_relationship_reviews where id=r)<>'rejected'then raise exception 'rejection history lost';end if;
 end $$;
 rollback;

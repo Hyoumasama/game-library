@@ -91,6 +91,10 @@ for (const [type, forward, inverse] of [
   ["remaster_of", "Remaster of", "Remaster"],
   ["expansion_of", "Expansion for", "Expansion"],
   ["edition_of", "Edition of", "Edition"],
+  ["demo_of", "Demo of", "Demo"],
+  ["playtest_of", "Playtest of", "Playtest"],
+  ["beta_of", "Beta of", "Beta"],
+  ["prologue_of", "Prologue of", "Prologue"],
 ])
   test(`${type} derives forward and reverse display from one row`, () => {
     const r = { source_game_id: "derived", relation_type: type };
@@ -113,7 +117,12 @@ test("validation rejects self relationships, unknown types, and invalid confiden
     relationshipPayload({ ...valid, relation_type: "same_game" }),
   );
   assert.throws(() => relationshipPayload({ ...valid, confidence: 1.1 }));
-  assert.equal(relationTypes.length, 15);
+  assert.equal(relationTypes.length, 19);
+  for (const type of ["demo_of", "playtest_of", "beta_of", "prologue_of"])
+    assert.equal(
+      relationshipPayload({ ...valid, relation_type: type }).relation_type,
+      type,
+    );
 });
 
 import { buildEnrichmentPlan } from "../../scripts/relationships/enrichment-planner.mjs";
