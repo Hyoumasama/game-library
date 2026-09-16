@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { buildAssetPayload } from "@/lib/assets";
 
 type AssetOptionRow = {
   type?: string | null;
@@ -37,28 +38,23 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  let payload: ReturnType<typeof buildAssetPayload>;
 
-  const name = body.name?.trim();
-
-  if (!name) {
+  try {
+    payload = buildAssetPayload(body);
+  } catch (error) {
     return Response.json(
-      { error: "Name is required" },
+      { error: error instanceof Error ? error.message : "Invalid payload" },
       { status: 400 }
     );
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("library_assets")
-    .insert({
-      type: body.type,
-      name,
-      purchase_date: body.purchaseDate || null,
-      price: body.price || null,
-      market: body.market || null,
-      image_url: body.imageUrl || null,
-      notes: body.notes || null,
-    });
+    .insert(payload)
+    .select("*")
+    .single();
 
   if (error) {
     return Response.json(
@@ -67,7 +63,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return Response.json({
-    success: true,
-  });
+  return Response.json({ asset: data }, { status: 201 });
 }

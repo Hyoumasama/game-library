@@ -1,21 +1,11 @@
 import AddAssetModal from "@/components/assets/AddAssetModal";
+import AssetModal from "@/components/assets/AssetModal";
 import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
+import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
+import type { Asset } from "@/lib/assets";
 import { supabase } from "@/lib/supabase";
-
-type Asset = {
-  id: number;
-  type: string;
-  category: string | null;
-  name: string;
-  brand: string | null;
-  purchase_date: string | null;
-  price: string | null;
-  market: string | null;
-  image_url: string | null;
-  status: string | null;
-  notes: string | null;
-};
+import { cookies } from "next/headers";
 
 function formatDate(date: string | null) {
   if (!date) return "-";
@@ -34,6 +24,10 @@ function formatDate(date: string | null) {
 }
 
 export default async function AssetsPage() {
+  const cookieStore = await cookies();
+  const isAdmin = await verifyAdminSessionValue(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  );
   const { data, error } = await supabase
     .from("library_assets")
     .select("*")
@@ -72,7 +66,7 @@ export default async function AssetsPage() {
     </p>
   </div>
 
-  <AddAssetModal />
+  {isAdmin && <AddAssetModal />}
 </div>
 
         <section className="mb-12">
@@ -113,17 +107,20 @@ export default async function AssetsPage() {
           </p>
         </div>
 
-        <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-            asset.status === "Owned" || asset.status === "Active"
-              ? "bg-green-500/15 text-green-400"
-              : asset.status === "Retired" || asset.status === "Expired"
-              ? "bg-red-500/15 text-red-400"
-              : "bg-zinc-700/30 text-zinc-300"
-          }`}
-        >
-          {asset.status || "-"}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-3">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              asset.status === "Owned" || asset.status === "Active"
+                ? "bg-green-500/15 text-green-400"
+                : asset.status === "Retired" || asset.status === "Expired"
+                ? "bg-red-500/15 text-red-400"
+                : "bg-zinc-700/30 text-zinc-300"
+            }`}
+          >
+            {asset.status || "-"}
+          </span>
+          {isAdmin && <AssetModal asset={asset} />}
+        </div>
       </div>
     ))}
   </div>
@@ -173,6 +170,7 @@ export default async function AssetsPage() {
 >
   {asset.status || "-"}
 </p>
+                  {isAdmin && <div className="mt-3"><AssetModal asset={asset} /></div>}
                 </div>
               </div>
             ))}
