@@ -28,6 +28,10 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Use your actual Supabase project URL and service role key for the first two
+variables. Keep the service role key server-side; do not prefix it with
+`NEXT_PUBLIC_`. Restart `npm run dev` after changing `.env.local`.
+
 ## Useful Commands
 
 ```bash
@@ -53,3 +57,7 @@ supabase/migrations/202607081_stats_performance.sql
 - Public pages read through server-side Supabase calls.
 - `all-games` uses `get_games_lite_stats` for filtered dashboard stats.
 - `stats` uses monthly logs for 2024+ and completion dates as archive mode for years before 2024.
+
+## Game Relationships
+
+Canonical identities, ownership mapping, editions, series/franchises, and directed relationships are documented in [docs/GAME_RELATIONSHIPS.md](docs/GAME_RELATIONSHIPS.md). Administrators can manage relationships on game detail pages and review ambiguous matches at `/admin/relationships`. The current results are in [docs/RELATIONSHIP_BACKFILL_REPORT.md](docs/RELATIONSHIP_BACKFILL_REPORT.md).

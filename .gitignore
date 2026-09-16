@@ -42,3 +42,9 @@ data/watch-import/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local relationship backfill plans (contain library metadata)
+data/relationships/
+
+# Supabase CLI cache
+supabase/.temp/
