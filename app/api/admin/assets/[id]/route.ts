@@ -36,3 +36,27 @@ export async function PATCH(
 
   return Response.json({ asset: data });
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const assetId = Number(id);
+
+  if (!Number.isSafeInteger(assetId) || assetId <= 0) {
+    return Response.json({ error: "Invalid asset id" }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("library_assets")
+    .delete()
+    .eq("id", assetId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (!data) return Response.json({ error: "Asset not found" }, { status: 404 });
+
+  return Response.json({ success: true });
+}

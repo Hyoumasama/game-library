@@ -1,5 +1,5 @@
 import AddAssetModal from "@/components/assets/AddAssetModal";
-import AssetModal from "@/components/assets/AssetModal";
+import AssetAdminActions from "@/components/assets/AssetAdminActions";
 import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
@@ -76,7 +76,7 @@ export default async function AssetsPage() {
     {hardware.map((asset) => (
       <div
         key={asset.id}
-        className="flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
+        className="group relative flex items-center gap-4 overflow-visible rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
       >
         <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-black">
           {asset.image_url ? (
@@ -119,7 +119,7 @@ export default async function AssetsPage() {
           >
             {asset.status || "-"}
           </span>
-          {isAdmin && <AssetModal asset={asset} />}
+          {isAdmin && <AssetAdminActions asset={asset} />}
         </div>
       </div>
     ))}
@@ -133,7 +133,7 @@ export default async function AssetsPage() {
             {subscriptions.map((asset) => (
               <div
                 key={asset.id}
-                className="flex items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
+                className="group relative flex items-center gap-4 overflow-visible rounded-2xl border border-zinc-800 bg-zinc-900 p-4"
               >
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-black">
                   {asset.image_url ? (
@@ -170,7 +170,7 @@ export default async function AssetsPage() {
 >
   {asset.status || "-"}
 </p>
-                  {isAdmin && <div className="mt-3"><AssetModal asset={asset} /></div>}
+                  {isAdmin && <AssetAdminActions asset={asset} />}
                 </div>
               </div>
             ))}

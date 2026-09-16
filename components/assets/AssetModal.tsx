@@ -24,7 +24,15 @@ async function responseError(response: Response) {
   return data?.error || "Something went wrong. Please try again.";
 }
 
-export default function AssetModal({ asset }: { asset?: Asset }) {
+export default function AssetModal({
+  asset,
+  hideButton = false,
+  openSignal = 0,
+}: {
+  asset?: Asset;
+  hideButton?: boolean;
+  openSignal?: number;
+}) {
   const router = useRouter();
   const editing = Boolean(asset);
   const [open, setOpen] = useState(false);
@@ -32,6 +40,13 @@ export default function AssetModal({ asset }: { asset?: Asset }) {
   const [options, setOptions] = useState<AssetOptions>(emptyOptions);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!openSignal) return;
+    setValues(assetToFormValues(asset));
+    setMessage("");
+    setOpen(true);
+  }, [asset, openSignal]);
 
   useEffect(() => {
     if (!open) return;
@@ -90,15 +105,17 @@ export default function AssetModal({ asset }: { asset?: Asset }) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        className={editing
-          ? "rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:border-zinc-500 hover:text-white"
-          : "rounded-xl bg-white px-4 py-3 font-bold text-black"}
-      >
-        {editing ? "Edit" : "+ Add Asset"}
-      </button>
+      {!hideButton && (
+        <button
+          type="button"
+          onClick={openModal}
+          className={editing
+            ? "rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:border-zinc-500 hover:text-white"
+            : "rounded-xl bg-white px-4 py-3 font-bold text-black"}
+        >
+          {editing ? "Edit" : "+ Add Asset"}
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
