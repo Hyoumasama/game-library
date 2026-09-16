@@ -1,0 +1,31 @@
+{
+  "phase": "before",
+  "counts": {
+    "relationships": 194,
+    "canonical_games": 2027,
+    "library_entries": 2234,
+    "pending_reviews": 0,
+    "rejected_reviews": 56,
+    "resolved_reviews": 26,
+    "duplicate_mappings": 0,
+    "self_relationships": 0,
+    "broken_foreign_keys": 0,
+    "demo_full_game_merges": 0,
+    "stale_pending_reviews": 0,
+    "duplicate_relationships": 0,
+    "suspicious_merge_groups": 0,
+    "orphan_canonical_records": 0,
+    "pending_already_resolved": 0,
+    "pending_identity_reviews": 0,
+    "duplicate_review_candidates": 0,
+    "owner_verified_relationships": 4,
+    "pending_relationship_reviews": 0,
+    "conflicting_relationship_pairs": 0,
+    "duplicate_edition_remaster_links": 0,
+    "library_entries_without_identity": 0,
+    "conflicting_inverse_relationships": 0,
+    "collection_component_identity_mistakes": 0,
+    "canonical_games_without_library_entries": 12
+  },
+  "games_checksum": "bfc99040dc279f60202c2acbeb27c7b4191c75f8ac5871ccfdda31f053cbcea3"
+}
