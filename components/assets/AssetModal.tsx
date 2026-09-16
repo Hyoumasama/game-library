@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Asset, AssetFormValues, assetToFormValues } from "@/lib/assets";
 
 type AssetOptions = {
@@ -40,9 +40,12 @@ export default function AssetModal({
   const [options, setOptions] = useState<AssetOptions>(emptyOptions);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const handledOpenSignal = useRef(openSignal);
 
   useEffect(() => {
-    if (!openSignal) return;
+    if (!openSignal || handledOpenSignal.current === openSignal) return;
+
+    handledOpenSignal.current = openSignal;
     setValues(assetToFormValues(asset));
     setMessage("");
     setOpen(true);
