@@ -37,8 +37,12 @@ test("Steam exact matches map safely without IGDB", () => {
 test("ambiguous identifier matches are isolated for review", () => {
   const p = buildPlan([game(1, "Agony", 10), game(2, "Agony UNRATED", 10)]);
   assert.equal(p.canonical.length, 2);
-  assert.equal(p.reviews.length, 1);
-  assert.equal(p.reviews[0].kind, "identity");
+  assert.equal(p.reviews.filter((r) => r.kind === "identity").length, 1);
+  assert.equal(
+    p.reviews.filter((r) => r.proposed_relation === "enhanced_edition_of")
+      .length,
+    1,
+  );
   assert.equal(p.report.automatically_accepted, 0);
 });
 test("conflicting release years cannot collapse Silent Hill identities", () => {
@@ -231,4 +235,94 @@ test("suspicious IGDB edition parent naming is review-only", () => {
   );
   assert.equal(p.relationships.length, 0);
   assert.equal(p.reviews[0].proposed_relation, "edition_of");
+});
+
+import {
+  canReuseIdentity,
+  releaseMarkers,
+} from "../../scripts/relationships/planner.mjs";
+for (const marker of [
+  "Edition",
+  "Definitive Edition",
+  "Complete Edition",
+  "Gold Edition",
+  "Royal Edition",
+  "Platinum Edition",
+  "Deluxe Edition",
+  "Premium Edition",
+  "Enhanced Edition",
+  "Remastered",
+  "Remake",
+  "Redux",
+  "Director's Cut",
+  "GOTY",
+  "Celebration Edition",
+  "UNRATED",
+  "Demo",
+  "Playtest",
+  "Beta",
+  "Prologue",
+]) {
+  test(`${marker} cannot collapse into base through shared external identifiers`, () => {
+    assert.ok(releaseMarkers(`Example ${marker}`));
+    const p = buildPlan([
+      game(1, "Example", 10, 100),
+      game(2, `Example ${marker}`, 10, 100),
+    ]);
+    assert.equal(p.canonical.length, 2);
+    assert.notEqual(p.links[0].canonical_game_id, p.links[1].canonical_game_id);
+  });
+}
+test("an existing incorrect manual mapping cannot pull a new edition copy into the base", () => {
+  const canonical = {
+    id: "base",
+    title: "Example",
+    normalized_title: "example",
+    igdb_id: 10,
+    steam_appid: 100,
+    release_date: "2020-01-01",
+  };
+  const p = buildPlan(
+    [
+      game(1, "Example Deluxe Edition", 10, 100),
+      game(2, "Example Deluxe Edition", 10, 100),
+    ],
+    [{ game_id: 1, canonical_game_id: "base" }],
+    [canonical],
+  );
+  assert.notEqual(p.links[0].canonical_game_id, "base");
+  assert.equal(p.links.length, 1);
+});
+test("genuine copies reuse the verified full release despite another variant sharing its ID", () => {
+  const c = {
+    id: "edition",
+    title: "Example Deluxe Edition",
+    normalized_title: "example deluxe edition",
+    igdb_id: 10,
+    steam_appid: 100,
+    release_date: "2020-01-01",
+  };
+  assert.equal(canReuseIdentity(game(2, c.title, 10, 100), c), true);
+  const p = buildPlan(
+    [game(2, c.title, 10, 100)],
+    [],
+    [c, { ...c, id: "base", title: "Example", normalized_title: "example" }],
+  );
+  assert.equal(p.canonical.length, 0);
+  assert.equal(p.links[0].canonical_game_id, "edition");
+});
+test("punctuation-equivalent reboots still require matching IDs and years", () => {
+  const c = {
+    title: "Star Wars Battlefront II",
+    igdb_id: 26401,
+    steam_appid: 1237950,
+    release_date: "2017-11-17",
+  };
+  assert.equal(
+    canReuseIdentity(
+      game(1, "Star Wars: Battlefront II", 142, 6060, "2005-10-31"),
+      c,
+    ),
+    false,
+  );
 });

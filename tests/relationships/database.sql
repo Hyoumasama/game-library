@@ -67,4 +67,27 @@ do $$ declare a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); r uuid; fing
  if(select count(*)from public.game_relationship_reviews where semantic_key=public.game_review_fact_key('relationship',b,a,'sequel_of'))<>2 then raise exception 'new evidence not eligible';end if;
  if(select status from public.game_relationship_reviews where id=r)<>'rejected'then raise exception 'rejection history lost';end if;
 end $$;
+do $$ declare gid bigint; duplicate_id bigint; base_id uuid; variant_id uuid; marker text; begin
+ insert into public.games(title,slug,igdb_id,release,platform)values('Identity guard test',gen_random_uuid()::text,999999996,'2026-01-01','Steam')returning id into gid;
+ select canonical_game_id into base_id from public.game_identity_links where game_id=gid;
+ foreach marker in array array['Edition','Definitive Edition','Complete Edition','Gold Edition','Royal Edition','Platinum Edition','Deluxe Edition','Premium Edition','Enhanced Edition','Remastered','Remake','Redux','Director''s Cut','GOTY','Celebration Edition','UNRATED','Demo','Playtest','Beta','Prologue']loop
+ insert into public.games(title,slug,igdb_id,release,platform)values('Identity guard test '||marker,gen_random_uuid()::text,999999996,'2026-01-01','Steam')returning id into gid;
+ select canonical_game_id into variant_id from public.game_identity_links where game_id=gid;
+ if variant_id=base_id then raise exception 'Variant merged: %',marker;end if;
+ insert into public.games(title,slug,igdb_id,release,platform)values('Identity guard test '||marker,gen_random_uuid()::text,999999996,'2026-01-01','EPIC')returning id into duplicate_id;
+ if(select canonical_game_id from public.game_identity_links where game_id=duplicate_id)<>variant_id then raise exception 'Genuine ownership duplicate isolated: %',marker;end if;
+ end loop;
+ if exists(select 1 from public.game_relationship_reviews where status='pending'and decision_notes like 'Verified cleanup:%')then raise exception 'Cleanup decisions reopened';end if;
+ if has_function_privilege('anon','public.audit_game_relationship_integrity()','EXECUTE')then raise exception 'Private integrity audit exposed';end if;
+end $$;
+do $$ declare gold_id bigint; deluxe_id bigint; c uuid; baseline bigint; result jsonb; begin
+ select public.audit_game_relationship_integrity()into result;
+ if(result->'counts'->>'broken_foreign_keys')::bigint<>0 or(result->'counts'->>'duplicate_mappings')::bigint<>0 then raise exception 'Integrity regression';end if;
+ baseline:=(result->'counts'->>'suspicious_merge_groups')::bigint;
+ insert into public.games(title,slug,igdb_id,release)values('Audit marker test Gold Edition',gen_random_uuid()::text,999999995,'2026-01-01')returning id into gold_id;
+ insert into public.games(title,slug,igdb_id,release)values('Audit marker test Deluxe Edition',gen_random_uuid()::text,999999995,'2026-01-01')returning id into deluxe_id;
+ select canonical_game_id into c from public.game_identity_links where game_id=gold_id;
+ update public.game_identity_links set canonical_game_id=c,version_id=null where game_id=deluxe_id;
+ if(public.audit_game_relationship_integrity()->'counts'->>'suspicious_merge_groups')::bigint<=baseline then raise exception 'Different edition titles with shared IDs not audited';end if;
+end $$;
 rollback;
