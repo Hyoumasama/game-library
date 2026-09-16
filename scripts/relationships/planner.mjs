@@ -11,7 +11,7 @@ export const uuid = (key) => {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
 };
 const editionPattern =
-  /(?:[ :\u2013\u2014-]+)?(remastered|remaster|remake|definitive edition|enhanced edition|director['\u2019]?s cut|ultimate edition|gold edition|goty(?: edition)?|game of the year(?: edition)?|complete edition|deluxe edition|special edition|anniversary edition|redux|royal edition|spacer['\u2019]?s choice edition)$/i;
+  /(?:[ :\u2013\u2014-]+)?(remastered|remaster|remake|definitive edition|enhanced edition|director['\u2019]?s cut|ultimate edition|gold edition|goty(?: edition)?|game of the year(?: edition)?|complete edition|deluxe edition|special edition|anniversary edition|premium edition|platinum edition|celebration edition|eldritch edition|edition|unrated|redux|royal edition|spacer['\u2019]?s choice edition)$/i;
 export function versionCandidate(title) {
   const m = title.match(editionPattern);
   if (!m) return null;
@@ -20,10 +20,37 @@ export function versionCandidate(title) {
     ? "remaster_of"
     : suffix === "remake"
       ? "remake_of"
-      : suffix.includes("enhanced") || suffix.includes("director")
+      : suffix.includes("enhanced") ||
+          suffix.includes("director") ||
+          suffix === "unrated" ||
+          suffix === "eldritch edition"
         ? "enhanced_edition_of"
         : "edition_of";
   return { base: normalize(title.slice(0, m.index)), type, name: m[1] };
+}
+export function releaseMarkers(title) {
+  return [
+    ...new Set(
+      normalize(title).match(
+        /\b(?:edition|remastered|remaster|remake|redux|directors|director|goty|unrated|demo|playtest|beta|prologue)\b/g,
+      ) || [],
+    ),
+  ]
+    .sort()
+    .join(",");
+}
+export function canReuseIdentity(game, canonical) {
+  return (
+    normalize(game.title) === normalize(canonical.title) &&
+    releaseMarkers(game.title) === releaseMarkers(canonical.title) &&
+    String(game.release || "").slice(0, 4) ===
+      String(canonical.release_date || "").slice(0, 4) &&
+    (game.igdb_id > 0
+      ? game.igdb_id === canonical.igdb_id
+      : game.steam_appid > 0 &&
+        game.steam_appid === canonical.steam_appid &&
+        !(canonical.igdb_id > 0))
+  );
 }
 export function buildPlan(games, existingLinks = [], existingCanonical = []) {
   const canonical = [],
@@ -81,7 +108,24 @@ export function buildPlan(games, existingLinks = [], existingCanonical = []) {
       const existing = [
         ...new Set(copies.map((g) => mapped.get(Number(g.id))).filter(Boolean)),
       ];
-      const cid = existing[0] || uuid(`library:${first.id}`);
+      const unmapped = copies.find((g) => !mapped.has(Number(g.id)));
+      const compatible = [...allCanonical.values()].filter((c) =>
+        canReuseIdentity(first, c),
+      );
+      let cid =
+        !unmapped && existing.length
+          ? existing[0]
+          : compatible.length === 1
+            ? compatible[0].id
+            : uuid(`library:${(unmapped || first).id}`);
+      if (
+        unmapped &&
+        allCanonical.has(cid) &&
+        !canReuseIdentity(first, allCanonical.get(cid))
+      )
+        cid = uuid(
+          `isolated-release:${unmapped.id}:${normalize(first.title)}:${first.release || ""}`,
+        );
       const identityKey = `library:${first.id}`;
       if (!allCanonical.has(cid)) {
         const c = {
