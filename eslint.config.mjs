@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    ".agents/**",
+    ".codex/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

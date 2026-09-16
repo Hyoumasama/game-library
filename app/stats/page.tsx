@@ -1031,8 +1031,8 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
   const distRows: DistributedHoursRow[] = [];
   let distGameIds: number[] = [];
-  let distributedErrorMessage: string | null = null;
-  let distGamesMap: Record<number, any> = {};
+  const distributedErrorMessage: string | null = null;
+  const distGamesMap: Record<number, any> = {};
 
   if (useArchiveTimeline && Number.isInteger(year)) {
     // Fetch distributed hours for historical years only.
