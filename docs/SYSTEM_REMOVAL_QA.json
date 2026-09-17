@@ -1,0 +1,945 @@
+{
+  "completed": true,
+  "project_id": "odohyafmagygisgvonch",
+  "backup": {
+    "directory": "backups/retired-game-system-20260917",
+    "tables": 11,
+    "rows": 7162,
+    "sql_data_chunks": 34,
+    "counts_and_checksums_verified": true,
+    "games_data_included": false,
+    "games_schema_included": false,
+    "git_ignored": true
+  },
+  "deleted_tables": [
+    {
+      "name": "canonical_game_franchises",
+      "rows_backed_up": 612
+    },
+    {
+      "name": "canonical_game_series",
+      "rows_backed_up": 971
+    },
+    {
+      "name": "canonical_games",
+      "rows_backed_up": 2025
+    },
+    {
+      "name": "game_franchises",
+      "rows_backed_up": 225
+    },
+    {
+      "name": "game_identity_links",
+      "rows_backed_up": 2235
+    },
+    {
+      "name": "game_relationship_backfill_runs",
+      "rows_backed_up": 11
+    },
+    {
+      "name": "game_relationship_reviews",
+      "rows_backed_up": 222
+    },
+    {
+      "name": "game_relationships",
+      "rows_backed_up": 192
+    },
+    {
+      "name": "game_semantic_cleanup_archive",
+      "rows_backed_up": 23
+    },
+    {
+      "name": "game_series",
+      "rows_backed_up": 525
+    },
+    {
+      "name": "game_versions",
+      "rows_backed_up": 121
+    }
+  ],
+  "deleted_functions": [
+    "apply_game_identity_backfill(jsonb)",
+    "apply_game_relationship_enrichment(jsonb)",
+    "audit_game_relationship_integrity()",
+    "audit_game_relationship_integrity_core()",
+    "enforce_game_series_exclusions()",
+    "game_identity_compatible(uuid, text, bigint, bigint, date)",
+    "game_identity_markers(text)",
+    "game_identity_title(text)",
+    "game_release_class(text)",
+    "game_review_fact_key(text, uuid, uuid, text)",
+    "game_review_identifiers(uuid, uuid)",
+    "game_review_resolution(text, uuid, uuid, text)",
+    "link_new_library_game_identity()",
+    "prepare_game_relationship_review()",
+    "prevent_duplicate_verified_canonical()",
+    "reconcile_game_relationship_reviews()",
+    "relationship_updated_at()",
+    "resolve_game_relationship_review(uuid, boolean, text)"
+  ],
+  "deleted_triggers": [
+    {
+      "table": "canonical_games",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_versions",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_franchises",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_series",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_relationships",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "relationship_updated_at"
+    },
+    {
+      "table": "games",
+      "name": "link_new_library_game_identity"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "prepare_game_relationship_review"
+    },
+    {
+      "table": "canonical_games",
+      "name": "prevent_duplicate_verified_canonical"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "enforce_game_series_exclusions"
+    }
+  ],
+  "deleted_indexes": [
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_pkey"
+    },
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_franchise_idx"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "canonical_game_series_pkey"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "canonical_game_series_series_idx"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_identity_key_key"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_igdb_idx"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_steam_idx"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_pkey"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_title_idx"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_search_idx"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_pkey"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_slug_key"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_igdb_franchise_id_key"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_pkey"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_canonical_idx"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_version_idx"
+    },
+    {
+      "table": "game_relationship_backfill_runs",
+      "name": "game_relationship_backfill_runs_pkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_pkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_candidate_key_key"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_status_idx"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_source_idx"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_target_idx"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_review_semantic_identifiers_unique"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_pkey"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_source_game_id_target_game_id_relation_t_key"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_inverse_unique"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_target_idx"
+    },
+    {
+      "table": "game_semantic_cleanup_archive",
+      "name": "game_semantic_cleanup_archive_pkey"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_pkey"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_slug_key"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_franchise_idx"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_pkey"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_canonical_game_id_key"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_identity_unique"
+    }
+  ],
+  "deleted_constraints": [
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_canonical_game_id_fkey"
+    },
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_franchise_id_fkey"
+    },
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_membership_role_check"
+    },
+    {
+      "table": "canonical_game_franchises",
+      "name": "canonical_game_franchises_pkey"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "canonical_game_series_canonical_game_id_fkey"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "canonical_game_series_pkey"
+    },
+    {
+      "table": "canonical_game_series",
+      "name": "canonical_game_series_series_id_fkey"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_identity_key_key"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_pkey"
+    },
+    {
+      "table": "canonical_games",
+      "name": "canonical_games_title_check"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_igdb_franchise_id_key"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_name_check"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_pkey"
+    },
+    {
+      "table": "game_franchises",
+      "name": "game_franchises_slug_key"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_canonical_game_id_fkey"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_confidence_check"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_game_id_fkey"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_match_type_check"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_pkey"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_version_id_fkey"
+    },
+    {
+      "table": "game_identity_links",
+      "name": "game_identity_links_version_identity_fk"
+    },
+    {
+      "table": "game_relationship_backfill_runs",
+      "name": "game_relationship_backfill_runs_pkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_candidate_key_key"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_check"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_check1"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_confidence_check"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_kind_check"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_pkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_source_game_id_fkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_status_check"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_relationship_reviews_target_game_id_fkey"
+    },
+    {
+      "table": "game_relationship_reviews",
+      "name": "game_review_relation_check"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_check"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_confidence_check"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_pkey"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_relation_type_check"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_source_check"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_source_game_id_fkey"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_source_game_id_target_game_id_relation_t_key"
+    },
+    {
+      "table": "game_relationships",
+      "name": "game_relationships_target_game_id_fkey"
+    },
+    {
+      "table": "game_semantic_cleanup_archive",
+      "name": "game_semantic_cleanup_archive_pkey"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_franchise_id_fkey"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_name_check"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_pkey"
+    },
+    {
+      "table": "game_series",
+      "name": "game_series_slug_key"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_canonical_game_id_fkey"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_canonical_game_id_key"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_identity_unique"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_pkey"
+    },
+    {
+      "table": "game_versions",
+      "name": "game_versions_version_type_check"
+    }
+  ],
+  "deleted_sequence": "game_semantic_cleanup_archive_id_seq",
+  "dependency_audit": {
+    "external_foreign_keys": [],
+    "external_function_callers": [],
+    "outside_schema_callers": [],
+    "edge_functions": [],
+    "cron_jobs_schema_present": false,
+    "internal_dependents_only": true,
+    "drop_uses_restrict": true
+  },
+  "preservation": {
+    "before_teardown": {
+      "row_count": 2235,
+      "checksum": "5ecb00b4332aef604d38959231ca84a57ec6ad66698f888a8fa14dcd56536968"
+    },
+    "after_teardown": {
+      "checksum": "5ecb00b4332aef604d38959231ca84a57ec6ad66698f888a8fa14dcd56536968",
+      "row_count": 2235
+    },
+    "after_runtime_qa": {
+      "row_count": 2235,
+      "checksum": "5ecb00b4332aef604d38959231ca84a57ec6ad66698f888a8fa14dcd56536968"
+    },
+    "games_unchanged_by_teardown": true,
+    "retained_tables": [
+      {
+        "table_name": "game_achievements",
+        "row_count": 846,
+        "checksum": "d26c2b19c2ee8eba2e5bd292d6e16edfd2574b4279e0b457372bb2ab76aa4335",
+        "unchanged": true
+      },
+      {
+        "table_name": "game_achievements_backup",
+        "row_count": 689,
+        "checksum": "7839636d445a61895930e691c40f70c7ec2f70f37c22cfcca92ce6f2115787f6",
+        "unchanged": true
+      },
+      {
+        "table_name": "game_hour_distributions",
+        "row_count": 6,
+        "checksum": "6afe0fef8b79bfe0e385e6a4f4f79b54174d2ef64724408f41a7e6a0af6714e3",
+        "unchanged": true
+      },
+      {
+        "table_name": "games",
+        "row_count": 2235,
+        "checksum": "4e341fb22c889120073efabdde251c7a8ac48005c05d1834854c9b486587cbad",
+        "unchanged": true
+      },
+      {
+        "table_name": "games_backup",
+        "row_count": 2127,
+        "checksum": "dce40f684b31be5e18b1b52b2ad0ffcb6edadec48868d9a096483ec7914f80f7",
+        "unchanged": true
+      },
+      {
+        "table_name": "library_assets",
+        "row_count": 20,
+        "checksum": "4292ccd41e8a6239b597ed6e0f39226b9024472e358c061004f82c8c413c3bd8",
+        "unchanged": true
+      },
+      {
+        "table_name": "monthly_play_logs",
+        "row_count": 281,
+        "checksum": "cce3c2d028974eec0fca875311b6a7ae9bce83ac08e28d84041433bb183cf907",
+        "unchanged": true
+      },
+      {
+        "table_name": "monthly_play_logs_backup",
+        "row_count": 268,
+        "checksum": "d17ae7289844ed3f5ed65a9424c06ec8319927d2cb9296a2424971916ea4c6d3",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_episodes",
+        "row_count": 536,
+        "checksum": "c6def39b4927971122defa1d3c622db76f94e119c40798d1e62d4a2f095a9623",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_files",
+        "row_count": 0,
+        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_import_items",
+        "row_count": 130,
+        "checksum": "21ed080b551ef8332ce1a04e7e835bb0375e7f2faf02d28babf99f27d5cba2db",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_library_entries",
+        "row_count": 26,
+        "checksum": "83203e7077df868da2d31f5ad7f9dec090bdb59cc33d6e6b9328823fc87ff7d9",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_media",
+        "row_count": 26,
+        "checksum": "f06848fe3973fcb6fb2716e59e348d67a2ee144b7700192673e0fe40ad0d1ea7",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_owned_episodes",
+        "row_count": 325,
+        "checksum": "d06884264ad76528a204948760cc04dca26e62523ac4a3d0c64b6929af872255",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_seasons",
+        "row_count": 38,
+        "checksum": "67b2c0365852e00e64c6081f9f8f5e1cb6afd5ec593ff8375ebe294b9a18ca75",
+        "unchanged": true
+      },
+      {
+        "table_name": "watch_source_links",
+        "row_count": 26,
+        "checksum": "a235e10c2cfe833050519a73dbf1fbe138ed85722b0dff6ac218db1c25f6dd99",
+        "unchanged": true
+      }
+    ],
+    "unchanged_assets": 53,
+    "unchanged_screenshots": 12,
+    "protected_file_hashes_verified": true,
+    "concurrent_change_before_teardown": {
+      "initial": [
+        {
+          "table_name": "game_achievements",
+          "row_count": 845,
+          "checksum": "e643a113358c28dd30163eceb29bc7d186fe265c240b13b493da4f695a69b28b"
+        },
+        {
+          "table_name": "games",
+          "row_count": 2235,
+          "checksum": "2b63ac9d5efeccbbef7a9e804f68849f055a8fa84a10621b40caec785d83b14d"
+        }
+      ],
+      "current": [
+        {
+          "table_name": "game_achievements",
+          "row_count": 846,
+          "checksum": "d26c2b19c2ee8eba2e5bd292d6e16edfd2574b4279e0b457372bb2ab76aa4335"
+        },
+        {
+          "table_name": "games",
+          "row_count": 2235,
+          "checksum": "4e341fb22c889120073efabdde251c7a8ac48005c05d1834854c9b486587cbad"
+        }
+      ],
+      "note": "Observed before teardown. This task issued only SELECT queries against retained tables; CRUD tests used an isolated in-memory client."
+    },
+    "initial_id_ordered_checksum": "456a7c93923b4d491acbc39be859119b994cd8bb9413bd0f3aeaf21d66feb618"
+  },
+  "deleted_files": [
+    "lib/relationships/client.ts",
+    "lib/relationships/compact.ts",
+    "lib/relationships/model.ts",
+    "lib/relationships/presentation.ts",
+    "lib/relationships/relatedEntries.ts",
+    "lib/relationships/validation.ts",
+    "lib/server/relationships/data.ts",
+    "app/canonical/[id]/loading.tsx",
+    "app/canonical/[id]/page.tsx",
+    "app/franchise/[id]/page.tsx",
+    "app/admin/relationships/loading.tsx",
+    "app/admin/relationships/page.tsx",
+    "app/admin/relationships/RelationshipReviewClient.tsx",
+    "app/api/admin/relationships/route.ts",
+    "app/api/game-relationships/route.ts",
+    "components/games/CanonicalPicker.tsx",
+    "components/games/GameCompactMetadata.tsx",
+    "components/games/GameRelationships.tsx",
+    "components/games/GameRelationshipsServer.tsx",
+    "components/games/GameRelationshipSections.tsx",
+    "components/games/ManageGameModal.tsx",
+    "components/games/OwnedCopiesIndicator.tsx",
+    "components/games/RelatedEntries.tsx",
+    "scripts/relationships/audit.mjs",
+    "scripts/relationships/backfill.mjs",
+    "scripts/relationships/cleanup-snapshot.mjs",
+    "scripts/relationships/enrich.mjs",
+    "scripts/relationships/enrichment-planner.mjs",
+    "scripts/relationships/planner.mjs",
+    "scripts/relationships/reference-candidates.mjs",
+    "scripts/relationships/report.mjs",
+    "scripts/relationships/semantic-metadata.mjs",
+    "scripts/relationships/semantic-report.mjs",
+    "scripts/relationships/semantic-snapshot.mjs",
+    "scripts/relationships/ui-games-diff.mjs",
+    "tests/relationships/browser-qa.mjs",
+    "tests/relationships/cleanup-http.mjs",
+    "tests/relationships/compact-browser.mjs",
+    "tests/relationships/database.sql",
+    "tests/relationships/details-http.mjs",
+    "tests/relationships/game-details-browser.mjs",
+    "tests/relationships/model.test.mjs",
+    "tests/relationships/presentation.test.mjs",
+    "tests/relationships/related-entries-browser.mjs",
+    "tests/relationships/related-entries.test.mjs",
+    "tests/relationships/semantic-http.mjs",
+    "tests/relationships/semantic.sql",
+    "tests/relationships/semantic.test.mjs",
+    "tests/relationships/smoke.mjs",
+    "docs/GAME_RELATIONSHIPS.md",
+    "docs/GAME_RELATIONSHIPS_BROWSER_QA.json",
+    "docs/GAME_RELATIONSHIPS_UI.md",
+    "docs/RELATIONSHIP_BACKFILL_REPORT.md",
+    "docs/RELATIONSHIP_CLEANUP_AFTER.json",
+    "docs/RELATIONSHIP_CLEANUP_BEFORE.json",
+    "docs/RELATIONSHIP_CLEANUP_REPORT.md",
+    "docs/RELATIONSHIP_INTEGRITY_AUDIT.json",
+    "docs/RELATIONSHIP_INTEGRITY_AUDIT.md",
+    "docs/RELATIONSHIP_REVIEW_CANDIDATES.json",
+    "docs/SEMANTIC_CLEANUP.md",
+    "docs/SEMANTIC_CLEANUP_AFTER.json",
+    "docs/SEMANTIC_CLEANUP_BEFORE.json",
+    "docs/SEMANTIC_RELATIONSHIP_REVIEW.json",
+    "docs/GAME_DETAILS_COMPACT_QA.json",
+    "docs/GAME_DETAILS_RESTORED_QA.json",
+    "docs/RELATED_ENTRIES_DIRECTION_AUDIT.md",
+    "docs/RELATED_ENTRIES_QA.json",
+    "supabase/migrations/20260916090336_game_relationship_system.sql",
+    "supabase/migrations/20260916091210_game_relationship_integrity.sql",
+    "supabase/migrations/20260916091406_game_relationship_enrichment.sql",
+    "supabase/migrations/20260916091738_game_relationship_review_safety.sql",
+    "supabase/migrations/20260916111145_relationship_finalization.sql",
+    "supabase/migrations/20260916111421_relationship_integrity_audit.sql",
+    "supabase/migrations/20260916111757_relationship_audit_release_years.sql",
+    "supabase/migrations/20260916113610_relationship_release_cleanup.sql",
+    "supabase/migrations/20260916114036_relationship_cleanup_audit.sql",
+    "supabase/migrations/20260916114542_relationship_audit_execution.sql",
+    "supabase/migrations/20260916114735_relationship_cleanup_review_decisions.sql",
+    "supabase/migrations/20260916161119_game_semantic_cleanup.sql",
+    "supabase/migrations/20260916161910_semantic_identity_predicate_fix.sql",
+    "supabase/migrations/20260916162252_semantic_original_release_targets.sql",
+    "supabase/migrations/20260916162652_historical_identity_reuse.sql",
+    "data/relationships/backfill-plan.json",
+    "data/relationships/backfill-report.json",
+    "data/relationships/cleanup-after.json",
+    "data/relationships/cleanup-before.json",
+    "data/relationships/enrichment-plan.json",
+    "data/relationships/lint-results.json",
+    "data/relationships/semantic-after.json",
+    "data/relationships/semantic-before.json",
+    "data/relationships/semantic-igdb.json",
+    "data/relationships/ui-games-current.json",
+    "data/relationships/ui-games-diff.json"
+  ],
+  "modified_files": [
+    "app/game/[id]/page.tsx",
+    "components/AppNav.tsx",
+    "package.json",
+    "README.md",
+    ".gitignore"
+  ],
+  "added_files": [
+    "tests/core/setup.mjs",
+    "tests/core/database.mjs",
+    "tests/core/games-api.test.mjs",
+    "tests/core/library.test.mjs",
+    "supabase/migrations/20260917152125_retire_game_identity_system.sql",
+    "docs/SYSTEM_REMOVAL_REPORT.md",
+    "docs/SYSTEM_REMOVAL_QA.json"
+  ],
+  "verification": {
+    "core_tests": {
+      "passed": 10,
+      "failed": 0,
+      "crud_backend": "Real add/edit/delete/read route handlers tested using an isolated in-memory database; no production writes."
+    },
+    "typecheck": "pass",
+    "lint": {
+      "status": "pass",
+      "errors": 0,
+      "existing_warnings": 42
+    },
+    "production_build": "pass",
+    "database": {
+      "games": {
+        "checksum": "5ecb00b4332aef604d38959231ca84a57ec6ad66698f888a8fa14dcd56536968",
+        "row_count": 2235
+      },
+      "tables": [],
+      "functions": [],
+      "archive_sequence": null,
+      "identity_trigger": 0,
+      "remaining_function_references": []
+    },
+    "runtime_report": "See private backup runtime-qa.json: 18 game renders, 18 route checks, add/edit UI opens, delete confirmation dismissed; zero live writes, page errors or retired API requests.",
+    "runtime": {
+      "pass": true,
+      "cases": [
+        {
+          "id": 206,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 206,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 938,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 938,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 944,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 944,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 1099,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 1099,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 1333,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 1333,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 1231,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 1231,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 628,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 628,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 463,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 463,
+          "width": 1440,
+          "status": 200
+        },
+        {
+          "id": 2180,
+          "width": 390,
+          "status": 200
+        },
+        {
+          "id": 2180,
+          "width": 1440,
+          "status": 200
+        }
+      ],
+      "routes": [
+        {
+          "route": "/",
+          "status": 200
+        },
+        {
+          "route": "/all-games",
+          "status": 200
+        },
+        {
+          "route": "/stats",
+          "status": 200
+        },
+        {
+          "route": "/monthly-log",
+          "status": 200
+        },
+        {
+          "route": "/assets",
+          "status": 200
+        },
+        {
+          "route": "/watch",
+          "status": 200
+        },
+        {
+          "route": "/admin-login",
+          "status": 307
+        },
+        {
+          "route": "/api/games",
+          "status": 200
+        },
+        {
+          "route": "/api/game-options",
+          "status": 200
+        },
+        {
+          "route": "/api/home-games",
+          "status": 200
+        },
+        {
+          "route": "/api/admin/me",
+          "status": 200
+        },
+        {
+          "route": "/api/admin/games/206",
+          "status": 200
+        },
+        {
+          "route": "/api/admin/owned-games",
+          "status": 200
+        },
+        {
+          "route": "/api/game-relationships?game=206",
+          "status": 404
+        },
+        {
+          "route": "/api/admin/relationships",
+          "status": 404
+        },
+        {
+          "route": "/admin/relationships",
+          "status": 404
+        },
+        {
+          "route": "/canonical/14ac509b-c6ed-45bd-aa49-b6c1c9db2c99",
+          "status": 404
+        },
+        {
+          "route": "/franchise/00000000-0000-0000-0000-000000000001",
+          "status": 404
+        }
+      ],
+      "admin_ui": {
+        "add_opens": true,
+        "edit_opens": true,
+        "delete_confirmation": true
+      },
+      "live_database_writes": 0,
+      "page_errors": [],
+      "retired_api_requests": []
+    }
+  },
+  "commits": {
+    "application": "580a8ff",
+    "database": "d3edfc8"
+  },
+  "intentionally_retained": [
+    "Private schema/data recovery backup and required removal report",
+    "Removal-only migration, matching applied Supabase version 20260917152125",
+    "Shared Supabase migration ledger: historical records retained for auditing; old subsystem SQL files removed from repository",
+    "Git history and all original screenshots",
+    "Watch media's own canonical metadata and media/season relationships: separate feature, not game relationships"
+  ]
+}
