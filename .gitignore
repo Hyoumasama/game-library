@@ -43,8 +43,8 @@ data/watch-import/
 *.tsbuildinfo
 next-env.d.ts
 
-# Local relationship backfill plans (contain library metadata)
-data/relationships/
+# Private local database backups
+/backups/
 
 # Supabase CLI cache
 supabase/.temp/

@@ -1,5 +1,3 @@
-import GameRelationships from "@/components/games/GameRelationshipsServer";
-import { Suspense } from "react";
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
 import { getGameById } from "@/lib/games";
@@ -373,6 +371,10 @@ const displayPrice =
   </div>
 ) : null}
 
+  <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-400">
+    {game.developer && <p>Developers: <span className="text-zinc-200">{game.developer}</span></p>}
+    {game.publisher && <p>Publishers: <span className="text-zinc-200">{game.publisher}</span></p>}
+  </div>
   <div className="mt-2 flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">
           {displayPrice}
@@ -456,7 +458,7 @@ const displayPrice =
     </section>
   ) : null}
 </div>
-      <Suspense fallback={null}><GameRelationships gameId={Number(id)} /></Suspense>
+
     </main>
     
   );

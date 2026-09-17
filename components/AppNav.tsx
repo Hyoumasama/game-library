@@ -63,7 +63,7 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isHome = pathname === "/";
-  const visibleItems = [...navItems, ...(isAdmin ? [{ href: "/admin/relationships", label: "Relationships", match: (path: string) => path.startsWith("/admin/relationships") }] : [])].filter((item) => {
+  const visibleItems = navItems.filter((item) => {
     // Hide the Watch nav item on all pages except the home page
     if (item.label === "Watch" && !isHome) return false;
 
