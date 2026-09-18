@@ -50,8 +50,12 @@ function parsePositiveInteger(value: string) {
 async function fetchSteamAppDetails(appid: number) {
   const detailResponse = await fetch(
     `https://store.steampowered.com/api/appdetails?appids=${appid}&l=en&cc=US`,
-    { cache: "no-store" }
+    { cache: "no-store", signal: AbortSignal.timeout(8000) }
   );
+
+  if (!detailResponse.ok) {
+    throw new Error(`Steam app details failed (${detailResponse.status})`);
+  }
 
   const detailData = (await detailResponse.json()) as Record<
     string,
@@ -116,8 +120,12 @@ export async function GET(request: Request) {
       `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(
         query
       )}&l=en&cc=US`,
-      { cache: "no-store" }
+      { cache: "no-store", signal: AbortSignal.timeout(8000) }
     );
+
+    if (!searchResponse.ok) {
+      throw new Error(`Steam store search failed (${searchResponse.status})`);
+    }
 
     const searchData = (await searchResponse.json()) as {
       items?: SteamSearchItem[];
@@ -127,7 +135,12 @@ export async function GET(request: Request) {
     const results = await Promise.all(
       items.slice(0, 10).map(async (item) => {
         const appid = item.id;
-        const data = await fetchSteamAppDetails(appid);
+        let data: SteamAppDetails | null = null;
+        try {
+          data = await fetchSteamAppDetails(appid);
+        } catch (error) {
+          console.error(`Steam app details unavailable for ${appid}:`, error);
+        }
 
         return mapSteamResult(appid, data, item);
       })
@@ -136,7 +149,10 @@ export async function GET(request: Request) {
     return Response.json({ results: results.filter((result) => result) });
   } catch (error) {
     console.error("Steam search error:", error);
-    return Response.json({ results: [], error: "Steam search failed" });
+    return Response.json(
+      { results: [], error: "Steam search is temporarily unavailable. Please try again." },
+      { status: 502 }
+    );
   }
 }
 type SteamSearchItem = {
