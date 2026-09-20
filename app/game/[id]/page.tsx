@@ -11,6 +11,8 @@ import {
 import { getRankFromDatabase } from "@/lib/server/gameRanking";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
+import RelatedEntries from "@/components/games/RelatedEntries";
+import { getRelatedEntries } from "@/lib/server/relatedEntries";
 
 export default async function GamePage({
   params,
@@ -28,6 +30,7 @@ if (!game) {
 }
 
 const coverImage = game.cover_url || undefined;
+const relatedEntries = await getRelatedEntries(Number(id));
 const steamVerticalCover = game.steam_vertical_cover || undefined;
 const primaryCoverImage = steamVerticalCover || coverImage;
 const heroImage = game.hero_url || undefined;
@@ -204,6 +207,7 @@ const displayPrice =
   </div>
 ) : null}
 
+            <RelatedEntries entries={relatedEntries} />
           </div>
         </div>
 
@@ -375,6 +379,7 @@ const displayPrice =
     {game.developer && <p>Developers: <span className="text-zinc-200">{game.developer}</span></p>}
     {game.publisher && <p>Publishers: <span className="text-zinc-200">{game.publisher}</span></p>}
   </div>
+  <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
   <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">
           {displayPrice}
