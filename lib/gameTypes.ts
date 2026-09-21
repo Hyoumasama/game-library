@@ -37,6 +37,7 @@ export type DbGame = {
   publisher?: string | null;
   franchise?: string | null;
   igdb_id?: number | null;
+  igdb_slug?: string | null;
   steam_appid?: number | null;
   screenshots?: string | null;
   game_achievements?: GameAchievementRelation;

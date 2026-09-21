@@ -226,10 +226,11 @@ The page has separate desktop and mobile layouts.
 
 Steam links are generated at render time from `games.steam_appid` using
 `https://store.steampowered.com/app/{appid}/`; full links are not stored. The local
-`games.slug` is an internal library slug, not an IGDB slug. When `games.igdb_id` is
-present, the server requests the canonical `url` and `slug` fields from IGDB and only
-renders the IGDB button when a valid game URL can be formed. This requires no schema
-change and does not write game data.
+`games.slug` remains an internal library slug. `20260921220000_add_games_igdb_slug.sql`
+adds the distinct `games.igdb_slug` field, populated by IGDB search and sync flows. The
+detail page builds `https://www.igdb.com/games/{igdb_slug}` locally, so opening a game
+does not make an external IGDB API request. After applying the migration, the existing
+admin IGDB sync route can backfill slugs for rows that already have `igdb_id`.
 
 ### `/stats`
 
@@ -411,6 +412,7 @@ Important columns used throughout the app:
 - `developer`
 - `publisher`
 - `igdb_id`
+- `igdb_slug`
 - `steam_appid`
 
 Known statuses include:

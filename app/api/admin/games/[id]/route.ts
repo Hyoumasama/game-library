@@ -99,6 +99,7 @@ export async function PATCH(
         developer,
         publisher,
         igdb_id,
+        igdb_slug,
         steam_appid
       `
     )

@@ -37,6 +37,7 @@ type OwnedGame = {
 type SearchResult = {
   source?: "igdb" | "steam";
   igdbId: number | null;
+  igdbSlug?: string | null;
   steamAppId?: number | null;
   title: string;
   year: number | null;
@@ -91,6 +92,7 @@ const [developer, setDeveloper] = useState("");
 const [publisher, setPublisher] = useState("");
 const [screenshots, setScreenshots] = useState("");
 const [igdbId, setIgdbId] = useState<number | null>(null);
+const [igdbSlug, setIgdbSlug] = useState<string | null>(null);
 const [steamAppId, setSteamAppId] = useState<number | null>(null);
 const [bronze, setBronze] = useState("");
 const [silver, setSilver] = useState("");
@@ -207,6 +209,7 @@ useEffect(() => {
   setPublisher(game.publisher || "");
   setScreenshots(game.screenshots || "");
   setIgdbId(game.igdbId || null);
+  setIgdbSlug(game.igdbSlug || null);
   setSteamAppId(game.steamAppId || null);
   setResults([]);
   try {
@@ -300,6 +303,7 @@ setSteamVerticalCoverOptions([]);
     setScreenshots("");
 
     setIgdbId(null);
+    setIgdbSlug(null);
     setSteamAppId(null);
     setBronze("");
     setSilver("");
@@ -335,6 +339,7 @@ setCompletionPercentage("");
   hardware,
 
   igdbId,
+  igdbSlug,
   steamAppId,
 
 coverUrl,

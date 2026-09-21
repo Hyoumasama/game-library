@@ -34,6 +34,7 @@ export async function getGameById(id: number) {
         developer,
         publisher,
         igdb_id,
+        igdb_slug,
         steam_appid
       `
       )

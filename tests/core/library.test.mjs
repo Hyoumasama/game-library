@@ -18,9 +18,10 @@ test("achievement badges support original joined shapes", () => {
   assert.equal(getAchievementBadge([{ platinum: 1, completion_percentage: 100 }]), "100completion");
 });
 test("admin payload preserves artwork, dates and external identifiers", () => {
-  const payload = buildGamePayload({ title: " Game ", genres: [], release: "2001-09-24", igdbId: "481", steamAppId: "123", coverUrl: "cover", screenshots: "shot", developer: "Studio", dateStarted: "2026-01-01" });
+  const payload = buildGamePayload({ title: " Game ", genres: [], release: "2001-09-24", igdbId: "481", igdbSlug: "game", steamAppId: "123", coverUrl: "cover", screenshots: "shot", developer: "Studio", dateStarted: "2026-01-01" });
   assert.equal(payload.title, "Game"); assert.equal(payload.release, "2001-09-24");
   assert.equal(payload.igdb_id, "481"); assert.equal(payload.steam_appid, "123");
+  assert.equal(payload.igdb_slug, "game");
   assert.equal(payload.cover_url, "cover"); assert.equal(payload.screenshots, "shot");
   assert.equal(payload.date_started, "2026-01-01");
 });

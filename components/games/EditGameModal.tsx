@@ -29,6 +29,7 @@ function calculateRewardCompletion(earnedAwards: string, totalAwards: string) {
 type SearchResult = {
   source?: "igdb" | "steam";
   igdbId: number | null;
+  igdbSlug?: string | null;
   steamAppId?: number | null;
   title: string;
   year: number | null;
@@ -63,6 +64,7 @@ type EditableGame = UiGame & {
   steamVerticalCover?: string | null;
   dateStarted?: string | null;
   igdbId?: number | null;
+  igdbSlug?: string | null;
   steamAppId?: number | null;
   steam_app_id?: number | null;
 };
@@ -131,6 +133,9 @@ export default function EditGameModal({
   const [publisher, setPublisher] = useState(game.publisher || "");
   const [screenshots, setScreenshots] = useState(game.screenshots || "");
   const [igdbId, setIgdbId] = useState(game.igdb_id || game.igdbId || null);
+  const [igdbSlug, setIgdbSlug] = useState(
+    game.igdb_slug || game.igdbSlug || null
+  );
   const [steamAppId, setSteamAppId] = useState(
     game.steam_appid || game.steam_app_id || game.steamAppId || null
   );
@@ -191,6 +196,7 @@ const [dateStarted, setDateStarted] = useState(
     setScreenshots(savedGame.screenshots || "");
 
     setIgdbId(savedGame.igdb_id || savedGame.igdbId || null);
+    setIgdbSlug(savedGame.igdb_slug || savedGame.igdbSlug || null);
     setSteamAppId(
       savedGame.steam_appid ||
         savedGame.steam_app_id ||
@@ -339,6 +345,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     setPublisher(selected.publisher || "");
     setScreenshots(selected.screenshots || "");
     setIgdbId(selected.igdbId || null);
+    setIgdbSlug(selected.igdbSlug || null);
     setSteamAppId(selected.steamAppId || null);
     setResults([]);
 
@@ -425,6 +432,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         hardware,
 
         igdbId,
+        igdbSlug,
         steamAppId,
 
         coverUrl,
@@ -610,9 +618,10 @@ if (!onGameUpdated) {
                     type="number"
                     inputMode="numeric"
                     value={igdbId ?? ""}
-                    onChange={(e) =>
-                      setIgdbId(e.target.value === "" ? null : Number(e.target.value))
-                    }
+                    onChange={(e) => {
+                      setIgdbId(e.target.value === "" ? null : Number(e.target.value));
+                      setIgdbSlug(null);
+                    }}
                     placeholder="Enter IGDB ID"
                     className="mt-2 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 font-normal text-white"
                   />

@@ -103,6 +103,7 @@ export function buildGamePayload(body: AdminGameBody) {
     platform: nullableText(body.platform),
     hardware: nullableText(body.hardware),
     igdb_id: nullableText(body.igdbId),
+    igdb_slug: nullableText(body.igdbSlug),
     steam_appid: nullableText(body.steamAppId),
     cover_url: nullableText(body.coverUrl),
     hero_url: nullableText(body.heroUrl),

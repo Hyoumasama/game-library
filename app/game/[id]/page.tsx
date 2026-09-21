@@ -43,13 +43,13 @@ const gameGenres = Array.isArray(game.genres)
   ? game.genres.filter(Boolean)
   : [];
 const steamUrl = getSteamStoreUrl(game.steam_appid);
+const igdbUrl = getIgdbGameUrl(game.igdb_slug);
 const releaseYear = getYearFromDate(game.Release);
 const completedYear = getYearFromDate(game["Completion Last Played"]);
 const status = game.Status?.trim();
 
-const [relatedEntries, igdbUrl, scoreRank, completedRank] = await Promise.all([
+const [relatedEntries, scoreRank, completedRank] = await Promise.all([
   getRelatedEntries(Number(id)),
-  getIgdbGameUrl(game.igdb_id),
   getRankFromDatabase({
     column: "score",
     currentValue: Number(game.Score || 0),
