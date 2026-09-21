@@ -5,10 +5,11 @@ import type { UiGame } from "./gameTypes";
 export type Game = UiGame;
 
 export async function getGameById(id: number) {
-  const { data, error } = await supabase
-    .from("games")
-    .select(
-      `
+  const [gameResult, identityResult] = await Promise.all([
+    supabase
+      .from("games")
+      .select(
+        `
         id,
         title,
         slug,
@@ -33,16 +34,46 @@ export async function getGameById(id: number) {
         developer,
         publisher,
         igdb_id,
+        igdb_slug,
         steam_appid
       `
-    )
-    .eq("id", id)
-    .limit(1)
-    .single();
+      )
+      .eq("id", id)
+      .limit(1)
+      .single(),
+    supabase
+      .from("game_identity_links")
+      .select("canonical_game_id")
+      .eq("game_id", id)
+      .maybeSingle(),
+  ]);
 
-  if (error || !data) {
+  if (gameResult.error || !gameResult.data) {
     return null;
   }
 
-  return mapDbGameToUiGame(data);
+  let franchise: string | null = null;
+  const canonicalGameId = identityResult.data?.canonical_game_id;
+
+  if (!identityResult.error && canonicalGameId) {
+    const membership = await supabase
+      .from("canonical_game_franchises")
+      .select("franchise:game_franchises(name)")
+      .eq("canonical_game_id", canonicalGameId)
+      .limit(1)
+      .maybeSingle();
+
+    if (!membership.error) {
+      const joinedFranchise = membership.data?.franchise as
+        | { name: string | null }
+        | { name: string | null }[]
+        | null
+        | undefined;
+      franchise = Array.isArray(joinedFranchise)
+        ? joinedFranchise[0]?.name || null
+        : joinedFranchise?.name || null;
+    }
+  }
+
+  return { ...mapDbGameToUiGame(gameResult.data), franchise };
 }

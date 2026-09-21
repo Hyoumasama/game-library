@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 import type { UiGame } from "@/lib/gameTypes";
+import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -28,6 +29,7 @@ function calculateRewardCompletion(earnedAwards: string, totalAwards: string) {
 type SearchResult = {
   source?: "igdb" | "steam";
   igdbId: number | null;
+  igdbSlug?: string | null;
   steamAppId?: number | null;
   title: string;
   year: number | null;
@@ -62,6 +64,7 @@ type EditableGame = UiGame & {
   steamVerticalCover?: string | null;
   dateStarted?: string | null;
   igdbId?: number | null;
+  igdbSlug?: string | null;
   steamAppId?: number | null;
   steam_app_id?: number | null;
 };
@@ -130,6 +133,9 @@ export default function EditGameModal({
   const [publisher, setPublisher] = useState(game.publisher || "");
   const [screenshots, setScreenshots] = useState(game.screenshots || "");
   const [igdbId, setIgdbId] = useState(game.igdb_id || game.igdbId || null);
+  const [igdbSlug, setIgdbSlug] = useState(
+    game.igdb_slug || game.igdbSlug || null
+  );
   const [steamAppId, setSteamAppId] = useState(
     game.steam_appid || game.steam_app_id || game.steamAppId || null
   );
@@ -141,6 +147,7 @@ const [earnedAwards, setEarnedAwards] = useState("");
 const [totalAwards, setTotalAwards] = useState("");
 const [completionPercentage, setCompletionPercentage] = useState("");
   const [message, setMessage] = useState("");
+  const [metadata, setMetadata] = useState<GameMetadataValue>({ franchise: null, relationships: [] });
 
     const playStationGame = isPlayStationGame(store, platform);
   const rewardCompletionPercentage = calculateRewardCompletion(
@@ -189,6 +196,7 @@ const [dateStarted, setDateStarted] = useState(
     setScreenshots(savedGame.screenshots || "");
 
     setIgdbId(savedGame.igdb_id || savedGame.igdbId || null);
+    setIgdbSlug(savedGame.igdb_slug || savedGame.igdbSlug || null);
     setSteamAppId(
       savedGame.steam_appid ||
         savedGame.steam_app_id ||
@@ -337,6 +345,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     setPublisher(selected.publisher || "");
     setScreenshots(selected.screenshots || "");
     setIgdbId(selected.igdbId || null);
+    setIgdbSlug(selected.igdbSlug || null);
     setSteamAppId(selected.steamAppId || null);
     setResults([]);
 
@@ -423,6 +432,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         hardware,
 
         igdbId,
+        igdbSlug,
         steamAppId,
 
         coverUrl,
@@ -443,11 +453,14 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         completionPercentage: playStationGame
           ? completionPercentage
           : rewardCompletionPercentage,
+        franchise: metadata.franchise ?? { clear: true },
+        relationships: metadata.relationships,
       }),
     });
 
     if (!response.ok) {
-      setMessage("Failed to update game");
+      const data = await response.json().catch(() => ({}));
+      setMessage(data.error || "Failed to update game");
       return;
     }
 
@@ -605,9 +618,10 @@ if (!onGameUpdated) {
                     type="number"
                     inputMode="numeric"
                     value={igdbId ?? ""}
-                    onChange={(e) =>
-                      setIgdbId(e.target.value === "" ? null : Number(e.target.value))
-                    }
+                    onChange={(e) => {
+                      setIgdbId(e.target.value === "" ? null : Number(e.target.value));
+                      setIgdbSlug(null);
+                    }}
                     placeholder="Enter IGDB ID"
                     className="mt-2 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 font-normal text-white"
                   />
@@ -740,6 +754,7 @@ onChange={(e) => {
   placeholder="Genre"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
+              <GameMetadataFields gameId={Number(game.id)} value={metadata} onChange={setMetadata} />
                                           <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
                 <p className="mb-3 text-sm font-bold text-zinc-300">Achievements</p>
 

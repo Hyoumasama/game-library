@@ -10,6 +10,7 @@ type IgdbCompany = {
 type IgdbWebsite = { url?: string };
 type IgdbGame = {
   id?: number;
+  slug?: string;
   name?: string;
   first_release_date?: number;
   cover?: IgdbImage;
@@ -118,6 +119,7 @@ async function fetchIgdbGames(body: string, clientId: string, token: string) {
 
 const igdbGameFields = `
   name,
+  slug,
   first_release_date,
   cover.image_id,
   summary,
@@ -211,6 +213,7 @@ export async function GET(request: Request) {
     const results = finalGames.map((game: IgdbGame) => ({
     source: "igdb" as const,
     igdbId: game.id,
+    igdbSlug: game.slug || null,
     steamAppId: extractSteamAppId(game.websites),
     title: game.name,
     year: game.first_release_date

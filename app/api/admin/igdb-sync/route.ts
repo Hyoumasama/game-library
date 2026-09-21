@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 type IgdbWebsite = { url?: string };
 type IgdbSyncGame = {
   id?: number;
+  slug?: string;
   rating?: number | null;
   rating_count?: number | null;
   websites?: IgdbWebsite[];
@@ -42,15 +43,20 @@ export async function GET() {
   let steamFound = 0;
   let noRating = 0;
   const errors: string[] = [];
+  const failedLocalIds = new Set<number>();
 
   const token = await getIgdbToken();
 
   for (let batch = 0; batch < maxBatches; batch++) {
+    const excludedIds = failedLocalIds.size > 0
+      ? `(${[...failedLocalIds].join(",")})`
+      : "(0)";
     const { data: localGames, error } = await supabase
       .from("games")
       .select("id, title, igdb_id")
       .not("igdb_id", "is", null)
-      .is("igdb_score_updated_at", null)
+      .or("igdb_score_updated_at.is.null,igdb_slug.is.null")
+      .not("id", "in", excludedIds)
       .limit(batchSize);
 
     if (error) {
@@ -70,6 +76,7 @@ export async function GET() {
       },
       body: `
         fields
+          slug,
           rating,
           rating_count,
           websites.url;
@@ -97,6 +104,7 @@ export async function GET() {
 
       if (!igdbGame) {
         errors.push(`${localGame.title}: IGDB not found`);
+        failedLocalIds.add(Number(localGame.id));
         continue;
       }
 
@@ -113,6 +121,7 @@ export async function GET() {
       if (igdbGame.rating == null) noRating++;
 
       const updatePayload: Record<string, string | number | null> = {
+        igdb_slug: igdbGame.slug ?? null,
         igdb_score: igdbGame.rating ?? null,
         igdb_rating_count: igdbGame.rating_count ?? null,
         igdb_score_updated_at: new Date().toISOString(),
@@ -129,6 +138,7 @@ export async function GET() {
 
       if (updateError) {
         errors.push(`${localGame.title}: ${updateError.message}`);
+        failedLocalIds.add(Number(localGame.id));
       } else {
         updated++;
       }
