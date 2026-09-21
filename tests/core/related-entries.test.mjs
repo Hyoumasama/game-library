@@ -15,6 +15,17 @@ test("F.E.A.R. shows next installment before expansions, sorted by release", () 
   const entries = buildRelatedEntries("fear", [relation("perseus", "fear", "expansion_of"), relation("extraction", "fear", "expansion_of"), relation("fear2", "fear", "sequel_of")], [game("perseus", "2007-11-06"), game("extraction", "2006-10-24"), game("fear2", "2009-02-10")]);
   assert.deepEqual(entries.map(e => [e.title, e.label]), [["fear2", "Next Installment"], ["extraction", "Expansion"], ["perseus", "Expansion"]]);
 });
+test("prequel_of labels both directions as installment chronology", () => {
+  const relations = [relation("sky-3rd", "cold-steel", "prequel_of")];
+  assert.deepEqual(
+    buildRelatedEntries("sky-3rd", relations, [game("cold-steel")]).map(e => [e.title, e.label]),
+    [["cold-steel", "Next Installment"]]
+  );
+  assert.deepEqual(
+    buildRelatedEntries("cold-steel", relations, [game("sky-3rd")]).map(e => [e.title, e.label]),
+    [["sky-3rd", "Previous Installment"]]
+  );
+});
 for (const [type, outgoing, incoming] of [
   ["edition_of", "Base Game", "Other Edition"], ["enhanced_edition_of", "Base Game", "Enhanced Edition"],
   ["remake_of", "Original Version", "Remake"], ["remaster_of", "Original Version", "Remastered Version"],

@@ -3,6 +3,44 @@ import { normalizeGenres } from "@/lib/genres";
 
 export type AdminGameBody = Record<string, unknown>;
 
+export type AdminGameMetadataInput = {
+  franchise: { id?: string; name: string } | { clear: true } | null;
+  relationships: { id?: string; relationType: string; relatedGameId: string }[] | null;
+};
+
+export function parseAdminGameMetadata(body: AdminGameBody): AdminGameMetadataInput {
+  const hasFranchise = Object.hasOwn(body, "franchise");
+  const hasRelationships = Object.hasOwn(body, "relationships");
+  const rawFranchise = body.franchise;
+  const franchise = !hasFranchise
+    ? null
+    : rawFranchise === null
+      ? { clear: true as const }
+      : rawFranchise && typeof rawFranchise === "object" && (rawFranchise as { clear?: unknown }).clear === true
+        ? { clear: true as const }
+        : rawFranchise && typeof rawFranchise === "object"
+    ? {
+        id: typeof (rawFranchise as { id?: unknown }).id === "string" ? (rawFranchise as { id: string }).id : undefined,
+        name: String((rawFranchise as { name?: unknown }).name || "").trim().replace(/\s+/g, " "),
+      }
+    : (() => { throw new Error("Invalid franchise update"); })();
+  if (hasRelationships && !Array.isArray(body.relationships)) {
+    throw new Error("Relationships must be an array");
+  }
+  const relationships = !hasRelationships ? null : (body.relationships as unknown[]).map((item) => {
+    if (!item || typeof item !== "object") throw new Error("Invalid relationship");
+    const row = item as Record<string, unknown>;
+    return {
+      id: typeof row.id === "string" ? row.id : undefined,
+      relationType: String(row.relationType || ""),
+      relatedGameId: String(row.relatedGameId || ""),
+    };
+  });
+  if (franchise && !("clear" in franchise) && !franchise.name) throw new Error("Franchise name is required");
+  if (relationships?.some((row) => !row.relationType || !row.relatedGameId)) throw new Error("Every relationship needs a type and a related game");
+  return { franchise, relationships };
+}
+
 export function toNumber(value: unknown) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;

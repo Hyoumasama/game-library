@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 import type { UiGame } from "@/lib/gameTypes";
+import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -141,6 +142,7 @@ const [earnedAwards, setEarnedAwards] = useState("");
 const [totalAwards, setTotalAwards] = useState("");
 const [completionPercentage, setCompletionPercentage] = useState("");
   const [message, setMessage] = useState("");
+  const [metadata, setMetadata] = useState<GameMetadataValue>({ franchise: null, relationships: [] });
 
     const playStationGame = isPlayStationGame(store, platform);
   const rewardCompletionPercentage = calculateRewardCompletion(
@@ -443,11 +445,14 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         completionPercentage: playStationGame
           ? completionPercentage
           : rewardCompletionPercentage,
+        franchise: metadata.franchise ?? { clear: true },
+        relationships: metadata.relationships,
       }),
     });
 
     if (!response.ok) {
-      setMessage("Failed to update game");
+      const data = await response.json().catch(() => ({}));
+      setMessage(data.error || "Failed to update game");
       return;
     }
 
@@ -740,6 +745,7 @@ onChange={(e) => {
   placeholder="Genre"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
+              <GameMetadataFields gameId={Number(game.id)} value={metadata} onChange={setMetadata} />
                                           <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
                 <p className="mb-3 text-sm font-bold text-zinc-300">Achievements</p>
 

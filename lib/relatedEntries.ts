@@ -3,6 +3,7 @@ export type RelatedGame = { id: string; title: string; release_date: string | nu
 export type RelatedEntry = RelatedGame & { key: string; label: string; priority: number };
 const labels: Record<string, [string, string, number]> = {
   sequel_of: ["Previous Installment", "Next Installment", 0],
+  prequel_of: ["Next Installment", "Previous Installment", 0],
   remaster_of: ["Original Version", "Remastered Version", 2],
   remake_of: ["Original Version", "Remake", 2],
   edition_of: ["Base Game", "Other Edition", 3],
@@ -28,7 +29,13 @@ export function buildRelatedEntries(currentId: string, relations: Relation[], ga
     const display = labels[relation.relation_type];
     if (!other || other.id === currentId || !display) continue;
     const label = display[outgoing ? 0 : 1];
-    const priority = relation.relation_type === "sequel_of" ? (outgoing ? 0 : 1) : label === "Base Game" ? 3 : display[2];
+    const priority = relation.relation_type === "sequel_of"
+      ? (outgoing ? 0 : 1)
+      : relation.relation_type === "prequel_of"
+        ? (outgoing ? 1 : 0)
+        : label === "Base Game"
+          ? 3
+          : display[2];
     const key = `${other.id}:${label}`;
     entries.set(key, { ...other, key, label, priority });
   }

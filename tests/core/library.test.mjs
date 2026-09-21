@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mapDbGameToUiGame, getAchievementBadge } from "../../lib/gameMappers.ts";
-import { buildGamePayload, buildAchievementPayload } from "../../lib/server/adminGamePayload.ts";
+import { buildGamePayload, buildAchievementPayload, parseAdminGameMetadata } from "../../lib/server/adminGamePayload.ts";
 
 test("library mapping preserves original game details and cover preference", () => {
   const record = { id: 42, title: "Game", release: "2001-09-24", status: "Completed", cover_url: "cover", steam_vertical_cover: "vertical", developer: "Studio", screenshots: "image1,image2", game_achievements: [{ completion_percentage: 100 }] };
@@ -28,4 +28,33 @@ test("achievement payload clamps completion and numeric values", () => {
   const payload = buildAchievementPayload({ earnedAwards: 20, totalAwards: 10, bronze: -1, platinum: true }, 42);
   assert.equal(payload.game_id, 42); assert.equal(payload.completion_percentage, 100);
   assert.equal(payload.bronze, 0); assert.equal(payload.platinum, 1);
+});
+
+test("omitted admin metadata means preserve existing links", () => {
+  assert.deepEqual(parseAdminGameMetadata({}), {
+    franchise: null,
+    relationships: null,
+  });
+});
+
+test("explicit metadata clears remain distinguishable from omission", () => {
+  assert.deepEqual(parseAdminGameMetadata({ franchise: null }), {
+    franchise: { clear: true },
+    relationships: null,
+  });
+  assert.deepEqual(parseAdminGameMetadata({ relationships: [] }), {
+    franchise: null,
+    relationships: [],
+  });
+});
+
+test("franchise-only and relationship-only updates preserve the other side", () => {
+  assert.deepEqual(parseAdminGameMetadata({ franchise: { id: "f1", name: " Halo " } }), {
+    franchise: { id: "f1", name: "Halo" },
+    relationships: null,
+  });
+  assert.deepEqual(parseAdminGameMetadata({ relationships: [{ id: "e1", relationType: "sequel_of", relatedGameId: "g2" }] }), {
+    franchise: null,
+    relationships: [{ id: "e1", relationType: "sequel_of", relatedGameId: "g2" }],
+  });
 });

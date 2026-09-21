@@ -13,6 +13,11 @@ import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import RelatedEntries from "@/components/games/RelatedEntries";
 import { getRelatedEntries } from "@/lib/server/relatedEntries";
+import {
+  getIgdbGameUrl,
+  getSteamStoreUrl,
+} from "@/lib/server/gameExternalLinks";
+import ExpandableGameSummary from "@/components/games/ExpandableGameSummary";
 
 export default async function GamePage({
   params,
@@ -30,7 +35,6 @@ if (!game) {
 }
 
 const coverImage = game.cover_url || undefined;
-const relatedEntries = await getRelatedEntries(Number(id));
 const steamVerticalCover = game.steam_vertical_cover || undefined;
 const primaryCoverImage = steamVerticalCover || coverImage;
 const heroImage = game.hero_url || undefined;
@@ -38,30 +42,30 @@ const wideCoverImage = game.wide_cover_url || undefined;
 const gameGenres = Array.isArray(game.genres)
   ? game.genres.filter(Boolean)
   : [];
-
+const steamUrl = getSteamStoreUrl(game.steam_appid);
 const releaseYear = getYearFromDate(game.Release);
-
-const scoreRank = await getRankFromDatabase({
-  column: "score",
-  currentValue: Number(game.Score || 0),
-  yearColumn: "release",
-  currentYear: releaseYear,
-});
-
 const completedYear = getYearFromDate(game["Completion Last Played"]);
-
 const status = game.Status?.trim();
 
-const completedRank =
+const [relatedEntries, igdbUrl, scoreRank, completedRank] = await Promise.all([
+  getRelatedEntries(Number(id)),
+  getIgdbGameUrl(game.igdb_id),
+  getRankFromDatabase({
+    column: "score",
+    currentValue: Number(game.Score || 0),
+    yearColumn: "release",
+    currentYear: releaseYear,
+  }),
   status === "Completed"
-    ? await getRankFromDatabase({
+    ? getRankFromDatabase({
         column: "hours_played",
         currentValue: Number(game["Hours Played"] || 0),
         yearColumn: "completion_last_played",
         currentYear: completedYear,
         status: "Completed",
       })
-    : undefined;
+    : Promise.resolve(undefined),
+]);
   
     const daysToPurchase = getDaysBetween(
   game.Release,
@@ -89,7 +93,9 @@ const displayPrice =
           ? { backgroundColor: "rgba(113, 113, 122, 0.18)", color: "#d4d4d8" }
           : status === "Unplayed"
             ? { backgroundColor: "rgba(250, 204, 21, 0.15)", color: "#fde047" }
-            : { backgroundColor: "#27272a", color: "#e4e4e7" };
+            : status === "Wishlist"
+              ? { backgroundColor: "rgba(168, 85, 247, 0.15)", color: "#d8b4fe" }
+              : { backgroundColor: "#27272a", color: "#e4e4e7" };
 
   return (
     <main className="min-h-screen bg-[#070a0f] text-white">
@@ -100,7 +106,7 @@ const displayPrice =
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="w-[264px] self-start">
-            <div className="relative">
+            <div>
             <div className="relative h-fit overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
   {primaryCoverImage ? (
     <SafeImage
@@ -139,10 +145,9 @@ const displayPrice =
   )}
             </div>
 
-            <GameExternalIds
-              igdbId={game.igdb_id}
-              steamAppId={game.steam_appid}
-              className="absolute left-0 top-full"
+            <GameExternalLinks
+              steamUrl={steamUrl}
+              igdbUrl={igdbUrl}
             />
             </div>
           </div>
@@ -170,9 +175,11 @@ const displayPrice =
                     </div>
                   </div>
 
-            <p className="mb-4 max-w-3xl text-lg leading-8 text-zinc-300">
-              {game.summary || "No description available."}
-            </p>
+            <ExpandableGameSummary
+              summary={game.summary}
+              containerClassName="mb-4 max-w-3xl"
+              textClassName="text-lg leading-8 text-zinc-300"
+            />
 
            {gameGenres.length > 0 ? (
   <div className="mb-4 flex flex-wrap gap-2">
@@ -187,7 +194,7 @@ const displayPrice =
   </div>
 ) : null}
 
-            {game.developer || game.publisher ? (
+            {game.developer || game.publisher || game.franchise ? (
   <div className="mb-4 flex flex-wrap gap-x-8 gap-y-2 text-zinc-400">
     <p>
       Developers:
@@ -204,6 +211,13 @@ const displayPrice =
         {game.publisher || "-"}
       </span>
     </p>
+
+    {game.franchise ? (
+      <p>
+        Franchise:
+        <span className="text-zinc-200"> {game.franchise}</span>
+      </p>
+    ) : null}
   </div>
 ) : null}
 
@@ -211,7 +225,7 @@ const displayPrice =
           </div>
         </div>
 
-        <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
+        <section className="mt-2 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
           <h2 className="mb-5 text-2xl font-bold">Library Details</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -314,9 +328,9 @@ const displayPrice =
     )}
 
     <div className="p-4">
-      <GameExternalIds
-        igdbId={game.igdb_id}
-        steamAppId={game.steam_appid}
+      <GameExternalLinks
+        steamUrl={steamUrl}
+        igdbUrl={igdbUrl}
       />
 
       <span
@@ -358,9 +372,11 @@ const displayPrice =
         </div>
       </div>
 
-      <p className="mt-3 line-clamp-5 text-sm leading-6 text-zinc-300">
-        {game.summary || "No description available."}
-      </p>
+      <ExpandableGameSummary
+        summary={game.summary}
+        containerClassName="mt-3"
+        textClassName="text-sm leading-6 text-zinc-300"
+      />
 
             {gameGenres.length > 0 ? (
   <div className="mt-4 flex flex-wrap gap-2">
@@ -378,6 +394,7 @@ const displayPrice =
   <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-400">
     {game.developer && <p>Developers: <span className="text-zinc-200">{game.developer}</span></p>}
     {game.publisher && <p>Publishers: <span className="text-zinc-200">{game.publisher}</span></p>}
+    {game.franchise && <p>Franchise: <span className="text-zinc-200">{game.franchise}</span></p>}
   </div>
   <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -485,23 +502,39 @@ function Info({
   );
 }
 
-function GameExternalIds({
-  igdbId,
-  steamAppId,
+function GameExternalLinks({
+  igdbUrl,
+  steamUrl,
   className = "",
 }: {
-  igdbId?: number | string | null;
-  steamAppId?: number | string | null;
+  igdbUrl?: string | null;
+  steamUrl?: string | null;
   className?: string;
 }) {
-  if (!igdbId && !steamAppId) return null;
+  if (!igdbUrl && !steamUrl) return null;
 
   return (
-    <p className={`mt-2 text-xs leading-5 text-zinc-500 ${className}`}>
-      {igdbId ? <span>IGDB ID: {igdbId}</span> : null}
-      {igdbId && steamAppId ? <span> / </span> : null}
-      {steamAppId ? <span>Steam App ID: {steamAppId}</span> : null}
-    </p>
+    <div className={`mt-2 flex flex-wrap gap-2 ${className}`}>
+      {steamUrl ? <ExternalGameLink href={steamUrl} label="Steam" /> : null}
+      {igdbUrl ? <ExternalGameLink href={igdbUrl} label="IGDB" /> : null}
+    </div>
+  );
+}
+
+function ExternalGameLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs font-semibold text-zinc-200 transition-colors hover:border-cyan-400/60 hover:bg-zinc-800 hover:text-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+      aria-label={`Open ${label} page in a new tab`}
+    >
+      {label}
+      <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="1.8">
+        <path d="M7 4H4.75A1.75 1.75 0 0 0 3 5.75v9.5C3 16.22 3.78 17 4.75 17h9.5A1.75 1.75 0 0 0 16 15.25V13M11 3h6v6M17 3l-8 8" />
+      </svg>
+    </a>
   );
 }
 

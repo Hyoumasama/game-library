@@ -214,6 +214,7 @@ The page displays:
 - Title and summary.
 - Status, score rank, and completion rank.
 - External IDs for IGDB and Steam.
+- External Steam and IGDB page links when their required identifiers resolve.
 - Genres, developers, and publishers.
 - Release, purchase, start, and completion dates.
 - Days from release to purchase.
@@ -222,6 +223,13 @@ The page displays:
 - Admin game actions through `GameHeroActions`.
 
 The page has separate desktop and mobile layouts.
+
+Steam links are generated at render time from `games.steam_appid` using
+`https://store.steampowered.com/app/{appid}/`; full links are not stored. The local
+`games.slug` is an internal library slug, not an IGDB slug. When `games.igdb_id` is
+present, the server requests the canonical `url` and `slug` fields from IGDB and only
+renders the IGDB button when a valid game URL can be formed. This requires no schema
+change and does not write game data.
 
 ### `/stats`
 
@@ -638,6 +646,38 @@ Returns admin option lists through `get_admin_game_options`.
 `GET /api/admin/owned-games`
 
 Returns owned-game groupings for admin workflows.
+
+`GET /api/admin/game-metadata-options`
+
+Returns franchise choices, database-defined relationship types, canonical owned-game
+choices grouped across platforms, and (for Edit Game) the current canonical franchise
+and bidirectional relationship rows. Add Game and Edit Game submit this metadata through
+the existing game create/update endpoints. Relationships are stored once in
+`game_relationships`; inverse labels come from `game_relationships_bidirectional`.
+
+`20260921190000_enforce_normalized_franchise_names.sql` prevents franchise names that
+differ only by case or repeated/leading/trailing whitespace. It also adds the
+service-role-only `sync_admin_game_metadata()` RPC, which atomically resolves or creates
+the canonical identity, updates its single franchise membership, and applies the
+relationship diff while preserving unchanged edge IDs.
+
+`20260921213000_preserve_omitted_game_metadata.sql` corrects the RPC contract after the
+initial migration: `NULL` now means “leave unchanged” for both metadata arguments,
+`{"clear": true}` explicitly removes franchise membership, and an explicitly supplied
+empty relationship array removes all relationships. Partial game PATCH requests that
+omit metadata therefore preserve all existing canonical links.
+
+The corrective RPC also compares submitted relationship rows from the currently edited
+game's direct or inverse perspective. Unchanged edge IDs are preserved; changed targets
+or types replace the single stored edge atomically without creating a reverse row.
+New library copies reuse a canonical identity only when normalized title and release
+date match and no conflicting non-null IGDB or Steam ID exists, including conflicts
+found on another linked copy. `release_variant_kind` is descriptive metadata assigned
+when a new canonical is created; it is not a merge condition because historical values
+were not derived uniformly. Different Standard, Edition, Enhanced Edition, Remaster,
+and similar titles remain separate through exact normalized-title matching. Relationship
+choices aggregate both platform and store labels across owned copies (for example,
+`EPIC • Steam`).
 
 ### Admin Metadata and Backfill Routes
 
