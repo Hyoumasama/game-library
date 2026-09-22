@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { supabase } from "@/lib/supabase";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
 
 const STEAMGRIDDB_API_KEY = process.env.STEAMGRIDDB_API_KEY;
 
@@ -114,6 +116,12 @@ export async function POST() {
       });
     }
   }
+
+  // steam_vertical_cover/wide_cover_url are both shown on the home page's
+  // wishlist calendar and card grids, so an edit here needs the same
+  // read-your-own-writes invalidation as a direct game edit. { expire: 0 }
+  // (not "max") forces the next request to wait for fresh data.
+  revalidateTag(CACHE_TAGS.homeGames, { expire: 0 });
 
   return Response.json({
     done: false,

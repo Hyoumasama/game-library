@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
 import { getIgdbToken } from "@/lib/igdb";
 import { supabase } from "@/lib/supabase";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
 
 type LocalWishlistGame = {
   id: number | string;
@@ -122,6 +124,13 @@ export async function POST() {
         }
       }
     }
+
+    // release drives the wishlist calendar's dates/countdowns on the home
+    // page, and this route is what HomePageClient's refresh button calls
+    // right before re-fetching /api/home-games - so this needs
+    // { expire: 0 } (immediate), not "max" (stale-while-revalidate), or
+    // the refresh button would appear to do nothing on the first click.
+    revalidateTag(CACHE_TAGS.homeGames, { expire: 0 });
 
     return Response.json({
       message: "Wishlist release dates refreshed",

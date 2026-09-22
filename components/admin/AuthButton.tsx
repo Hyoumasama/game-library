@@ -1,28 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { setAdminStatus, useIsAdmin } from "@/lib/useAdminStatus";
 
 export default function AuthButton() {
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    async function checkAdmin() {
-      const response = await fetch("/api/admin/me");
-      const data = await response.json();
-      setIsAdmin(data.isAdmin);
-    }
-
-    checkAdmin();
-  }, []);
+  const isAdmin = useIsAdmin();
 
   async function logout() {
     await fetch("/api/admin/logout", {
       method: "POST",
     });
 
-    setIsAdmin(false);
-window.location.reload();
+    setAdminStatus(false);
   }
 
   if (isAdmin) {

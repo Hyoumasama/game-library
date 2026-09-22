@@ -1,7 +1,6 @@
 "use client";
 
 import AppNav from "@/components/AppNav";
-import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import SafeImage from "@/components/SafeImage";
 import {
@@ -13,12 +12,20 @@ import type { DbGame, UiGame } from "@/lib/gameTypes";
 import type { GamesLiteData } from "@/lib/server/gamesLite";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { useIsAdmin } from "@/lib/useAdminStatus";
+
+// Only admins ever open this modal, so keep it out of everyone else's
+// initial JS bundle.
+const EditGameModal = dynamic(() => import("@/components/games/EditGameModal"), {
+  ssr: false,
+});
 
 const PAGE_SIZE = 24;
 
@@ -299,7 +306,7 @@ function AllGamesContent({
   const [filters, setFilters] = useState<AllGamesFilters>(safeInitialFilters);
   const filtersRef = useRef<AllGamesFilters>(safeInitialFilters);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = useIsAdmin();
   const [games, setGames] = useState<UiGame[]>(
     initialData.games.map(mapDbGameToUiGame)
   );
@@ -481,16 +488,6 @@ function AllGamesContent({
       }
     };
   }, [loadGames]);
-
-  useEffect(() => {
-    async function checkAdmin() {
-      const response = await fetch("/api/admin/me");
-      const data = await response.json();
-      setIsAdmin(data.isAdmin);
-    }
-
-    checkAdmin();
-    }, []);
 
   const dashboard = {
   total: dashboardStats.total_games,

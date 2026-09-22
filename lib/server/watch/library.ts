@@ -383,29 +383,25 @@ async function fetchLibraryBase({
     };
   }
 
-  const { data: mediaData, error: mediaError } = await supabase
-    .from("watch_media")
-    .select(mediaColumns)
-    .in("id", mediaIds);
+  // media and seasons both only depend on mediaIds (not on each other), so
+  // fetch them together instead of one after the other.
+  const [mediaResult, seasonResult] = await Promise.all([
+    supabase.from("watch_media").select(mediaColumns).in("id", mediaIds),
+    supabase.from("watch_seasons").select(seasonColumns).in("media_id", mediaIds),
+  ]);
 
-  if (mediaError) throw mediaError;
+  if (mediaResult.error) throw mediaResult.error;
+  if (seasonResult.error) throw seasonResult.error;
 
   const mediaById = new Map(
-    (mediaData || []).map((row) => {
+    (mediaResult.data || []).map((row) => {
       const media = mapMedia(row);
 
       return [media.id, media] as const;
     })
   );
 
-  const { data: seasonData, error: seasonError } = await supabase
-    .from("watch_seasons")
-    .select(seasonColumns)
-    .in("media_id", mediaIds);
-
-  if (seasonError) throw seasonError;
-
-  const seasons = (seasonData || []).map(mapSeason);
+  const seasons = (seasonResult.data || []).map(mapSeason);
   const seasonIds = seasons.map((season) => season.id);
   const seasonById = new Map(seasons.map((season) => [season.id, season]));
   const entryIds = entries.map((entry) => entry.id);

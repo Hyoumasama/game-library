@@ -81,6 +81,13 @@ type GamesLiteStatsQueryResult = {
   error: { message: string } | null;
 };
 
+type GamesLiteStatsRpcRow = {
+  total_games: number | string | null;
+  completed_games: number | string | null;
+  total_hours: number | string | null;
+  avg_score: number | string | null;
+};
+
 interface GamesLiteStatsQuery
   extends GamesLiteFilterableQuery<GamesLiteStatsQuery> {
   range(from: number, to: number): PromiseLike<GamesLiteStatsQueryResult>;
@@ -234,6 +241,55 @@ function calculateStats(games: GamesLiteStatsRow[]) {
   };
 }
 
+async function fetchGamesLiteStatsViaRpc(
+  filters: GamesLiteFilters,
+  isNeverPlayed: boolean
+) {
+  const { data, error } = await supabase.rpc("get_games_lite_stats_v2", {
+    p_search: filters.search,
+    p_statuses: filters.statuses,
+    p_stores: filters.stores,
+    p_release_years: filters.releases.map(Number),
+    p_completion_years: filters.completions.map(Number),
+    p_genres: filters.genres,
+    p_never_played: isNeverPlayed,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const row = (data as GamesLiteStatsRpcRow[] | null)?.[0];
+
+  return {
+    total_games: Number(row?.total_games || 0),
+    completed_games: Number(row?.completed_games || 0),
+    total_hours: Number(row?.total_hours || 0),
+    avg_score: Number(row?.avg_score || 0),
+  };
+}
+
+// All Games used to compute these stats by paging through the entire
+// `games` table client-side (fetchAllStatsRows below), 1-3+ sequential
+// round trips on every load, filter change, and page click. The RPC does
+// the same aggregation in one indexed query. If the RPC's migration
+// (supabase/migrations/20260922_games_lite_stats_rpc.sql) hasn't been
+// applied yet, fall back to the old scan so the page still works.
+async function fetchGamesLiteStats(
+  filters: GamesLiteFilters,
+  options: { isNeverPlayed: boolean; completedIgdbIds: number[] }
+) {
+  try {
+    return await fetchGamesLiteStatsViaRpc(filters, options.isNeverPlayed);
+  } catch (error) {
+    console.error(
+      "get_games_lite_stats_v2 RPC failed, falling back to full-table scan. " +
+        "Run supabase/migrations/20260922_games_lite_stats_rpc.sql to fix this.",
+      error
+    );
+
+    return calculateStats(await fetchAllStatsRows(filters, options));
+  }
+}
+
 async function fetchAllStatsRows(
   filters: GamesLiteFilters,
   options: { isNeverPlayed: boolean; completedIgdbIds: number[] }
@@ -336,6 +392,16 @@ export async function getGamesLiteData({
   const from = (safePage - 1) * safePageSize;
   const to = from + safePageSize - 1;
 
+  // Card grid rendering (components/AllGamesClient.tsx) only ever reads the
+  // fields below; igdb_id is kept because this function also uses it
+  // server-side for the "completed elsewhere" enrichment further down.
+  // summary/screenshots/developer/publisher/date_started/hero_url/
+  // steam_appid are detail-page-only (lib/games.ts has its own full column
+  // list for /game/[id]) - selecting them here just inflated every list/
+  // filter/page response for data this page never displays.
+  // EditGameModal, opened from a card here, re-fetches full game data on
+  // open (see components/games/EditGameModal.tsx: handleOpen), so it's
+  // unaffected.
   const baseQuery = supabase
     .from("games")
     .select(
@@ -344,7 +410,6 @@ export async function getGamesLiteData({
         title,
         slug,
         release,
-        date_started,
         date_of_purchase,
         completion_last_played,
         score,
@@ -356,15 +421,9 @@ export async function getGamesLiteData({
         hardware,
         genres,
         cover_url,
-        hero_url,
         steam_vertical_cover,
         wide_cover_url,
-        summary,
-        screenshots,
-        developer,
-        publisher,
         igdb_id,
-        steam_appid,
         game_achievements (
           platinum,
           completion_percentage
@@ -394,12 +453,12 @@ export async function getGamesLiteData({
     ? applyNeverPlayedToQuery(filteredQuery, completedIgdbIds).range(from, to)
     : filteredQuery.range(from, to);
 
-  const statsPromise = fetchAllStatsRows(safeFilters, {
+  const statsPromise = fetchGamesLiteStats(safeFilters, {
     isNeverPlayed,
     completedIgdbIds,
   });
 
-  const [gamesResult, statsResult, filtersResult] = await Promise.all([
+  const [gamesResult, stats, filtersResult] = await Promise.all([
     gamesPromise,
     statsPromise,
     supabase.rpc("get_games_lite_filters"),
@@ -497,7 +556,6 @@ export async function getGamesLiteData({
   });
 
   // Use enrichedGames for return
-  const stats = calculateStats(statsResult);
   const total = gamesResult.count || 0;
 
   return {

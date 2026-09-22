@@ -1,27 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import EditGameModal from "./EditGameModal";
+import dynamic from "next/dynamic";
 import DeleteGameButton from "./DeleteGameButton";
-import AddGameModal from "./AddGameModal";
 import type { UiGame } from "@/lib/gameTypes";
+import { useIsAdmin } from "@/lib/useAdminStatus";
+
+// This component renders null for non-admins, but the modal imports were
+// still bundled for every visitor. Load them on demand instead.
+const EditGameModal = dynamic(() => import("./EditGameModal"), { ssr: false });
+const AddGameModal = dynamic(() => import("./AddGameModal"), { ssr: false });
 
 export default function GameAdminActions({ game }: { game: UiGame }) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = useIsAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editSignal, setEditSignal] = useState(0);
   const [addSignal, setAddSignal] = useState(0);
   const menuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    async function checkAdmin() {
-      const response = await fetch("/api/admin/me");
-      const data = await response.json();
-      setIsAdmin(data.isAdmin);
-    }
-
-    checkAdmin();
-  }, []);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {

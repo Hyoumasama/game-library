@@ -1,13 +1,22 @@
+import { unstable_cache } from "next/cache";
 import { mapDbGameToUiGame } from "@/lib/gameMappers";
 import type { DbGame, UiGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
 
+// Card/calendar rendering on the home page only ever reads the fields
+// below (mapDbGameToUiGame + WishlistReleaseCalendar's use of hero_url).
+// summary/screenshots/developer/publisher/date_started/igdb_id/steam_appid
+// are detail-page-only fields (lib/games.ts has its own full column list
+// for that) - selecting them here just inflated every home page response
+// for data nothing on this page reads. EditGameModal, opened from a home
+// page card, re-fetches full game data on open (see
+// components/games/EditGameModal.tsx: handleOpen), so it's unaffected.
 const selectColumns = `
   id,
   title,
   slug,
   release,
-  date_started,
   date_of_purchase,
   completion_last_played,
   score,
@@ -22,12 +31,6 @@ const selectColumns = `
   hero_url,
   wide_cover_url,
   steam_vertical_cover,
-  summary,
-  screenshots,
-  developer,
-  publisher,
-  igdb_id,
-  steam_appid,
   game_achievements (
     platinum,
     completion_percentage
@@ -44,7 +47,7 @@ function toDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export async function getHomeGames() {
+async function fetchHomeGames() {
   const today = new Date();
   const todayText = toDateKey(today);
 
@@ -155,3 +158,18 @@ export async function getHomeGames() {
     ),
   };
 }
+
+// The home page ran these 6 queries fresh on every single visit
+// (app/page.tsx is force-dynamic). unstable_cache keeps the result around
+// so repeat visits are instant; admin routes that change what the home
+// page shows call revalidateTag(CACHE_TAGS.homeGames, { expire: 0 }) (see
+// app/api/admin/games/route.ts, app/api/admin/games/[id]/route.ts,
+// app/api/admin/backfill-wide-covers/route.ts, and
+// app/api/admin/wishlist-release-refresh/route.ts) so an edit is reflected
+// on the very next request instead of waiting out the revalidate window.
+// The 5-minute revalidate below is just a safety net in case a future
+// mutation path forgets to call revalidateTag.
+export const getHomeGames = unstable_cache(fetchHomeGames, ["home-games"], {
+  tags: [CACHE_TAGS.homeGames],
+  revalidate: 300,
+});

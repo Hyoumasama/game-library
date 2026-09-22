@@ -2,13 +2,12 @@
 
 import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
-import EditGameModal from "@/components/games/EditGameModal";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -19,6 +18,13 @@ import {
   getIcon,
 } from "@/lib/gameHelpers";
 import type { UiGame } from "@/lib/gameTypes";
+import { useIsAdmin } from "@/lib/useAdminStatus";
+
+// Only admins ever open this modal, so keep it out of everyone else's
+// initial JS bundle.
+const EditGameModal = dynamic(() => import("@/components/games/EditGameModal"), {
+  ssr: false,
+});
 
 type Game = UiGame;
 
@@ -34,7 +40,7 @@ export default function HomePageClient({
 }: {
   initialData: HomePageData;
 }) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = useIsAdmin();
 const [wishlistGames, setWishlistGames] = useState<Game[]>(initialData.wishlist);
 const [currentlyPlayingGames, setCurrentlyPlayingGames] = useState<Game[]>(
   initialData.currentlyPlaying
@@ -120,17 +126,6 @@ async function refreshWishlistMetadata() {
     setIsRefreshingMetadata(false);
   }
 }
-
-useEffect(() => {
-  async function checkAdmin() {
-    const response = await fetch("/api/admin/me");
-    const data = await response.json();
-
-    setIsAdmin(data.isAdmin);
-  }
-
-  checkAdmin();
-}, []);
 
     return (
     <main className="min-h-screen bg-[#070a0f] p-4 text-white md:p-8">

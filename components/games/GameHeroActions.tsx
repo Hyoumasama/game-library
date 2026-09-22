@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import EditGameModal from "./EditGameModal";
+import dynamic from "next/dynamic";
 import DeleteGameButton from "./DeleteGameButton";
 import type { UiGame } from "@/lib/gameTypes";
+import { useIsAdmin } from "@/lib/useAdminStatus";
+
+// Only admins ever open this modal, so keep it out of everyone else's
+// initial JS bundle.
+const EditGameModal = dynamic(() => import("./EditGameModal"), {
+  ssr: false,
+});
 
 export default function GameHeroActions({ game }: { game: UiGame }) {
+  const isAdmin = useIsAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editSignal, setEditSignal] = useState(0);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -37,6 +45,8 @@ export default function GameHeroActions({ game }: { game: UiGame }) {
   function handleBeforeDelete() {
     setMenuOpen(false);
   }
+
+  if (!isAdmin) return null;
 
   return (
     <div className="relative inline-block" ref={menuRef}>

@@ -5,19 +5,32 @@ function check<T>({ data, error }: { data: T; error: { message: string } | null 
   if (error) throw new Error(error.message);
   return data;
 }
-export async function getRelatedEntries(gameId: number) {
+// `canonicalGameId` is optional: when the caller already fetched
+// game_identity_links (e.g. the game page fetching it in parallel with the
+// game row), pass it in to skip this function's own duplicate lookup.
+// Pass `undefined` (not `null`) to have it looked up here.
+export async function getRelatedEntries(
+  gameId: number,
+  canonicalGameId?: string | null
+) {
   try {
-    return await fetchRelatedEntries(gameId);
+    return await fetchRelatedEntries(gameId, canonicalGameId);
   } catch (error) {
     // Optional relationship metadata must not prevent the library details from rendering.
     console.error("Unable to load related entries", error);
     return [];
   }
 }
-async function fetchRelatedEntries(gameId: number) {
-  const identity = check(await supabase.from("game_identity_links").select("canonical_game_id").eq("game_id", gameId).maybeSingle());
-  if (!identity) return [];
-  const currentId: string = identity.canonical_game_id;
+async function fetchRelatedEntries(
+  gameId: number,
+  providedCanonicalGameId?: string | null
+) {
+  let currentId = providedCanonicalGameId;
+  if (currentId === undefined) {
+    const identity = check(await supabase.from("game_identity_links").select("canonical_game_id").eq("game_id", gameId).maybeSingle());
+    currentId = identity?.canonical_game_id ?? null;
+  }
+  if (!currentId) return [];
   const relations: Relation[] = [];
   for (let offset = 0; ; offset += 500) {
     const rows = check(await supabase.from("game_relationships").select("id,source_game_id,target_game_id,relation_type").or(`source_game_id.eq.${currentId},target_game_id.eq.${currentId}`).order("id").range(offset, offset + 499)) || [];

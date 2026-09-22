@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import AuthButton from "@/components/admin/AuthButton";
-import AddGameModal from "@/components/games/AddGameModal";
 import HomeGameSearch from "@/components/HomeGameSearch";
 import BackButton from "@/components/BackButton";
+import { useIsAdmin } from "@/lib/useAdminStatus";
+
+// Only admins ever see this modal, so keep it out of everyone else's
+// initial JS bundle and fetch it on demand once we know isAdmin is true.
+const AddGameModal = dynamic(() => import("@/components/games/AddGameModal"), {
+  ssr: false,
+});
 
 const navItems = [
   { href: "/", label: "Home", match: (path: string) => path === "/" },
@@ -60,7 +67,7 @@ type AppNavProps = {
 
 export default function AppNav({ onGameAdded, actions }: AppNavProps) {
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = useIsAdmin();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isHome = pathname === "/";
   const visibleItems = navItems.filter((item) => {
@@ -69,16 +76,6 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
 
     return !item.match(pathname);
   });
-
-  useEffect(() => {
-    async function checkAdmin() {
-      const response = await fetch("/api/admin/me");
-      const data = await response.json();
-      setIsAdmin(data.isAdmin);
-    }
-
-    checkAdmin();
-  }, []);
 
   return (
     <div className="mb-5">

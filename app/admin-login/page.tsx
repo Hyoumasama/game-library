@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { setAdminStatus } from "@/lib/useAdminStatus";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function AdminLoginPage() {
       return;
     }
 
+    setAdminStatus(true);
     router.push("/");
     router.refresh();
   }

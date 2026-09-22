@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import {
   buildAchievementPayload,
@@ -5,6 +6,15 @@ import {
   parseAdminGameMetadata,
 } from "@/lib/server/adminGamePayload";
 import { getGameById } from "@/lib/games";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+
+// { expire: 0 } (not "max") makes the next request wait for fresh data
+// instead of serving stale-while-revalidate, so an admin edit shows up on
+// the very next page load. See app/api/admin/games/route.ts for why this
+// can't just be updateTag (Route Handlers can't call it).
+function revalidateHomeGames() {
+  revalidateTag(CACHE_TAGS.homeGames, { expire: 0 });
+}
 
 export async function GET(
   request: Request,
@@ -129,6 +139,8 @@ export async function PATCH(
     return Response.json({ error: message }, { status: 500 });
   }
 
+  revalidateHomeGames();
+
   return Response.json({ game: data });
 }
 
@@ -154,6 +166,8 @@ export async function DELETE(
       console.error("Failed to delete game", { gameId, error });
       return Response.json({ error: error.message }, { status: 500 });
     }
+
+    revalidateHomeGames();
 
     return Response.json({ success: true });
   } catch (err) {

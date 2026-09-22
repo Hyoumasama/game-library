@@ -1,6 +1,6 @@
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
-import { getGameById } from "@/lib/games";
+import { getFranchiseName, getGameIdentity, getGameRow } from "@/lib/games";
 import {
   formatDisplayDate,
   formatHours,
@@ -25,14 +25,52 @@ export default async function GamePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
- const game = await getGameById(Number(id));
-if (!game) {
+  const numericId = Number(id);
+
+  // The game row and its identity link don't depend on each other, so
+  // fetch them together instead of one after the other.
+  const [gameRow, canonicalGameId] = await Promise.all([
+    getGameRow(numericId),
+    getGameIdentity(numericId),
+  ]);
+
+if (!gameRow) {
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       Game not found
     </main>
   );
 }
+
+const releaseYear = getYearFromDate(gameRow.Release);
+const completedYear = getYearFromDate(gameRow["Completion Last Played"]);
+const status = gameRow.Status?.trim();
+
+// Franchise, related entries, and both ranks are all independent of each
+// other once we have gameRow/canonicalGameId, so run them together too
+// (getRelatedEntries reuses canonicalGameId instead of re-fetching the
+// identity link itself).
+const [franchise, relatedEntries, scoreRank, completedRank] = await Promise.all([
+  canonicalGameId ? getFranchiseName(canonicalGameId) : Promise.resolve(null),
+  getRelatedEntries(numericId, canonicalGameId),
+  getRankFromDatabase({
+    column: "score",
+    currentValue: Number(gameRow.Score || 0),
+    yearColumn: "release",
+    currentYear: releaseYear,
+  }),
+  status === "Completed"
+    ? getRankFromDatabase({
+        column: "hours_played",
+        currentValue: Number(gameRow["Hours Played"] || 0),
+        yearColumn: "completion_last_played",
+        currentYear: completedYear,
+        status: "Completed",
+      })
+    : Promise.resolve(undefined),
+]);
+
+const game = { ...gameRow, franchise };
 
 const coverImage = game.cover_url || undefined;
 const steamVerticalCover = game.steam_vertical_cover || undefined;
@@ -44,29 +82,7 @@ const gameGenres = Array.isArray(game.genres)
   : [];
 const steamUrl = getSteamStoreUrl(game.steam_appid);
 const igdbUrl = getIgdbGameUrl(game.igdb_slug);
-const releaseYear = getYearFromDate(game.Release);
-const completedYear = getYearFromDate(game["Completion Last Played"]);
-const status = game.Status?.trim();
 
-const [relatedEntries, scoreRank, completedRank] = await Promise.all([
-  getRelatedEntries(Number(id)),
-  getRankFromDatabase({
-    column: "score",
-    currentValue: Number(game.Score || 0),
-    yearColumn: "release",
-    currentYear: releaseYear,
-  }),
-  status === "Completed"
-    ? getRankFromDatabase({
-        column: "hours_played",
-        currentValue: Number(game["Hours Played"] || 0),
-        yearColumn: "completion_last_played",
-        currentYear: completedYear,
-        status: "Completed",
-      })
-    : Promise.resolve(undefined),
-]);
-  
     const daysToPurchase = getDaysBetween(
   game.Release,
   game["Date of Purchase"]
@@ -100,10 +116,19 @@ const displayPrice =
   return (
     <main className="min-h-screen bg-[#070a0f] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(250,204,21,0.12),transparent_30%)]" />
-  
-      <div className="mx-auto hidden max-w-6xl px-6 py-12 lg:block">
-      <AppNav />
 
+      {/* AppNav is already fully self-responsive (its own hidden/lg:flex
+          classes), so one shared instance covers both breakpoints instead
+          of mounting (and fetching admin status for) two copies. The
+          padding here reproduces each breakpoint's original top spacing
+          exactly: mobile matched px-4 pt-3, desktop matched px-6 py-12
+          (top half); the content wrappers below keep the matching bottom
+          half. */}
+      <div className="mx-auto max-w-[430px] px-4 pt-3 lg:max-w-6xl lg:px-6 lg:pt-12">
+        <AppNav />
+      </div>
+
+      <div className="mx-auto hidden max-w-6xl px-6 pb-12 lg:block">
         <div className="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-[264px_1fr]">
           <div className="w-[264px] self-start">
             <div>
@@ -115,7 +140,15 @@ const displayPrice =
       width={264}
       height={396}
       sizes="264px"
-      loading="eager"
+      // This and the mobile-block cover below are the same art-direction
+      // pattern Next.js recommends for "different image per breakpoint"
+      // (next/image can't swap sources by media query on its own): two
+      // Image elements, one hidden per breakpoint via CSS. loading="lazy"
+      // (not "eager"/priority) on both is what makes that efficient -
+      // browsers skip fetching a lazy image whose ancestor is
+      // display:none, so only the cover for the active breakpoint is ever
+      // downloaded instead of both on every page load.
+      loading="lazy"
       className="aspect-[2/3] w-full object-cover"
     />
   ) : (
@@ -288,9 +321,7 @@ const displayPrice =
   </section>
 ) : null}
       </div>
-      <div className="mx-auto max-w-[430px] px-4 pb-10 pt-3 lg:hidden">
-  <AppNav />
-
+      <div className="mx-auto max-w-[430px] px-4 pb-10 lg:hidden">
   <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
     {wideCoverImage ? (
   <SafeImage
@@ -299,7 +330,10 @@ const displayPrice =
     width={430}
     height={242}
     sizes="(max-width: 1023px) 100vw, 430px"
-    loading="eager"
+    // See the desktop cover's comment above: lazy (not eager) lets the
+    // browser skip this fetch entirely when this block is display:none
+    // (i.e. on desktop), instead of always downloading both covers.
+    loading="lazy"
     className="aspect-video w-full object-cover"
   />
 ) : heroImage ? (
@@ -308,7 +342,7 @@ const displayPrice =
   alt=""
   fill
   sizes="(max-width: 1023px) 100vw, 430px"
-  loading="eager"
+  loading="lazy"
   className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 blur-sm"
 />
 ) : coverImage ? (
@@ -318,7 +352,7 @@ const displayPrice =
     width={430}
     height={242}
     sizes="(max-width: 1023px) 100vw, 430px"
-    loading="eager"
+    loading="lazy"
     className="aspect-video w-full object-cover"
   />
 ) : (
