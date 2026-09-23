@@ -19,11 +19,15 @@ const BATCH_SIZE = 200;
 // Card grid rendering (components/games/GameCardGrid.tsx) only ever reads
 // the fields below, same "cards only, no detail-page columns" split already
 // established by lib/server/gamesLite.ts and lib/server/homeGames.ts -
-// these pages don't need summary/screenshots/genres/igdb_id/etc.
+// these pages don't need summary/screenshots/igdb_id/etc. genres and
+// completion_last_played are only here for the All Games filters/sort these
+// pages share (lib/gameFilters.ts: filterAndSortGames).
 const CARD_COLUMNS = `
   id,
   title,
   release,
+  completion_last_played,
+  genres,
   score,
   hours_played,
   status,

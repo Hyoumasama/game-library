@@ -4,20 +4,41 @@ function positiveInt(value: string | null) {
   return value && /^\d+$/.test(value) ? Number(value) : null;
 }
 
+const PAGE_SIZE = 1000;
+
+// Supabase caps an unpaginated select at 1000 rows, and the library has more
+// games/identity links than that - without paging, anything past the first
+// 1000 silently disappears from the owned-games picker (and from the
+// current game's identity lookup below).
+async function fetchAllRows<T>(
+  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>
+) {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await fetchPage(from, from + PAGE_SIZE - 1);
+    if (error) return { data: null, error };
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE_SIZE) return { data: rows, error: null };
+  }
+}
+
 export async function GET(request: Request) {
   const gameId = positiveInt(new URL(request.url).searchParams.get("gameId"));
   const [franchisesResult, typesResult, linksResult] = await Promise.all([
     supabase.from("game_franchises").select("id,name").order("name"),
     supabase.from("game_relationship_types").select("code,label_en,inverse_label_en,sort_order").eq("is_selectable", true).order("sort_order"),
-    supabase.from("game_identity_links").select("game_id,canonical_game_id"),
+    fetchAllRows((from, to) =>
+      supabase.from("game_identity_links").select("game_id,canonical_game_id").order("game_id").range(from, to)
+    ),
   ]);
   const error = franchisesResult.error || typesResult.error || linksResult.error;
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
-  const gameIds = linksResult.data.map((row) => row.game_id);
-  const gamesResult = gameIds.length
-    ? await supabase.from("games").select("id,title,platform,store").in("id", gameIds).order("title")
-    : { data: [], error: null };
+  // Every linked game is needed, so page through `games` instead of an
+  // `.in("id", [2000+ ids])` filter that would overflow the request URL.
+  const gamesResult = await fetchAllRows((from, to) =>
+    supabase.from("games").select("id,title,platform,store").order("title").order("id").range(from, to)
+  );
   if (gamesResult.error) return Response.json({ error: gamesResult.error.message }, { status: 500 });
 
   const byCanonical = new Map<string, { id: string; title: string; platforms: Set<string> }>();

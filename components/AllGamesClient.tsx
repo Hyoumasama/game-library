@@ -1,8 +1,20 @@
 "use client";
 
 import AppNav from "@/components/AppNav";
+import {
+  ActiveFilterChips,
+  GameFilterControls,
+  useGameFilters,
+} from "@/components/games/GameFilters";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import SafeImage from "@/components/SafeImage";
+import {
+  DEFAULT_GAME_FILTERS,
+  buildGameFilterQueryParams,
+  readFiltersFromSearchParams,
+  type GameFilterOptions,
+  type GameFilters,
+} from "@/lib/gameFilters";
 import {
   formatHours,
   getIcon,
@@ -29,98 +41,11 @@ const EditGameModal = dynamic(() => import("@/components/games/EditGameModal"), 
 
 const PAGE_SIZE = 24;
 
-type FilterOptions = {
-  stores: string[];
-  years: string[];
-  completionYears: string[];
-  genres: string[];
-};
-
-type AllGamesFilters = {
-  search: string;
-  statuses: string[];
-  stores: string[];
-  releases: string[];
-  completions: string[];
-  genres: string[];
-  sort: string;
-  page: number;
-};
-
-const DEFAULT_FILTERS: AllGamesFilters = {
-  search: "",
-  statuses: [],
-  stores: [],
-  releases: [],
-  completions: [],
-  genres: [],
-  sort: "default",
-  page: 1,
-};
-
-const statusOptions = [
-  "Playing",
-  "Completed",
-  "Unplayed",
-  "Skipped",
-  "Dropped",
-  "Wishlist",
-  "__divider__",
-  "Never Played",
-];
-
-type MultiFilterKey =
-  | "statuses"
-  | "stores"
-  | "releases"
-  | "completions"
-  | "genres";
-
-type MultiFilterConfig = {
-  key: MultiFilterKey;
-  paramName: string;
-  label: string;
-  clearLabel: string;
-};
-
-const multiFilterConfigs: MultiFilterConfig[] = [
-  {
-    key: "statuses",
-    paramName: "status",
-    label: "Status",
-    clearLabel: "Clear Statuses",
-  },
-  {
-    key: "stores",
-    paramName: "store",
-    label: "Store",
-    clearLabel: "Clear Stores",
-  },
-  {
-    key: "releases",
-    paramName: "release",
-    label: "Release",
-    clearLabel: "Clear Releases",
-  },
-  {
-    key: "completions",
-    paramName: "completion",
-    label: "Completion",
-    clearLabel: "Clear Completions",
-  },
-  {
-    key: "genres",
-    paramName: "genre",
-    label: "Genre",
-    clearLabel: "Clear Genres",
-  },
-];
-
 type GamesLiteResponse = {
   games?: DbGame[];
   total?: number;
   totalPages?: number;
-  filters?: FilterOptions;
+  filters?: GameFilterOptions;
   stats?: {
     total_games: number;
     completed_games: number;
@@ -128,51 +53,6 @@ type GamesLiteResponse = {
     avg_score: number;
   };
 };
-
-function readFiltersFromSearchParams(searchParams: {
-  get(name: string): string | null;
-  getAll(name: string): string[];
-}): AllGamesFilters {
-  const page = Number(searchParams.get("page") || 1);
-
-  return {
-    search: searchParams.get("search") ?? DEFAULT_FILTERS.search,
-    statuses: searchParams.getAll("status").filter(Boolean),
-    stores: searchParams.getAll("store").filter(Boolean),
-    releases: searchParams.getAll("release").filter(Boolean),
-    completions: searchParams.getAll("completion").filter(Boolean),
-    genres: searchParams.getAll("genre").filter(Boolean),
-    sort: searchParams.get("sort") ?? DEFAULT_FILTERS.sort,
-    page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
-  };
-}
-
-function buildAllGamesQueryParams(
-  filters: AllGamesFilters,
-  options: { includePageSize?: boolean } = {}
-) {
-  const params = new URLSearchParams();
-
-  if (options.includePageSize) {
-    params.set("pageSize", String(PAGE_SIZE));
-  }
-
-  params.set("page", String(filters.page));
-
-  if (filters.search) params.set("search", filters.search);
-  multiFilterConfigs.forEach((config) => {
-    filters[config.key].forEach((value) =>
-      params.append(config.paramName, value)
-    );
-  });
-  if (filters.sort !== "default") params.set("sort", filters.sort);
-
-  if (!options.includePageSize && filters.page <= 1) {
-    params.delete("page");
-  }
-
-  return params;
-}
 
 function scoreClass(score?: string | number | null) {
   const value = Number(score || 0);
@@ -191,120 +71,23 @@ function hasGoldenAchievement(game: UiGame) {
   );
 }
 
-function hasSelectedValue(values: string[], value: string) {
-  return values.some(
-    (selectedValue) => selectedValue.toLowerCase() === value.toLowerCase()
-  );
-}
-
-function toggleSelectedValue(values: string[], value: string) {
-  return hasSelectedValue(values, value)
-    ? values.filter(
-        (selectedValue) => selectedValue.toLowerCase() !== value.toLowerCase()
-      )
-    : [...values, value];
-}
-
-function MultiSelectFilter({
-  label,
-  values,
-  selectedValues,
-  isOpen,
-  onToggleOpen,
-  onToggleValue,
-}: {
-  label: string;
-  values: string[];
-  selectedValues: string[];
-  isOpen: boolean;
-  onToggleOpen: () => void;
-  onToggleValue: (value: string) => void;
-}) {
-  const buttonLabel =
-    selectedValues.length > 0 ? `${label} (${selectedValues.length})` : label;
-
-  return (
-    <div className="relative" onClick={(event) => event.stopPropagation()}>
-      <button
-        type="button"
-        onClick={onToggleOpen}
-        className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-left text-sm font-bold text-white outline-none focus:border-cyan-400"
-      >
-        <span>{buttonLabel}</span>
-        <span className="text-zinc-500">v</span>
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full z-40 mt-2 max-h-80 w-72 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
-          {values.map((value) => {
-            if (value === "__divider__") {
-              return <div key={value} className="my-2 h-px bg-zinc-800" />;
-            }
-
-            const checked = hasSelectedValue(selectedValues, value);
-
-            // Special rendering for Never Played with small description
-            if (value === "Never Played") {
-              return (
-                <label
-                  key={value}
-                  className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => onToggleValue(value)}
-                    className="h-4 w-4 accent-cyan-400 mt-1"
-                  />
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span>{value}</span>
-                      <span className="text-xs font-normal text-zinc-400">Unplayed and not completed elsewhere</span>
-                    </div>
-                  </div>
-                </label>
-              );
-            }
-
-            return (
-              <label
-                key={value}
-                className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold text-zinc-200 hover:bg-zinc-900"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggleValue(value)}
-                  className="h-4 w-4 accent-cyan-400"
-                />
-                <span>{value}</span>
-              </label>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function AllGamesContent({
   initialData,
   initialFilters,
 }: {
   initialData: GamesLiteData;
-  initialFilters?: AllGamesFilters;
+  initialFilters?: GameFilters;
 }) {
-  const safeInitialFilters =
-    initialFilters ||
-    (typeof window === "undefined"
-      ? DEFAULT_FILTERS
-      : readFiltersFromSearchParams(new URLSearchParams(window.location.search)));
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [safeInitialFilters] = useState<GameFilters>(
+    () =>
+      initialFilters ||
+      (typeof window === "undefined"
+        ? DEFAULT_GAME_FILTERS
+        : readFiltersFromSearchParams(new URLSearchParams(window.location.search)))
+  );
   const requestAbortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
-  const [filters, setFilters] = useState<AllGamesFilters>(safeInitialFilters);
-  const filtersRef = useRef<AllGamesFilters>(safeInitialFilters);
+  const filtersRef = useRef<GameFilters>(safeInitialFilters);
 
   const isAdmin = useIsAdmin();
   const [games, setGames] = useState<UiGame[]>(
@@ -313,7 +96,7 @@ function AllGamesContent({
   const [isLoading, setIsLoading] = useState(false);
   const [totalGames, setTotalGames] = useState(initialData.total);
   const [totalPages, setTotalPages] = useState(initialData.totalPages);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+  const [filterOptions, setFilterOptions] = useState<GameFilterOptions>({
     stores: initialData.filters.stores,
     years: initialData.filters.years,
     completionYears: initialData.filters.completionYears,
@@ -325,17 +108,9 @@ function AllGamesContent({
     total_hours: initialData.stats.total_hours,
     avg_score: initialData.stats.avg_score,
   });
-  const [searchDraft, setSearchDraft] = useState(filters.search);
   const [editingGame, setEditingGame] = useState<UiGame | null>(null);
   const [editSignal, setEditSignal] = useState(0);
   const [openActionGameId, setOpenActionGameId] = useState<number | null>(null);
-  const [openFilterMenu, setOpenFilterMenu] = useState<MultiFilterKey | null>(
-    null
-  );
-
-  useEffect(() => {
-    filtersRef.current = filters;
-  }, [filters]);
 
   const loadGames = useCallback(async (nextFilters = filtersRef.current) => {
     requestAbortRef.current?.abort();
@@ -346,8 +121,8 @@ function AllGamesContent({
     setIsLoading(true);
 
     try {
-      const params = buildAllGamesQueryParams(nextFilters, {
-        includePageSize: true,
+      const params = buildGameFilterQueryParams(nextFilters, {
+        pageSize: PAGE_SIZE,
       });
       const response = await fetch(`/api/games-lite?${params.toString()}`, {
         signal: controller.signal,
@@ -384,67 +159,17 @@ function AllGamesContent({
     }
   }, []);
 
-  const updateFilters = useCallback(
-    (
-      nextFilters: Partial<AllGamesFilters>,
-      options: { resetPage?: boolean; history?: "push" | "replace" } = {
-        resetPage: true,
-        history: "push",
-      }
-    ) => {
-      const mergedFilters = {
-        ...filters,
-        ...nextFilters,
-        page:
-          options.resetPage === false
-            ? nextFilters.page ?? filters.page
-            : DEFAULT_FILTERS.page,
-      };
-      const query = buildAllGamesQueryParams(mergedFilters).toString();
-      const nextUrl = query ? `/all-games?${query}` : "/all-games";
+  const filterState = useGameFilters({
+    basePath: "/all-games",
+    initialFilters: safeInitialFilters,
+    onFiltersChange: loadGames,
+  });
+  const { filters, updateFilters, openFilterMenu, setOpenFilterMenu } =
+    filterState;
 
-      setFilters(mergedFilters);
-      window.history[options.history === "replace" ? "replaceState" : "pushState"](
-        null,
-        "",
-        nextUrl
-      );
-      loadGames(mergedFilters);
-    },
-    [filters, loadGames]
-  );
-
-  const toggleMultiFilter = useCallback(
-    (key: MultiFilterKey, value: string) => {
-      // Special handling for 'Never Played' in statuses
-      if (key === "statuses") {
-        const isNever = value === "Never Played";
-
-        if (isNever) {
-          // toggle Never Played: when selected, clear other statuses
-          const currently = filters.statuses || [];
-          const has = hasSelectedValue(currently, "Never Played");
-          updateFilters({ statuses: has ? [] : ["Never Played"] });
-          return;
-        }
-
-        // If selecting a regular status, ensure Never Played is cleared
-        const withoutNever = (filters.statuses || []).filter(
-          (s) => s.toLowerCase() !== "never played"
-        );
-
-        const next = hasSelectedValue(withoutNever, value)
-          ? withoutNever.filter((s) => s.toLowerCase() !== value.toLowerCase())
-          : [...withoutNever, value];
-
-        updateFilters({ statuses: next });
-        return;
-      }
-
-      updateFilters({ [key]: toggleSelectedValue(filters[key], value) });
-    },
-    [filters, updateFilters]
-  );
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   function openEditGame(game: UiGame) {
     setEditingGame(game);
@@ -469,25 +194,10 @@ function AllGamesContent({
   }
 
   useEffect(() => {
-    function handlePopState() {
-      const restoredFilters = readFiltersFromSearchParams(
-        new URLSearchParams(window.location.search)
-      );
-
-      setFilters(restoredFilters);
-      setSearchDraft(restoredFilters.search);
-      loadGames(restoredFilters);
-    }
-
-    window.addEventListener("popstate", handlePopState);
     return () => {
-      window.removeEventListener("popstate", handlePopState);
       requestAbortRef.current?.abort();
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-      }
     };
-  }, [loadGames]);
+  }, []);
 
   const dashboard = {
   total: dashboardStats.total_games,
@@ -496,17 +206,7 @@ function AllGamesContent({
   averageScore: dashboardStats.avg_score,
 };
 
-  const filterMenuOptions: Record<MultiFilterKey, string[]> = {
-    statuses: statusOptions,
-    stores: filterOptions.stores,
-    releases: filterOptions.years,
-    completions: filterOptions.completionYears,
-    genres: filterOptions.genres,
-  };
   const visibleGames = games;
-  const activeFilterConfigs = multiFilterConfigs.filter(
-    (config) => filters[config.key].length > 0
-  );
 
   return (
     <main
@@ -551,33 +251,7 @@ function AllGamesContent({
             </div>
           </div>
 
-          {activeFilterConfigs.length > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {activeFilterConfigs.flatMap((config) =>
-                filters[config.key].map((value) => (
-                  <button
-                    key={`${config.key}-${value}`}
-                    type="button"
-                    onClick={() => toggleMultiFilter(config.key, value)}
-                    className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-200"
-                  >
-                    {value} x
-                  </button>
-                ))
-              )}
-
-              {activeFilterConfigs.map((config) => (
-                <button
-                  key={config.key}
-                  type="button"
-                  onClick={() => updateFilters({ [config.key]: [] })}
-                  className="rounded-full border border-zinc-700 bg-black/50 px-3 py-1 text-xs font-black text-zinc-300 hover:border-zinc-500"
-                >
-                  {config.clearLabel}
-                </button>
-              ))}
-            </div>
-          )}
+          <ActiveFilterChips state={filterState} />
         </section>
 
         <section className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -587,62 +261,7 @@ function AllGamesContent({
           <StatCard label="Avg Score" value={dashboard.averageScore || "-"} />
         </section>
 
-        <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-            {multiFilterConfigs.map((config) => (
-              <MultiSelectFilter
-                key={config.key}
-                label={config.label}
-                values={filterMenuOptions[config.key]}
-                selectedValues={filters[config.key]}
-                isOpen={openFilterMenu === config.key}
-                onToggleOpen={() =>
-                  setOpenFilterMenu((open) =>
-                    open === config.key ? null : config.key
-                  )
-                }
-                onToggleValue={(value) => toggleMultiFilter(config.key, value)}
-              />
-            ))}
-
-<select
-  value={filters.sort}
-  onChange={(event) => updateFilters({ sort: event.target.value })}
-  className="rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none focus:border-cyan-400"
->
-  <option value="default">Sort</option>
-    <option value="score-high">+ Score</option>
-<option value="score-low">- Score</option>
-  <option value="hours-high">+ Hours</option>
-  <option value="hours-low">- Hours</option>
-  <option value="completion-newest">Newest Completion</option>
-  <option value="completion-oldest">Oldest Completion</option>
-    <option value="release-newest">Newest Release</option>
-  <option value="release-oldest">Oldest Release</option>
-
-</select>
-
-            <div className="col-span-2 md:col-span-1">
-              <input
-                value={searchDraft}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSearchDraft(value);
-
-                  if (searchDebounceRef.current) {
-                    clearTimeout(searchDebounceRef.current);
-                  }
-
-                  searchDebounceRef.current = setTimeout(() => {
-                    updateFilters({ search: value }, { history: "replace" });
-                  }, 350);
-                }}
-                placeholder="Search games..."
-                className="w-full rounded-2xl border border-zinc-800 bg-black/70 px-4 py-3 text-sm font-bold text-white outline-none placeholder:text-zinc-600 focus:border-cyan-400"
-              />
-            </div>
-          </div>
-        </section>
+        <GameFilterControls state={filterState} options={filterOptions} />
 
         <section className="relative">
           {isLoading && (
@@ -999,7 +618,7 @@ export default function AllGamesClient({
   initialFilters,
 }: {
   initialData: GamesLiteData;
-  initialFilters?: AllGamesFilters;
+  initialFilters?: GameFilters;
 }) {
   return <AllGamesContent initialData={initialData} initialFilters={initialFilters} />;
 }

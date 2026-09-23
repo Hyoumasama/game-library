@@ -20,6 +20,14 @@ export default function EntityPageSkeleton() {
           <SkeletonBlock className="mt-3 h-4 w-48" />
         </section>
 
+        <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonBlock key={index} className="h-[50px] rounded-2xl" />
+            ))}
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
           {Array.from({ length: 12 }).map((_, index) => (
             <GameCardSkeleton key={index} fixedWidth={false} />
