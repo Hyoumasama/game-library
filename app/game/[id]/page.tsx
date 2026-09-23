@@ -293,47 +293,30 @@ const displayPrice =
           </div>
         </div>
 
-        <section className="mt-2 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
-          <h2 className="mb-5 text-2xl font-bold">Library Details</h2>
+        <section className="mt-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+  <Info accent="cyan" icon="calendar" label="Release Date" value={formatDisplayDate(game.Release)} />
+  <Info accent="cyan" icon="cart" label="Purchase Date" value={formatDisplayDate(game["Date of Purchase"])} />
+  <Info accent="cyan" icon="hourglass" label="Days to Purchase" value={daysToPurchase} highlight />
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-  <Info label="Release Date" value={formatDisplayDate(game.Release)} />
-  <Info label="Purchase Date" value={formatDisplayDate(game["Date of Purchase"])} />
-  <Info label="Days to Purchase" value={daysToPurchase} />
-
-  <Info label="Start Date" value={formatDisplayDate(game.date_started)} />
+  <Info accent="emerald" icon="play" label="Start Date" value={formatDisplayDate(game.date_started)} />
   <Info
+    accent="emerald"
+    icon="flag"
     label="Completion / Last Played"
     value={formatDisplayDate(game["Completion Last Played"])}
   />
-  <Info label="Days to Complete" value={daysToComplete} />
+  <Info accent="emerald" icon="clock" label="Days to Complete" value={daysToComplete} highlight />
 
-  <Info label="Price" value={displayPrice} />
-
-  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
-    <p className="text-sm border-zinc-800">Store</p>
-
-    <div className="mt-2 flex items-center gap-2 font-semibold">
-     
-      <span>{game.Store || "-"}</span>
-    </div>
-  </div>
-
-  <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
-    <p className="text-sm border-zinc-800">Platform</p>
-
-    <div className="mt-2 flex items-center gap-2 font-semibold">
-      
-      <span>{game.Platform || "-"}</span>
-    </div>
-  </div>
+  <Info accent="amber" icon="tag" label="Price" value={displayPrice} highlight />
+  <Info accent="amber" icon="store" label="Store" value={game.Store} logo={getIcon(game.Store)} />
+  <Info accent="amber" icon="gamepad" label="Hardware" value={game["Hardware (1)"]} logo={getIcon(game["Hardware (1)"])} />
 </div>
         </section>
         {game.screenshots ? (
-  <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6">
-    <h2 className="mb-5 text-2xl font-bold">Screenshots</h2>
+  <section className="mt-3">
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {game.screenshots
         .split(",")
         .map((url: string) => url.trim())
@@ -402,18 +385,21 @@ const displayPrice =
         igdbUrl={igdbUrl}
       />
 
-      <span
-        style={{
-          ...statusStyle,
-          padding: "4px 8px",
-          borderRadius: "6px",
-          fontSize: "12px",
-        }}
-      >
-        {status}
-{completedRank ? ` • ${completedRank}` : ""}
-{scoreRank ? ` • Score ${scoreRank}` : ""}
-      </span>
+      <div className="mt-3">
+        <span
+          className="inline-block"
+          style={{
+            ...statusStyle,
+            padding: "4px 8px",
+            borderRadius: "6px",
+            fontSize: "12px",
+          }}
+        >
+          {status}
+          {completedRank ? ` • ${completedRank}` : ""}
+          {scoreRank ? ` • Score ${scoreRank}` : ""}
+        </span>
+      </div>
       {Number(game.Score || 0) > 0 && (
   <span
     className={`absolute left-3 top-3 flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-black ${
@@ -587,17 +573,81 @@ const displayPrice =
 }
 
 
+// Static class strings so Tailwind can see every accent variant.
+const INFO_ACCENTS = {
+  cyan: {
+    icon: "bg-cyan-400/10 text-cyan-300 ring-cyan-400/20",
+    hover: "hover:border-cyan-400/40",
+    glow: "from-cyan-400/10",
+    value: "text-cyan-200",
+  },
+  emerald: {
+    icon: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+    hover: "hover:border-emerald-400/40",
+    glow: "from-emerald-400/10",
+    value: "text-emerald-200",
+  },
+  amber: {
+    icon: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+    hover: "hover:border-amber-400/40",
+    glow: "from-amber-400/10",
+    value: "text-amber-200",
+  },
+} as const;
+
+const INFO_ICONS = {
+  calendar: "M8 2v3M16 2v3M3.5 9h17M5 4.5h14A1.5 1.5 0 0 1 20.5 6v13a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V6A1.5 1.5 0 0 1 5 4.5Z",
+  cart: "M3 3.5h2.2l2.3 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 7.5H6.2M10 20.5h.01M18 20.5h.01",
+  hourglass: "M6.5 2.5h11M6.5 21.5h11M7.5 2.5c0 5 4.5 6 4.5 9.5s-4.5 4.5-4.5 9.5M16.5 2.5c0 5-4.5 6-4.5 9.5s4.5 4.5 4.5 9.5",
+  play: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM10 8.5v7l5.5-3.5L10 8.5Z",
+  flag: "M5 21V4M5 4.5h11.5l-2 4 2 4H5",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3.5 2",
+  tag: "M3.5 12.1V4.5a1 1 0 0 1 1-1h7.6a1 1 0 0 1 .7.3l8 8a1 1 0 0 1 0 1.4l-7.6 7.6a1 1 0 0 1-1.4 0l-8-8a1 1 0 0 1-.3-.7ZM8 8h.01",
+  store: "M4 9.5V20h16V9.5M3 4h18l-1 5.5H4L3 4ZM9.5 20v-5h5v5",
+  gamepad: "M7.5 7h9a4.5 4.5 0 0 1 4.3 5.8l-1.2 4.1a2 2 0 0 1-3.4.8L14.5 16h-5l-1.7 1.7a2 2 0 0 1-3.4-.8l-1.2-4.1A4.5 4.5 0 0 1 7.5 7ZM8 10v3M6.5 11.5h3M15.5 11h.01M17.5 13h.01",
+} as const;
+
 function Info({
   label,
   value,
+  accent,
+  icon,
+  logo,
+  highlight = false,
 }: {
   label: string;
   value?: string | number | null;
+  accent: keyof typeof INFO_ACCENTS;
+  icon: keyof typeof INFO_ICONS;
+  logo?: string | null;
+  highlight?: boolean;
 }) {
+  const a = INFO_ACCENTS[accent];
+
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-4">
-      <p className="text-sm border-zinc-800">{label}</p>
-      <p className="mt-1 font-semibold">{value || "-"}</p>
+    <div
+      className={`group relative flex items-center gap-4 overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 transition-colors ${a.hover}`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${a.glow} to-transparent opacity-0 transition-opacity group-hover:opacity-100`}
+      />
+
+      <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${a.icon}`}>
+        {logo ? (
+          <Image src={logo} alt="" width={20} height={20} sizes="20px" className="h-5 w-5 object-contain" />
+        ) : (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d={INFO_ICONS[icon]} />
+          </svg>
+        )}
+      </div>
+
+      <div className="relative min-w-0">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+        <p className={`mt-0.5 truncate text-base font-semibold ${highlight && value && value !== "-" ? a.value : "text-zinc-100"}`}>
+          {value || "-"}
+        </p>
+      </div>
     </div>
   );
 }
