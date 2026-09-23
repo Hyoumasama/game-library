@@ -14,6 +14,10 @@ import { CACHE_TAGS } from "@/lib/server/cacheTags";
 // can't just be updateTag (Route Handlers can't call it).
 function revalidateHomeGames() {
   revalidateTag(CACHE_TAGS.homeGames, { expire: 0 });
+  // Edits/deletes can change a game's developer, publisher, or franchise
+  // membership (via sync_admin_game_metadata), which the cached
+  // /developer, /publisher, and /franchise pages need to pick up too.
+  revalidateTag(CACHE_TAGS.browsingEntities, { expire: 0 });
 }
 
 export async function GET(

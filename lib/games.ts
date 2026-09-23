@@ -83,6 +83,37 @@ export async function getFranchiseName(
     : joinedFranchise?.name || null;
 }
 
+/** Franchise name + slug, for linking to /franchise/[slug]. Separate from
+ * getFranchiseName (which only returns the display string and is already
+ * relied on by getGameById/admin edit) so that call site's return type
+ * doesn't change. */
+export async function getFranchiseRef(
+  canonicalGameId: string
+): Promise<{ name: string; slug: string } | null> {
+  const { data, error } = await supabase
+    .from("canonical_game_franchises")
+    .select("franchise:game_franchises(name, slug)")
+    .eq("canonical_game_id", canonicalGameId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) return null;
+
+  const joinedFranchise = data?.franchise as
+    | { name: string | null; slug: string | null }
+    | { name: string | null; slug: string | null }[]
+    | null
+    | undefined;
+
+  const franchise = Array.isArray(joinedFranchise)
+    ? joinedFranchise[0]
+    : joinedFranchise;
+
+  return franchise?.name && franchise?.slug
+    ? { name: franchise.name, slug: franchise.slug }
+    : null;
+}
+
 export async function getGameById(id: number) {
   // game row + identity link don't depend on each other, so fetch in
   // parallel; franchise depends on the identity link's result.

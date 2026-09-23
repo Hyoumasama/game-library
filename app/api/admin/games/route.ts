@@ -64,6 +64,9 @@ export async function POST(request: Request) {
   // updateTag's read-your-own-writes behavior - this route just can't use
   // updateTag itself since it's a Route Handler, not a Server Action.
   revalidateTag(CACHE_TAGS.homeGames, { expire: 0 });
+  // A new game can carry a developer/publisher/franchise that an existing
+  // /developer, /publisher, or /franchise page should now list.
+  revalidateTag(CACHE_TAGS.browsingEntities, { expire: 0 });
 
   return Response.json({ success: true });
 }

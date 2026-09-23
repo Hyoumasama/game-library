@@ -1,15 +1,17 @@
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
-import { getFranchiseName, getGameIdentity, getGameRow } from "@/lib/games";
+import { getFranchiseRef, getGameIdentity, getGameRow } from "@/lib/games";
 import {
   formatDisplayDate,
   formatHours,
   getDaysBetween,
   getIcon,
   getYearFromDate,
+  slugify,
 } from "@/lib/gameHelpers";
 import { getRankFromDatabase } from "@/lib/server/gameRanking";
 import Image from "next/image";
+import Link from "next/link";
 import SafeImage from "@/components/SafeImage";
 import RelatedEntries from "@/components/games/RelatedEntries";
 import { getRelatedEntries } from "@/lib/server/relatedEntries";
@@ -50,8 +52,8 @@ const status = gameRow.Status?.trim();
 // other once we have gameRow/canonicalGameId, so run them together too
 // (getRelatedEntries reuses canonicalGameId instead of re-fetching the
 // identity link itself).
-const [franchise, relatedEntries, scoreRank, completedRank] = await Promise.all([
-  canonicalGameId ? getFranchiseName(canonicalGameId) : Promise.resolve(null),
+const [franchiseRef, relatedEntries, scoreRank, completedRank] = await Promise.all([
+  canonicalGameId ? getFranchiseRef(canonicalGameId) : Promise.resolve(null),
   getRelatedEntries(numericId, canonicalGameId),
   getRankFromDatabase({
     column: "score",
@@ -70,7 +72,14 @@ const [franchise, relatedEntries, scoreRank, completedRank] = await Promise.all(
     : Promise.resolve(undefined),
 ]);
 
-const game = { ...gameRow, franchise };
+const game = { ...gameRow, franchise: franchiseRef?.name ?? null };
+// Whole stored developer/publisher string is treated as one entity for
+// /developer and /publisher (see lib/server/browsingEntities.ts) - the
+// data has no reliable delimiter to split multi-company credits into
+// separate links (some legal names already contain a comma, e.g.
+// "Thekla, Inc"), so each field links out as a single page.
+const developerSlug = game.developer ? slugify(game.developer) : null;
+const publisherSlug = game.publisher ? slugify(game.publisher) : null;
 
 const coverImage = game.cover_url || undefined;
 const steamVerticalCover = game.steam_vertical_cover || undefined;
@@ -233,7 +242,16 @@ const displayPrice =
       Developers:
       <span className="text-zinc-200">
         {" "}
-        {game.developer || "-"}
+        {game.developer && developerSlug ? (
+          <Link
+            href={`/developer/${developerSlug}`}
+            className="hover:text-cyan-300 hover:underline"
+          >
+            {game.developer}
+          </Link>
+        ) : (
+          "-"
+        )}
       </span>
     </p>
 
@@ -241,14 +259,31 @@ const displayPrice =
       Publishers:
       <span className="text-zinc-200">
         {" "}
-        {game.publisher || "-"}
+        {game.publisher && publisherSlug ? (
+          <Link
+            href={`/publisher/${publisherSlug}`}
+            className="hover:text-cyan-300 hover:underline"
+          >
+            {game.publisher}
+          </Link>
+        ) : (
+          "-"
+        )}
       </span>
     </p>
 
-    {game.franchise ? (
+    {franchiseRef ? (
       <p>
         Franchise:
-        <span className="text-zinc-200"> {game.franchise}</span>
+        <span className="text-zinc-200">
+          {" "}
+          <Link
+            href={`/franchise/${franchiseRef.slug}`}
+            className="hover:text-cyan-300 hover:underline"
+          >
+            {franchiseRef.name}
+          </Link>
+        </span>
       </p>
     ) : null}
   </div>
@@ -426,9 +461,36 @@ const displayPrice =
 ) : null}
 
   <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-400">
-    {game.developer && <p>Developers: <span className="text-zinc-200">{game.developer}</span></p>}
-    {game.publisher && <p>Publishers: <span className="text-zinc-200">{game.publisher}</span></p>}
-    {game.franchise && <p>Franchise: <span className="text-zinc-200">{game.franchise}</span></p>}
+    {game.developer && developerSlug && (
+      <p>
+        Developers:{" "}
+        <span className="text-zinc-200">
+          <Link href={`/developer/${developerSlug}`} className="hover:text-cyan-300 hover:underline">
+            {game.developer}
+          </Link>
+        </span>
+      </p>
+    )}
+    {game.publisher && publisherSlug && (
+      <p>
+        Publishers:{" "}
+        <span className="text-zinc-200">
+          <Link href={`/publisher/${publisherSlug}`} className="hover:text-cyan-300 hover:underline">
+            {game.publisher}
+          </Link>
+        </span>
+      </p>
+    )}
+    {franchiseRef && (
+      <p>
+        Franchise:{" "}
+        <span className="text-zinc-200">
+          <Link href={`/franchise/${franchiseRef.slug}`} className="hover:text-cyan-300 hover:underline">
+            {franchiseRef.name}
+          </Link>
+        </span>
+      </p>
+    )}
   </div>
   <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
