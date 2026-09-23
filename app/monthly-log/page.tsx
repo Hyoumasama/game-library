@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
 import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
@@ -64,10 +65,17 @@ export default async function MonthlyLogPage({
     cookieStore.get(ADMIN_SESSION_COOKIE)?.value
   );
 
-  const { data: yearsData, error: yearsError } = await supabase
-    .from("monthly_play_logs")
-    .select("year")
-    .order("year", { ascending: false });
+  // Paged: monthly_play_logs grows every month and Supabase silently caps
+  // an unpaginated select at 1000 rows, which would drop older years.
+  const { data: yearsData, error: yearsError } = await fetchAllRows(
+    (from, to) =>
+      supabase
+        .from("monthly_play_logs")
+        .select("year")
+        .order("year", { ascending: false })
+        .order("log_id")
+        .range(from, to)
+  );
 
   if (yearsError) {
     throw yearsError;
@@ -79,14 +87,18 @@ export default async function MonthlyLogPage({
 
   const selectedYear = Number(params.year || availableYears[0]);
 
-  const { data: rawLogs, error } = await supabase
-    .from("monthly_play_logs")
-    .select(
-      "log_id, game_id, title, hours, month, year, created_at, games(steam_vertical_cover)"
-    )
-    .eq("year", selectedYear)
-    .order("month", { ascending: false })
-    .order("hours", { ascending: false });
+  const { data: rawLogs, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("monthly_play_logs")
+      .select(
+        "log_id, game_id, title, hours, month, year, created_at, games(steam_vertical_cover)"
+      )
+      .eq("year", selectedYear)
+      .order("month", { ascending: false })
+      .order("hours", { ascending: false })
+      .order("log_id")
+      .range(from, to)
+  );
 
   if (error) {
     throw error;

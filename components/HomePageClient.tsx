@@ -697,9 +697,10 @@ function WishlistReleaseCalendar({
                               </div>
                             )}
 
-                            {countdown === "TODAY" && (
+                            {(countdown === "TODAY" ||
+                              game.home_tag === "Available Now") && (
                               <span className="absolute left-1 top-1 rounded bg-emerald-400 px-1.5 py-0.5 text-[8px] font-black uppercase text-black">
-                                TODAY
+                                {countdown}
                               </span>
                             )}
                           </div>
@@ -734,6 +735,15 @@ function WishlistReleaseCalendar({
           })}
 
           {tbaGames.length > 0 && (
+            (() => {
+              // Same 4-then-expand cap as the desktop TBA column - showing
+              // every TBA game here made this one column far taller than the
+              // date columns and stretched the whole calendar row.
+              const expanded = !!expandedMobileDates.tba;
+              const visibleGames = expanded ? tbaGames : tbaGames.slice(0, 4);
+              const remainingCount = Math.max(tbaGames.length - 4, 0);
+
+              return (
             <div
               ref={initialAnchorKey === "tba" ? mobileInitialAnchorRef : undefined}
               className="w-24 shrink-0 snap-start"
@@ -743,7 +753,7 @@ function WishlistReleaseCalendar({
               </div>
 
               <div className="grid grid-cols-2 gap-1.5">
-                {tbaGames.map((game) => {
+                {visibleGames.map((game) => {
                   const image = getWishlistCalendarPortraitImage(game);
 
                   return (
@@ -785,7 +795,30 @@ function WishlistReleaseCalendar({
                   );
                 })}
               </div>
+
+              {remainingCount > 0 && (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-label={
+                    expanded
+                      ? "Show fewer TBA games"
+                      : `Show ${remainingCount} more TBA games`
+                  }
+                  onClick={() =>
+                    setExpandedMobileDates((currentDates) => ({
+                      ...currentDates,
+                      tba: !expanded,
+                    }))
+                  }
+                  className="mx-auto mt-1.5 block rounded-full border border-cyan-400/25 bg-black/50 px-2.5 py-1 text-[10px] font-black text-cyan-300 backdrop-blur transition active:bg-zinc-800"
+                >
+                  {expanded ? "Show less" : `+${remainingCount}`}
+                </button>
+              )}
             </div>
+              );
+            })()
           )}
         </div>
       </div>

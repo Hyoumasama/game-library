@@ -5,6 +5,7 @@ import SafeImage from "@/components/SafeImage";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
 import type { Asset } from "@/lib/assets";
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { cookies } from "next/headers";
 
 function formatDate(date: string | null) {
@@ -28,10 +29,14 @@ export default async function AssetsPage() {
   const isAdmin = await verifyAdminSessionValue(
     cookieStore.get(ADMIN_SESSION_COOKIE)?.value
   );
-  const { data, error } = await supabase
-    .from("library_assets")
-    .select("*")
-    .order("purchase_date", { ascending: false });
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("library_assets")
+      .select("*")
+      .order("purchase_date", { ascending: false })
+      .order("id")
+      .range(from, to)
+  );
 
   if (error) {
     return (

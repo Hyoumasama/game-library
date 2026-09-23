@@ -494,9 +494,13 @@ const displayPrice =
   </div>
   <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
+  {/* No price (e.g. wishlist games) would render an empty "-" chip here;
+      Library Details below already shows the "-". */}
+  {displayPrice !== "-" && (
   <span className="rounded-md bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-200">
           {displayPrice}
         </span>
+  )}
 
 {getIcon(game.Platform) && (
             <span className="rounded-md bg-zinc-800 px-2 py-1">

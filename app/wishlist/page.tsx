@@ -16,6 +16,10 @@ export const revalidate = 0;
 // Shared column count for both layouts, so the month columns line up with
 // the wide grids above and below them.
 const GRID_CLASSES = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4";
+// Flat game grids go two-up on phones (one full-width card per game made
+// this page ~23k px tall on mobile); month columns keep GRID_CLASSES and
+// go two-up inside each column instead.
+const GAME_GRID_CLASSES = "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4";
 
 function getTone(game: UiGame, todayKey: string): WideGameCardTone {
   if (!game.Release) return "tba";
@@ -58,7 +62,7 @@ function WideGameGrid({
   eager?: boolean;
 }) {
   return (
-    <div className={GRID_CLASSES}>
+    <div className={GAME_GRID_CLASSES}>
       {games.map((game, index) => (
         <WideGameCard
           key={game.id}
@@ -90,7 +94,7 @@ function MonthColumn({
         <span className="text-xs font-medium text-zinc-500">{games.length}</span>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3">
         {games.map((game) => (
           <WideGameCard
             key={game.id}

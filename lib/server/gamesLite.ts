@@ -90,6 +90,7 @@ type GamesLiteStatsRpcRow = {
 
 interface GamesLiteStatsQuery
   extends GamesLiteFilterableQuery<GamesLiteStatsQuery> {
+  order(column: "id"): GamesLiteStatsQuery;
   range(from: number, to: number): PromiseLike<GamesLiteStatsQueryResult>;
 }
 
@@ -309,7 +310,8 @@ async function fetchAllStatsRows(
       query = applyNeverPlayedToQuery(query, options.completedIgdbIds);
     }
 
-    const { data, error } = await query.range(
+    // Stable order so consecutive pages don't skip or repeat rows.
+    const { data, error } = await query.order("id").range(
       from,
       from + SUPABASE_PAGE_SIZE - 1
     );
@@ -337,8 +339,9 @@ async function fetchCompletedIgdbIds() {
     const { data, error } = await supabase
       .from("games")
       .select("igdb_id")
-      .neq("igdb_id", null)
+      .not("igdb_id", "is", null)
       .eq("status", "Completed")
+      .order("id")
       .range(from, from + SUPABASE_PAGE_SIZE - 1);
 
     if (error) {

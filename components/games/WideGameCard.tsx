@@ -38,7 +38,7 @@ export default function WideGameCard({
     <Link
       href={`/game/${game.id}`}
       className={`group block overflow-hidden border border-zinc-800 bg-zinc-950/90 shadow-xl transition duration-300 hover:border-cyan-400/70 hover:shadow-cyan-950/40 ${
-        compact ? "rounded-2xl" : "rounded-[1.6rem] hover:-translate-y-1"
+        compact ? "rounded-2xl" : "rounded-2xl hover:-translate-y-1 sm:rounded-[1.6rem]"
       }`}
     >
       <div className="relative aspect-[460/215] overflow-hidden bg-zinc-900">
@@ -47,7 +47,7 @@ export default function WideGameCard({
             src={image}
             alt={game.Title}
             fill
-            sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+            sizes="(min-width: 1024px) 22vw, 48vw"
             loading={eager ? "eager" : "lazy"}
             className="object-cover transition duration-500 group-hover:scale-105"
           />
@@ -58,7 +58,7 @@ export default function WideGameCard({
         )}
       </div>
 
-      <div className={compact ? "p-2.5" : "p-3"}>
+      <div className={compact ? "p-2.5" : "p-2.5 sm:p-3"}>
         <h3 className="line-clamp-1 text-sm font-black text-white">
           {game.Title}
         </h3>

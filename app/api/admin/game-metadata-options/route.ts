@@ -8,12 +8,15 @@ function positiveInt(value: string | null) {
 // The library has more games/identity links than Supabase's 1000-row cap -
 // without paging (fetchAllRows), anything past the first 1000 silently
 // disappears from the owned-games picker (and from the current game's
-// identity lookup below).
+// identity lookup below). Franchises are paged the same way so the picker
+// keeps working once that list grows past the cap too.
 
 export async function GET(request: Request) {
   const gameId = positiveInt(new URL(request.url).searchParams.get("gameId"));
   const [franchisesResult, typesResult, linksResult] = await Promise.all([
-    supabase.from("game_franchises").select("id,name").order("name"),
+    fetchAllRows((from, to) =>
+      supabase.from("game_franchises").select("id,name").order("name").order("id").range(from, to)
+    ),
     supabase.from("game_relationship_types").select("code,label_en,inverse_label_en,sort_order").eq("is_selectable", true).order("sort_order"),
     fetchAllRows((from, to) =>
       supabase.from("game_identity_links").select("game_id,canonical_game_id").order("game_id").range(from, to)

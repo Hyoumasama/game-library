@@ -728,10 +728,14 @@ async function getAvailableStatsYears() {
   }
 
   const [monthlyYearsResult, completionYearsResult] = await Promise.all([
-    supabase
-      .from("monthly_play_logs")
-      .select("year")
-      .order("year", { ascending: false }),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("monthly_play_logs")
+        .select("year")
+        .order("year", { ascending: false })
+        .order("log_id")
+        .range(from, to)
+    ),
     // Paged: games with a completion date will outgrow Supabase's 1000-row
     // cap, and truncation would silently drop years from the selector.
     fetchAllRows((from, to) =>
@@ -1098,87 +1102,102 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
   // Fetch monthly logs and relevant games. For 2024+ we rely only on monthly logs.
   const logsQuery = useArchiveTimeline
     ? Promise.resolve({ data: [], error: null })
-    : supabase
-        .from("monthly_play_logs")
-        .select(
-          `
-          log_id,
-          game_id,
-          title,
-          hours,
-          month,
-          year,
-          games (
-            id,
+    : fetchAllRows((from, to) =>
+        supabase
+          .from("monthly_play_logs")
+          .select(
+            `
+            log_id,
+            game_id,
             title,
-            release,
-            date_started,
-            date_of_purchase,
-            completion_last_played,
-            steam_vertical_cover,
-            cover_url,
-            wide_cover_url,
-            platform,
-            hardware,
-            store,
-            status,
-            score,
-            price,
-            genres
+            hours,
+            month,
+            year,
+            games (
+              id,
+              title,
+              release,
+              date_started,
+              date_of_purchase,
+              completion_last_played,
+              steam_vertical_cover,
+              cover_url,
+              wide_cover_url,
+              platform,
+              hardware,
+              store,
+              status,
+              score,
+              price,
+              genres
+            )
+          `
           )
-        `
-        )
-        .eq("year", year)
-        .order("month", { ascending: true })
-        .order("hours", { ascending: false });
+          .eq("year", year)
+          .order("month", { ascending: true })
+          .order("hours", { ascending: false })
+          .order("log_id")
+          .range(from, to)
+      );
 
-  const completionGamesPromise = supabase
-    .from("games")
-    .select(
-      `
-            id,
-            title,
-            release,
-            date_started,
-            date_of_purchase,
-            completion_last_played,
-            steam_vertical_cover,
-            cover_url,
-            wide_cover_url,
-            platform,
-            hardware,
-            store,
-            status,
-            score,
-            price,
-            hours_played,
-            genres
-          `
-    )
-    .gte("completion_last_played", completionYearStart)
-    .lt("completion_last_played", completionYearEnd)
-    .order("completion_last_played", { ascending: true })
-    .order("hours_played", { ascending: false });
-
-  const [logsResult, libraryGamesResult, completionGamesResult] = await Promise.all([
-    logsQuery,
+  // Every per-year list below is paged: a busy year can pass Supabase's
+  // 1000-row cap (2024 alone already has ~500 purchases), and truncation
+  // would silently drop games from the stats.
+  const completionGamesPromise = fetchAllRows((from, to) =>
     supabase
       .from("games")
       .select(
         `
-          id,
-          title,
-          date_of_purchase,
-          steam_vertical_cover,
-          cover_url,
-          wide_cover_url,
-          store,
-          score,
-          price
-        `
+              id,
+              title,
+              release,
+              date_started,
+              date_of_purchase,
+              completion_last_played,
+              steam_vertical_cover,
+              cover_url,
+              wide_cover_url,
+              platform,
+              hardware,
+              store,
+              status,
+              score,
+              price,
+              hours_played,
+              genres
+            `
       )
-      .gte("date_of_purchase", purchaseYearStart)
-      .lt("date_of_purchase", purchaseYearEnd),
+      .gte("completion_last_played", completionYearStart)
+      .lt("completion_last_played", completionYearEnd)
+      .order("completion_last_played", { ascending: true })
+      .order("hours_played", { ascending: false })
+      .order("id")
+      .range(from, to)
+  );
+
+  const [logsResult, libraryGamesResult, completionGamesResult] = await Promise.all([
+    logsQuery,
+    fetchAllRows((from, to) =>
+      supabase
+        .from("games")
+        .select(
+          `
+            id,
+            title,
+            date_of_purchase,
+            steam_vertical_cover,
+            cover_url,
+            wide_cover_url,
+            store,
+            score,
+            price
+          `
+        )
+        .gte("date_of_purchase", purchaseYearStart)
+        .lt("date_of_purchase", purchaseYearEnd)
+        .order("id")
+        .range(from, to)
+    ),
     completionGamesPromise,
   ]);
 

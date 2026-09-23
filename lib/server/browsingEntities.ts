@@ -80,26 +80,28 @@ async function fetchFranchisePageData(
     .eq("slug", slug)
     .maybeSingle();
 
-  if (franchiseError || !franchise) return null;
+  // Throw instead of returning null: a null result is cached by
+  // unstable_cache below, so a transient Supabase error would otherwise
+  // pin the franchise page to a 404 until the cache expires.
+  if (franchiseError) throw new Error(franchiseError.message);
+  if (!franchise) return null;
 
-  // A franchise can have many member games (up to ~40 in this library), so
-  // page through the membership table defensively instead of assuming one
-  // response page covers it.
-  const canonicalIds: string[] = [];
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await supabase
-      .from("canonical_game_franchises")
-      .select("canonical_game_id")
-      .eq("franchise_id", franchise.id)
-      .range(offset, offset + 499);
+  // canonical_game_franchises is already past Supabase's 1000-row cap, so
+  // page through it with a stable order (range without order can skip or
+  // repeat rows between pages).
+  const { data: memberships, error: membershipsError } = await fetchAllRows(
+    (from, to) =>
+      supabase
+        .from("canonical_game_franchises")
+        .select("canonical_game_id")
+        .eq("franchise_id", franchise.id)
+        .order("canonical_game_id")
+        .range(from, to)
+  );
 
-    if (error) throw new Error(error.message);
+  if (membershipsError) throw new Error(membershipsError.message);
 
-    const rows = data || [];
-    canonicalIds.push(...rows.map((row) => row.canonical_game_id));
-
-    if (rows.length < 500) break;
-  }
+  const canonicalIds = (memberships || []).map((row) => row.canonical_game_id);
 
   if (canonicalIds.length === 0) {
     return { kind: "franchise", name: franchise.name, games: [] };
@@ -108,14 +110,20 @@ async function fetchFranchisePageData(
   // canonical_game_id -> owned library game_id(s). One canonical game can
   // have multiple library copies (different platforms/stores), and the
   // library count should reflect that, so this resolves to game ids rather
-  // than deduping to one card per canonical game.
+  // than deduping to one card per canonical game. Each batch is paged too,
+  // since one batch of canonical ids can map to more than one response
+  // page of links.
   const gameIds: number[] = [];
   for (let offset = 0; offset < canonicalIds.length; offset += BATCH_SIZE) {
     const batch = canonicalIds.slice(offset, offset + BATCH_SIZE);
-    const { data, error } = await supabase
-      .from("game_identity_links")
-      .select("game_id")
-      .in("canonical_game_id", batch);
+    const { data, error } = await fetchAllRows((from, to) =>
+      supabase
+        .from("game_identity_links")
+        .select("game_id")
+        .in("canonical_game_id", batch)
+        .order("game_id")
+        .range(from, to)
+    );
 
     if (error) throw new Error(error.message);
 
@@ -180,10 +188,14 @@ async function fetchCompanyPageData(
 
   if (variants.length === 0) return null;
 
-  const { data, error } = await supabase
-    .from("games")
-    .select(CARD_COLUMNS)
-    .in(kind, variants);
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("games")
+      .select(CARD_COLUMNS)
+      .in(kind, variants)
+      .order("id")
+      .range(from, to)
+  );
 
   if (error) throw new Error(error.message);
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 
 export type WatchMediaType = "anime" | "tv" | "movie";
 
@@ -357,17 +358,23 @@ async function fetchLibraryBase({
   includeEpisodeDetails?: boolean;
   mediaId?: number;
 } = {}) {
-  let entriesQuery = supabase
-    .from("watch_library_entries")
-    .select(libraryEntryColumns)
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
+  // Every query below is paged with fetchAllRows: Supabase silently caps an
+  // unpaginated select at 1000 rows, and episodes/owned episodes in
+  // particular pass that quickly as the watch library grows.
+  const { data, error } = await fetchAllRows((from, to) => {
+    let entriesQuery = supabase
+      .from("watch_library_entries")
+      .select(libraryEntryColumns);
 
-  if (mediaId) {
-    entriesQuery = entriesQuery.eq("media_id", mediaId);
-  }
+    if (mediaId) {
+      entriesQuery = entriesQuery.eq("media_id", mediaId);
+    }
 
-  const { data, error } = await entriesQuery;
+    return entriesQuery
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to);
+  });
 
   if (error) throw error;
 
@@ -386,8 +393,12 @@ async function fetchLibraryBase({
   // media and seasons both only depend on mediaIds (not on each other), so
   // fetch them together instead of one after the other.
   const [mediaResult, seasonResult] = await Promise.all([
-    supabase.from("watch_media").select(mediaColumns).in("id", mediaIds),
-    supabase.from("watch_seasons").select(seasonColumns).in("media_id", mediaIds),
+    fetchAllRows((from, to) =>
+      supabase.from("watch_media").select(mediaColumns).in("id", mediaIds).order("id").range(from, to)
+    ),
+    fetchAllRows((from, to) =>
+      supabase.from("watch_seasons").select(seasonColumns).in("media_id", mediaIds).order("id").range(from, to)
+    ),
   ]);
 
   if (mediaResult.error) throw mediaResult.error;
@@ -408,16 +419,24 @@ async function fetchLibraryBase({
 
   const [episodesResult, ownedResult] = await Promise.all([
     seasonIds.length
-      ? supabase
-          .from("watch_episodes")
-          .select(includeEpisodeDetails ? episodeColumns : "id, season_id")
-          .in("season_id", seasonIds)
+      ? fetchAllRows((from, to) =>
+          supabase
+            .from("watch_episodes")
+            .select(includeEpisodeDetails ? episodeColumns : "id, season_id")
+            .in("season_id", seasonIds)
+            .order("id")
+            .range(from, to)
+        )
       : Promise.resolve({ data: [], error: null }),
     entryIds.length
-      ? supabase
-          .from("watch_owned_episodes")
-          .select("library_entry_id, episode_id")
-          .in("library_entry_id", entryIds)
+      ? fetchAllRows((from, to) =>
+          supabase
+            .from("watch_owned_episodes")
+            .select("library_entry_id, episode_id")
+            .in("library_entry_id", entryIds)
+            .order("id")
+            .range(from, to)
+        )
       : Promise.resolve({ data: [], error: null }),
   ]);
 

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { buildAssetPayload } from "@/lib/assets";
 
 type AssetOptionRow = {
@@ -10,10 +11,14 @@ type AssetOptionRow = {
 };
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from("library_assets")
-    .select("type, category, brand, market, status")
-    .order("name", { ascending: true });
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("library_assets")
+      .select("type, category, brand, market, status")
+      .order("name", { ascending: true })
+      .order("id")
+      .range(from, to)
+  );
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
