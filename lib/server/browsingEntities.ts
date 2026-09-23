@@ -5,6 +5,7 @@ import { slugify } from "@/lib/gameHelpers";
 import type { DbGame, UiGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 
 export type BrowsingEntityKind = "franchise" | "developer" | "publisher";
 
@@ -147,16 +148,22 @@ async function resolveCompanyVariants(
   column: "developer" | "publisher",
   slug: string
 ): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("games")
-    .select(column)
-    .not(column, "is", null);
+  // Page through every games row - otherwise companies whose games all fall
+  // past Supabase's first 1000 rows resolve to no variants (404).
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("games")
+      .select(column)
+      .not(column, "is", null)
+      .order("id")
+      .range(from, to)
+  );
 
   if (error) throw new Error(error.message);
 
   const variants = new Set<string>();
 
-  for (const row of (data || []) as Record<string, string | null>[]) {
+  for (const row of data as Record<string, string | null>[]) {
     const raw = row[column];
     if (!raw || !normalizeCompanyName(raw)) continue;
     if (slugify(raw) === slug) variants.add(raw);

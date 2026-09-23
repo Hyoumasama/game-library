@@ -39,6 +39,12 @@ const selectColumns = `
 
 const WISHLIST_CALENDAR_FETCH_LIMIT = 500;
 
+// Released wishlist games stay on the home calendar for 7 days after
+// release (HomePageClient's WishlistReleaseCalendar applies the exact
+// cutoff in the viewer's local date); one extra day here absorbs the
+// server/browser timezone difference.
+const RECENT_RELEASE_FETCH_DAYS = 8;
+
 function toDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -50,6 +56,9 @@ function toDateKey(date: Date) {
 async function fetchHomeGames() {
   const today = new Date();
   const todayText = toDateKey(today);
+  const recentCutoff = new Date(today);
+  recentCutoff.setDate(recentCutoff.getDate() - RECENT_RELEASE_FETCH_DAYS);
+  const recentCutoffText = toDateKey(recentCutoff);
 
   const [
     wishlistPastResult,
@@ -64,7 +73,7 @@ async function fetchHomeGames() {
         .from("games")
         .select(selectColumns)
         .eq("status", "Wishlist")
-        .not("release", "is", null)
+        .gte("release", recentCutoffText)
         .lt("release", todayText)
         .order("release", { ascending: false })
         .order("title", { ascending: true })

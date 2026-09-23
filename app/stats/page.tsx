@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { getIcon } from "@/lib/gameIcons";
 import StatsYearSelect from "./StatsYearSelect";
 import Image from "next/image";
@@ -731,10 +732,16 @@ async function getAvailableStatsYears() {
       .from("monthly_play_logs")
       .select("year")
       .order("year", { ascending: false }),
-    supabase
-      .from("games")
-      .select("completion_last_played")
-      .not("completion_last_played", "is", null),
+    // Paged: games with a completion date will outgrow Supabase's 1000-row
+    // cap, and truncation would silently drop years from the selector.
+    fetchAllRows((from, to) =>
+      supabase
+        .from("games")
+        .select("completion_last_played")
+        .not("completion_last_played", "is", null)
+        .order("id")
+        .range(from, to)
+    ),
   ]);
 
   if (monthlyYearsResult.error) {

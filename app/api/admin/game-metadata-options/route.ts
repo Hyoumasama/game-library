@@ -1,26 +1,14 @@
 import { supabase } from "@/lib/supabase";
+import { fetchAllRows } from "@/lib/server/fetchAllRows";
 
 function positiveInt(value: string | null) {
   return value && /^\d+$/.test(value) ? Number(value) : null;
 }
 
-const PAGE_SIZE = 1000;
-
-// Supabase caps an unpaginated select at 1000 rows, and the library has more
-// games/identity links than that - without paging, anything past the first
-// 1000 silently disappears from the owned-games picker (and from the
-// current game's identity lookup below).
-async function fetchAllRows<T>(
-  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>
-) {
-  const rows: T[] = [];
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await fetchPage(from, from + PAGE_SIZE - 1);
-    if (error) return { data: null, error };
-    rows.push(...(data || []));
-    if (!data || data.length < PAGE_SIZE) return { data: rows, error: null };
-  }
-}
+// The library has more games/identity links than Supabase's 1000-row cap -
+// without paging (fetchAllRows), anything past the first 1000 silently
+// disappears from the owned-games picker (and from the current game's
+// identity lookup below).
 
 export async function GET(request: Request) {
   const gameId = positiveInt(new URL(request.url).searchParams.get("gameId"));
