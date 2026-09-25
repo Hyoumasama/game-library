@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
+import MetacriticScoreField from "@/components/games/MetacriticScoreField";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -635,7 +636,18 @@ className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
                 <option>Wishlist</option>
               </select>
 
-              <input value={score} onChange={(e) => setScore(e.target.value)} placeholder="Score" className="rounded-xl border border-zinc-700 bg-black px-4 py-3" />
+              <MetacriticScoreField
+                value={score}
+                onChange={setScore}
+                title={title}
+                release={release}
+                steamAppId={steamAppId}
+                autoFillKey={
+                  selectedGame
+                    ? String(selectedGame.igdbId ?? selectedGame.steamAppId ?? selectedGame.title)
+                    : null
+                }
+              />
               <input value={hoursPlayed} onChange={(e) => setHoursPlayed(e.target.value)} placeholder="Hours Played" className="rounded-xl border border-zinc-700 bg-black px-4 py-3" />
               <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" className="rounded-xl border border-zinc-700 bg-black px-4 py-3" />
               <input
