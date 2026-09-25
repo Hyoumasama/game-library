@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { hasAdultGenre, withAdultGenre } from "@/lib/adultContent";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 import type { UiGame } from "@/lib/gameTypes";
 import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
@@ -340,7 +341,15 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     setCoverUrl(selected.coverUrl || "");
     setHeroUrl(selected.heroUrl || "");
         setSummary(selected.summary || "");
-    setGenre(formatGenres(selected.genres));
+    // Re-matching a game must not drop a manually set Adult genre.
+    setGenre((current) =>
+      formatGenres(
+        withAdultGenre(
+          selected.genres || [],
+          hasAdultGenre(parseGenreText(current))
+        )
+      )
+    );
     setDeveloper(selected.developer || "");
     setPublisher(selected.publisher || "");
     setScreenshots(selected.screenshots || "");

@@ -1,11 +1,17 @@
 import {
+  IGDB_EROTIC_THEME,
+  withAdultGenre,
+} from "@/lib/adultContent";
+import {
   getIgdbCoverUrl,
   getIgdbExactReleaseDate,
   type IgdbReleaseDate,
 } from "@/lib/igdb";
+import { fetchSteamAdultAppIds } from "@/lib/server/steamAdultContent";
 
 type IgdbImage = { image_id?: string };
 type IgdbGenre = { name?: string };
+type IgdbTheme = { name?: string };
 type IgdbCompany = {
   developer?: boolean;
   publisher?: boolean;
@@ -23,6 +29,7 @@ type IgdbGame = {
   screenshots?: IgdbImage[];
   summary?: string;
   genres?: IgdbGenre[];
+  themes?: IgdbTheme[];
   involved_companies?: IgdbCompany[];
   websites?: IgdbWebsite[];
 };
@@ -131,6 +138,7 @@ const igdbGameFields = `
   cover.image_id,
   summary,
   genres.name,
+  themes.name,
   artworks.image_id,
   screenshots.image_id,
   involved_companies.company.name,
@@ -217,6 +225,14 @@ export async function GET(request: Request) {
       }
     }
 
+    // IGDB often misses the Erotic theme, so Steam's content descriptors
+    // are checked too (one batched call) for results that link a Steam app.
+    const steamAdultAppIds = await fetchSteamAdultAppIds(
+      finalGames
+        .map((game) => extractSteamAppId(game.websites))
+        .filter((appId): appId is number => !!appId)
+    );
+
     const results = finalGames.map((game: IgdbGame) => ({
     source: "igdb" as const,
     igdbId: game.id,
@@ -241,8 +257,13 @@ heroUrl:
 
 summary: game.summary || "",
 
-genres:
-  game.genres?.map((genre) => genre.name).filter(Boolean) || [],
+genres: withAdultGenre(
+  game.genres
+    ?.map((genre) => genre.name)
+    .filter((genre): genre is string => !!genre) || [],
+  !!game.themes?.some((theme) => theme.name === IGDB_EROTIC_THEME) ||
+    steamAdultAppIds.has(extractSteamAppId(game.websites) ?? 0)
+),
 
 screenshots:
   game.screenshots

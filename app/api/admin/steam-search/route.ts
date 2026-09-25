@@ -1,3 +1,5 @@
+import { isSteamAdultContent, withAdultGenre } from "@/lib/adultContent";
+
 function formatSteamDate(dateText: string) {
   const months: Record<string, string> = {
     Jan: "01",
@@ -62,7 +64,14 @@ async function fetchSteamAppDetails(appid: number) {
     { success?: boolean; data?: SteamAppDetails }
   >;
 
-  const app = detailData?.[appid];
+  // Steam sometimes keys the response by an unrelated id (e.g. a DLC's)
+  // instead of the requested appid, so fall back to matching steam_appid
+  // or to the single entry returned.
+  const entries = Object.values(detailData || {});
+  const app =
+    detailData?.[appid] ||
+    entries.find((entry) => Number(entry?.data?.steam_appid) === appid) ||
+    (entries.length === 1 ? entries[0] : undefined);
 
   return app?.success === false ? null : app?.data || null;
 }
@@ -88,7 +97,12 @@ function mapSteamResult(
     coverUrl: data?.capsule_image || fallback?.tiny_image || null,
     heroUrl: data?.header_image || data?.capsule_image || null,
     summary: data?.short_description || "",
-    genres: data?.genres?.map((genre) => genre.description).filter(Boolean) || [],
+    genres: withAdultGenre(
+      data?.genres
+        ?.map((genre) => genre.description)
+        .filter((genre): genre is string => !!genre) || [],
+      isSteamAdultContent(data?.content_descriptors?.ids)
+    ),
     developer: data?.developers?.join(", ") || "",
     publisher: data?.publishers?.join(", ") || "",
     screenshots:
@@ -164,6 +178,7 @@ type SteamGenre = { description?: string };
 type SteamScreenshot = { path_full?: string };
 type SteamAppDetails = {
   name?: string;
+  steam_appid?: number;
   release_date?: { date?: string };
   capsule_image?: string;
   header_image?: string;
@@ -172,4 +187,5 @@ type SteamAppDetails = {
   developers?: string[];
   publishers?: string[];
   screenshots?: SteamScreenshot[];
+  content_descriptors?: { ids?: number[] };
 };
