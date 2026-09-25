@@ -117,7 +117,7 @@ async function refreshWishlistMetadata() {
 
     await loadGames();
     setMetadataRefreshMessage(
-      `Updated ${data.updated || 0}, TBA ${data.stillTba || 0}`
+      `Updated ${data.updated || 0}, Cleared ${data.cleared || 0}, TBA ${data.stillTba || 0}`
     );
   } catch (error) {
     console.error("Wishlist metadata refresh failed:", error);

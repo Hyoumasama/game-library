@@ -1,7 +1,11 @@
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
-import { getIgdbToken } from "@/lib/igdb";
+import {
+  getIgdbExactReleaseDate,
+  getIgdbToken,
+  type IgdbReleaseDate,
+} from "@/lib/igdb";
 import { supabase } from "@/lib/supabase";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
 
@@ -15,13 +19,8 @@ type LocalWishlistGame = {
 type IgdbReleaseGame = {
   id?: number;
   first_release_date?: number;
+  release_dates?: IgdbReleaseDate[];
 };
-
-function toReleaseDate(value?: number) {
-  if (!value) return null;
-
-  return new Date(value * 1000).toISOString().slice(0, 10);
-}
 
 function chunk<T>(items: T[], size: number) {
   const chunks: T[][] = [];
@@ -61,6 +60,7 @@ export async function POST() {
     let updated = 0;
     let unchanged = 0;
     let stillTba = 0;
+    let cleared = 0;
     const errors: string[] = [];
 
     for (const batch of chunk(games, 100)) {
@@ -78,7 +78,7 @@ export async function POST() {
           Accept: "application/json",
         },
         body: `
-          fields first_release_date;
+          fields first_release_date, release_dates.date, release_dates.date_format;
           where id = (${ids.join(",")});
           limit ${ids.length};
         `,
@@ -92,17 +92,22 @@ export async function POST() {
       }
 
       const igdbGames = (await igdbResponse.json()) as IgdbReleaseGame[];
-      const releasesById = new Map(
-        igdbGames.map((game) => [Number(game.id), toReleaseDate(game.first_release_date)])
-      );
+      const igdbById = new Map(igdbGames.map((game) => [Number(game.id), game]));
 
       for (const game of batch) {
-        const nextRelease = releasesById.get(Number(game.igdb_id)) ?? null;
+        const igdbGame = igdbById.get(Number(game.igdb_id));
+        const nextRelease = igdbGame ? getIgdbExactReleaseDate(igdbGame) : null;
         const currentRelease = game.release
           ? String(game.release).slice(0, 10)
           : null;
 
-        if (!nextRelease) {
+        // IGDB only knows the year/month (first_release_date is a
+        // placeholder like Dec 31): drop any stored day so the game falls
+        // back to TBA. With no IGDB date at all, the stored date is kept.
+        const isImpreciseIgdbDate =
+          !nextRelease && !!igdbGame?.first_release_date;
+
+        if (!nextRelease && !(isImpreciseIgdbDate && currentRelease)) {
           stillTba++;
           continue;
         }
@@ -119,8 +124,10 @@ export async function POST() {
 
         if (updateError) {
           errors.push(`${game.title || game.id}: ${updateError.message}`);
-        } else {
+        } else if (nextRelease) {
           updated++;
+        } else {
+          cleared++;
         }
       }
     }
@@ -138,6 +145,7 @@ export async function POST() {
       updated,
       unchanged,
       stillTba,
+      cleared,
       errors,
     });
   } catch (error) {

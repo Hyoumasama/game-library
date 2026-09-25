@@ -1,4 +1,8 @@
-import { getIgdbCoverUrl } from "@/lib/igdb";
+import {
+  getIgdbCoverUrl,
+  getIgdbExactReleaseDate,
+  type IgdbReleaseDate,
+} from "@/lib/igdb";
 
 type IgdbImage = { image_id?: string };
 type IgdbGenre = { name?: string };
@@ -13,6 +17,7 @@ type IgdbGame = {
   slug?: string;
   name?: string;
   first_release_date?: number;
+  release_dates?: IgdbReleaseDate[];
   cover?: IgdbImage;
   artworks?: IgdbImage[];
   screenshots?: IgdbImage[];
@@ -121,6 +126,8 @@ const igdbGameFields = `
   name,
   slug,
   first_release_date,
+  release_dates.date,
+  release_dates.date_format,
   cover.image_id,
   summary,
   genres.name,
@@ -220,9 +227,9 @@ export async function GET(request: Request) {
   ? new Date(game.first_release_date * 1000).getFullYear()
   : null,
 
-releaseDate: game.first_release_date
-  ? new Date(game.first_release_date * 1000).toISOString().slice(0, 10)
-  : "",
+// Year/month-only IGDB dates are left empty (TBA) rather than saved as
+// a made-up Dec 31 / end-of-month day.
+releaseDate: getIgdbExactReleaseDate(game) || "",
     coverUrl: getIgdbCoverUrl(game.cover?.image_id),
 
 heroUrl:

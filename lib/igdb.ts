@@ -238,6 +238,42 @@ const baseGame = baseGames[0];
 
 return exactBaseMatch || baseGame || exactSafeMatch || safeMatches[0] || null;
 }
+export type IgdbReleaseDate = {
+  date?: number;
+  date_format?: number;
+  human?: string;
+};
+
+// IGDB release_dates.date_format: 0 = full day, 1 = month only, 2 = year
+// only, 3+ = quarters / TBD. For a year-only release IGDB still sets
+// first_release_date to Dec 31 of that year, so it can't be trusted alone.
+const IGDB_FULL_DATE_FORMAT = 0;
+
+// "YYYY-MM-DD" only when first_release_date is a real day; null (TBA) when
+// IGDB only knows the year/month/quarter. Needs release_dates.date and
+// release_dates.date_format in the query.
+export function getIgdbExactReleaseDate(game: {
+  first_release_date?: number;
+  release_dates?: IgdbReleaseDate[];
+}) {
+  const timestamp = game.first_release_date;
+
+  if (!timestamp) return null;
+
+  const matching = (game.release_dates || []).filter(
+    (release) => release.date === timestamp
+  );
+
+  if (
+    matching.length > 0 &&
+    !matching.some((release) => release.date_format === IGDB_FULL_DATE_FORMAT)
+  ) {
+    return null;
+  }
+
+  return new Date(timestamp * 1000).toISOString().slice(0, 10);
+}
+
 export function getIgdbCoverUrl(imageId?: string) {
   if (!imageId) return null;
 
