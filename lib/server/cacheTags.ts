@@ -8,4 +8,7 @@ export const CACHE_TAGS = {
   // through the admin game create/update/delete routes, so those routes
   // revalidate this tag the same way they already revalidate homeGames.
   browsingEntities: "browsing-entities",
+  // Home page Steam news ticker (lib/server/steamNews.ts), revalidated by
+  // app/api/cron/steam-news/route.ts after each sync.
+  steamNews: "steam-news",
 } as const;

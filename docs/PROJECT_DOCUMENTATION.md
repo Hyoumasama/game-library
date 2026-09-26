@@ -74,9 +74,12 @@ IGDB_CLIENT_SECRET=
 STEAMGRIDDB_API_KEY=
 RAWG_API_KEY=
 TMDB_READ_ACCESS_TOKEN=
+CRON_SECRET=
 ```
 
 `TMDB_READ_ACCESS_TOKEN` is required by the watch import and TMDB lookup flow. It is used in `lib/server/watch/tmdb.ts`.
+
+`CRON_SECRET` authorizes the scheduled Steam news sync (`GET /api/cron/steam-news` with `Authorization: Bearer <CRON_SECRET>`). Without it, only a logged-in admin can trigger the sync.
 
 `ADMIN_SESSION_SECRET` is used to sign admin cookies. If it is missing, `ADMIN_PASSWORD` is used as the fallback signing secret.
 
@@ -159,12 +162,17 @@ export const revalidate = 0;
 
 The home page shows:
 
+- A Steam-library style "What's New" row (below the nav, above the wishlist calendar): the 5 latest official announcements (max 2 per game) for library games with a `steam_appid`, shown as announcement-art cards badged "Update" or "News" laid out five across with no scrolling (2x2 on small screens), each linking to the Steam news post. Loaded by `getSteamNewsTicker()` in `lib/server/steamNews.ts` from the `steam_news` table; rendered by `components/SteamNewsTicker.tsx`. Admins get a sync button; for everyone else the row is hidden when empty.
 - Wishlist games, split into upcoming and already available by comparing `release` to today's date.
 - Currently playing games.
 - Recently added games.
 - Recently completed games.
 
 The UI is rendered by `components/HomePageClient.tsx`.
+
+### `/news`
+
+Steam news for the library: every announcement in `steam_news` from the last 7 days (no per-game cap), grouped by day in `Asia/Riyadh` time. A filter panel has multi-select groups for type (New Update / Dev News), game status (Playing, Completed, Unplayed, Wishlist, Dropped, Skipped) and content (Regular / Adult, from the `Adult` genre). Options within a group are ORed, groups are ANDed, chip counts are faceted, and the selection is mirrored to the URL (`?type=update&status=Playing,Wishlist&content=adult`). A text box also filters by game or title. Filter logic lives in `lib/newsFilters.ts`. Data comes from `getSteamNewsFeed()` in `lib/server/steamNews.ts`; the UI is `components/SteamNewsFeed.tsx`.
 
 ### `/all-games`
 
@@ -221,6 +229,7 @@ The page displays:
 - Days from start to completion.
 - Price, store, platform, and screenshots.
 - Admin game actions through `GameHeroActions`.
+- Steam News (games with a `steam_appid`), at the bottom of both layouts: the 4 newest official announcements as art cards, older ones as a text list with an All / Updates / News filter and "Load more" (20 per page via `GET /api/game-news`). Read live from Steam (full history, unlike the 7-day `steam_news` table) by `lib/server/gameSteamNews.ts`, cached per game for an hour, and streamed in with `<Suspense>` (`components/games/GameSteamNews.tsx`) so the page never waits on Steam.
 
 The page has separate desktop and mobile layouts.
 
@@ -505,6 +514,10 @@ Important fields include:
 - Distribution strategy and guards.
 - Estimated hour output through `get_distributed_game_hours()`.
 
+### `steam_news`
+
+Created by `20260926120000_create_steam_news.sql`. Holds the last 7 days of `steam_community_announcements` from the Steam `ISteamNews/GetNewsForApp` API for every distinct `games.steam_appid`, keyed by the Steam news `gid`. `kind` is `update` when the post is tagged `patchnotes` or its title looks like a patch/update, otherwise `news`. `image_url` is the announcement capsule art, taken from the app's store events (`store.steampowered.com/events/ajaxgetadjacentpartnerevents`, matched by title and only requested for apps with news that week); the UI falls back to the game's wide cover. The sync deletes rows older than 7 days, so the table stays small.
+
 ### Watch Library Tables
 
 `20260725_create_watch_schema.sql` creates the base watch schema:
@@ -581,6 +594,9 @@ Key migrations:
 - `20260801_stats_years_and_distribution_guards.sql`
   - Updates distributed-hour logic and available stats-year calculation.
 
+- `20260926120000_create_steam_news.sql`
+  - Creates the `steam_news` table for the home page news ticker.
+
 Apply migrations in chronological order through Supabase SQL Editor or the project's chosen Supabase migration process.
 
 ## API Routes
@@ -618,6 +634,14 @@ Admin-only. Inserts a monthly log through `insert_monthly_play_log`.
 `DELETE /api/monthly-logs?id=...`
 
 Admin-only. Deletes a monthly log through `delete_monthly_play_log`.
+
+`GET /api/cron/steam-news`
+
+Syncs the `steam_news` table: fetches recent official announcements for every library Steam app (8 concurrent requests, ~1.5 minutes for ~1800 apps), upserts the last 7 days, deletes older rows, and revalidates the ticker cache. Authorized by `Authorization: Bearer $CRON_SECRET` or an admin session cookie. Stops early if Steam answers 429. Scheduled daily at 06:00 UTC by `vercel.json` (Vercel Hobby allows one cron run per day).
+
+`GET /api/game-news?appid=...&before=...`
+
+Next page (20 posts) of a game's official Steam announcements older than the `before` unix timestamp, as returned in `nextBefore`. Used by "Load more" on the game page; cached per game and page for an hour.
 
 `GET /api/igdb-cover`
 

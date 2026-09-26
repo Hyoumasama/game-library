@@ -1,6 +1,7 @@
 "use client";
 
 import AppNav from "@/components/AppNav";
+import SteamNewsTicker from "@/components/SteamNewsTicker";
 import SafeImage from "@/components/SafeImage";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import CoverBottomBadges, { getGameIconItems } from "@/components/games/CoverBottomBadges";
@@ -16,6 +17,7 @@ import {
 } from "react";
 import type { UiGame } from "@/lib/gameTypes";
 import { useIsAdmin } from "@/lib/useAdminStatus";
+import type { SteamNewsTickerItem } from "@/lib/server/steamNews";
 
 // Only admins ever open this modal, so keep it out of everyone else's
 // initial JS bundle.
@@ -34,8 +36,10 @@ export type HomePageData = {
 
 export default function HomePageClient({
   initialData,
+  steamNews,
 }: {
   initialData: HomePageData;
+  steamNews: SteamNewsTickerItem[];
 }) {
   const isAdmin = useIsAdmin();
 const [wishlistGames, setWishlistGames] = useState<Game[]>(initialData.wishlist);
@@ -140,6 +144,8 @@ async function refreshWishlistMetadata() {
             hideButton
           />
         )}
+
+<SteamNewsTicker items={steamNews} isAdmin={isAdmin} />
 
 <WishlistReleaseCalendar
   games={wishlistGames}

@@ -20,6 +20,8 @@ import {
   getSteamStoreUrl,
 } from "@/lib/server/gameExternalLinks";
 import ExpandableGameSummary from "@/components/games/ExpandableGameSummary";
+import GameSteamNews, { GameSteamNewsSkeleton } from "@/components/games/GameSteamNews";
+import { Suspense } from "react";
 
 export default async function GamePage({
   params,
@@ -566,6 +568,19 @@ const displayPrice =
     </section>
   ) : null}
 </div>
+
+      {/* Shared by both layouts. Suspense streams it in after the rest of
+          the page, so a slow Steam response never delays the game page. */}
+      {game.steam_appid ? (
+        <div className="mx-auto -mt-6 max-w-[430px] px-4 pb-10 lg:-mt-8 lg:max-w-6xl lg:px-6 lg:pb-12">
+          <Suspense fallback={<GameSteamNewsSkeleton />}>
+            <GameSteamNews
+              appid={Number(game.steam_appid)}
+              fallbackImage={wideCoverImage || heroImage || null}
+            />
+          </Suspense>
+        </div>
+      ) : null}
 
     </main>
     

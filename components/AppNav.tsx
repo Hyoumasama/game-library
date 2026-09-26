@@ -23,6 +23,11 @@ const navItems = [
     match: (path: string) => path.startsWith("/all-games"),
   },
   {
+    href: "/news",
+    label: "News",
+    match: (path: string) => path.startsWith("/news"),
+  },
+  {
     href: "/watch",
     label: "Watch",
     match: (path: string) => path.startsWith("/watch"),
