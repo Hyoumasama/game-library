@@ -67,7 +67,7 @@ export default function SteamNewsTicker({
 
   return (
     <section className="mb-10" aria-label="What's new for your Steam games">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="group/header mb-4 flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-black text-white md:text-2xl">What&apos;s New</h2>
 
         {isAdmin && (
@@ -77,7 +77,7 @@ export default function SteamNewsTicker({
             disabled={isSyncing}
             aria-label="Sync Steam news"
             title="Sync Steam news"
-            className="flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            className={`-my-2 flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white focus-visible:opacity-100 group-hover/header:opacity-100 disabled:cursor-not-allowed ${isSyncing ? "opacity-60" : "opacity-0"}`}
           >
             {isSyncing ? "..." : "↻"}
           </button>

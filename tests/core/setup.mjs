@@ -5,6 +5,8 @@ import { resolve } from "node:path";
 
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === "next/cache")
+      return { url: pathToFileURL(resolve("tests/core/next-cache.mjs")).href, shortCircuit: true };
     // CRUD tests run the real route handlers against an isolated in-memory client.
     if (context.parentURL?.includes("/app/api/admin/games/")) {
       if (specifier === "@/lib/supabase")

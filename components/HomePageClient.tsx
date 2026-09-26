@@ -433,9 +433,9 @@ function WishlistReleaseCalendar({
 
   return (
     <section className="mb-10">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="group/header mb-4 flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-black text-white md:text-2xl">
-          Upcoming Games Calendar
+          Upcoming Games
         </h2>
 
         {isAdmin && (
@@ -445,7 +445,7 @@ function WishlistReleaseCalendar({
             disabled={isRefreshingMetadata}
             aria-label="Refresh wishlist release dates"
             title="Refresh release dates"
-            className="flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            className={`-my-2 flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white focus-visible:opacity-100 group-hover/header:opacity-100 disabled:cursor-not-allowed ${isRefreshingMetadata ? "opacity-60" : "opacity-0"}`}
           >
             {isRefreshingMetadata ? "..." : "↻"}
           </button>

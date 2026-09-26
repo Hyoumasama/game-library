@@ -448,47 +448,6 @@ function buildTimelineGames(
   });
 }
 
-function buildArchiveTimelineGames(
-  games: ArchiveGame[],
-  monthHours: Record<number, number>,
-  year: number
-) {
-  return games.map((game) => {
-    const month = getMonth(game.completion_last_played) || 1;
-    const hours = Number(game.hours_played || 0);
-    const monthTotal = monthHours[month] || 0;
-    const startedYear =
-      getYear(game.date_started) || getYear(game.date_of_purchase);
-
-    return {
-      id: game.id,
-      title: game.title || "Untitled",
-      hours,
-      month,
-      percent: monthTotal > 0 ? (hours / monthTotal) * 100 : 0,
-      cover: game.steam_vertical_cover || game.cover_url || null,
-      wideCover:
-        game.wide_cover_url ||
-        game.cover_url ||
-        game.steam_vertical_cover ||
-        null,
-      firstPlayedThisYear: startedYear === year,
-      returningThisYear: false,
-      platform: game.platform || null,
-      hardware: game.hardware || game.platform || game.store || "Unknown",
-      releaseYear: getYear(game.release),
-      status: game.status || null,
-      score: Number(game.score || 0),
-      price: parsePrice(game.price),
-      store: game.store || null,
-      genres: game.genres?.filter(Boolean) || [],
-      startedDate: game.date_started || game.date_of_purchase || null,
-      purchaseDate: game.date_of_purchase,
-      completionDate: game.completion_last_played,
-    };
-  });
-}
-
 function groupByMonth(games: TimelineGame[]) {
   const groups = games.reduce<Record<number, TimelineGame[]>>((groups, game) => {
     if (!groups[game.month]) groups[game.month] = [];
@@ -702,9 +661,13 @@ function getPaidPurchasesFromLibrary(
 async function getAvailableStatsYears() {
   const [statsYearsResult, distributionYearsResult] = await Promise.all([
     supabase.rpc("get_stats_years"),
-    supabase
-      .from("game_hour_distributions")
-      .select("start_month, end_month"),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("game_hour_distributions")
+        .select("start_month, end_month")
+        .order("game_id")
+        .range(from, to)
+    ),
   ]);
 
   const years = new Set<number>();
@@ -1047,9 +1010,15 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
   if (useArchiveTimeline && Number.isInteger(year)) {
     // Fetch distributed hours for historical years only.
-    const { data: distributedRows, error: distributedError } = await supabase.rpc(
-      "get_distributed_game_hours",
-      { p_year: year }
+    // Paged: the RPC returns one row per game per month, so a year with more
+    // than ~83 distributed games passes Supabase's 1000-row cap.
+    const { data: distributedRows, error: distributedError } = await fetchAllRows(
+      (from, to) =>
+        supabase
+          .rpc("get_distributed_game_hours", { p_year: year })
+          .order("game_id")
+          .order("month")
+          .range(from, to)
     );
 
     if (distributedError) {

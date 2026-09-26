@@ -11,12 +11,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type WatchTypeFilter = "all" | WatchMediaType;
-type WatchSort =
-  | "recently-added"
-  | "title-asc"
-  | "release-newest"
-  | "release-oldest"
-  | "most-owned";
 
 type WatchFilters = {
   type: string;

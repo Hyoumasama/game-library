@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import DeleteGameButton from "./DeleteGameButton";
 import type { UiGame } from "@/lib/gameTypes";
 import { useIsAdmin } from "@/lib/useAdminStatus";
 
@@ -49,7 +48,7 @@ export default function GameAdminActions({ game }: { game: UiGame }) {
         try {
           const body = await response.json();
           if (body && body.error) message = body.error;
-        } catch (e) {}
+        } catch {}
 
         alert(message);
         console.error("Delete game failed", response.status, message);

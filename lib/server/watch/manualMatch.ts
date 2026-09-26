@@ -82,12 +82,6 @@ function yearFromDate(value?: string | null) {
   return date ? Number(date.slice(0, 4)) : null;
 }
 
-function positiveIntegerOrNull(value: unknown) {
-  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
-    ? value
-    : null;
-}
-
 function scoreOrNull(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }

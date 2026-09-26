@@ -57,10 +57,10 @@ export type SteamNewsItem = {
 };
 
 type SteamEvent = {
+  gid?: string;
   event_name?: string;
   clan_steamid?: string;
   jsondata?: string;
-  announcement_body?: { gid?: string };
 };
 
 type SteamNewsRow = {
@@ -155,15 +155,16 @@ export async function fetchAppEventArt(appid: number) {
     const clanAccountId = event.clan_steamid
       ? BigInt(event.clan_steamid) - CLAN_STEAMID_BASE
       : null;
-    const announcementGid = event.announcement_body?.gid;
 
     artByTitle.set(normalizeTitle(event.event_name), {
       imageUrl:
         capsule && clanAccountId !== null
           ? `https://clan.akamai.steamstatic.com/images/${clanAccountId}/${capsule}`
           : null,
-      url: announcementGid
-        ? `https://store.steampowered.com/news/app/${appid}/view/${announcementGid}`
+      // The store view page is keyed by the event gid; the announcement gid
+      // (announcement_body.gid) only loads the hub's endless spinner.
+      url: event.gid
+        ? `https://store.steampowered.com/news/app/${appid}/view/${event.gid}`
         : null,
     });
   }

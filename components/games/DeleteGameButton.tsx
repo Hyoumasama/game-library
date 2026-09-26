@@ -33,7 +33,7 @@ export default function DeleteGameButton({
         try {
           const body = await response.json();
           if (body && body.error) message = body.error;
-        } catch (e) {
+        } catch {
           // ignore json parse errors
         }
 

@@ -273,7 +273,7 @@ export function GameFilterControls({
   };
 
   return (
-    <section className="mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
+    <section className="relative z-[45] mb-6 rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         {multiFilterConfigs.map((config) => (
           <MultiSelectFilter
