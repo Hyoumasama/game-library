@@ -29,7 +29,7 @@ export default function WatchLoading() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 18 }).map((_, index) => (
-            <GameCardSkeleton key={index} fixedWidth={false} />
+            <GameCardSkeleton key={index} fixedWidth={false} withText />
           ))}
         </div>
       </div>

@@ -42,10 +42,14 @@ export function SectionHeaderSkeleton() {
 }
 
 // Matches the poster-card shape used across Home / All Games / Watch.
+// Game cards are cover-only; Watch cards still show a title below the
+// poster, so they opt back into the text lines with withText.
 export function GameCardSkeleton({
   fixedWidth = true,
+  withText = false,
 }: {
   fixedWidth?: boolean;
+  withText?: boolean;
 }) {
   return (
     <div
@@ -54,10 +58,12 @@ export function GameCardSkeleton({
       }`}
     >
       <SkeletonBlock className="aspect-[2/3] w-full rounded-none" />
-      <div className="space-y-2 p-3">
-        <SkeletonBlock className="h-4 w-4/5" />
-        <SkeletonBlock className="h-4 w-2/5" />
-      </div>
+      {withText && (
+        <div className="space-y-2 p-3">
+          <SkeletonBlock className="h-4 w-4/5" />
+          <SkeletonBlock className="h-4 w-2/5" />
+        </div>
+      )}
     </div>
   );
 }

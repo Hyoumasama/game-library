@@ -3,6 +3,7 @@
 import AppNav from "@/components/AppNav";
 import SafeImage from "@/components/SafeImage";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
+import CoverBottomBadges, { getGameIconItems } from "@/components/games/CoverBottomBadges";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -13,10 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  formatHours,
-  getIcon,
-} from "@/lib/gameHelpers";
 import type { UiGame } from "@/lib/gameTypes";
 import { useIsAdmin } from "@/lib/useAdminStatus";
 
@@ -857,17 +854,7 @@ function GameSection({
         {games.map((game, index) => {
           const image = variant === "wishlist" ? game.Cover : game.Cover;
           const hasGoldenAchievementBadge = hasGoldenAchievement(game);
-          const gameIcons = Array.from(
-            new Set(
-              [game.Store, game.Platform, game.Hardware]
-                .filter((value): value is string => Boolean(value))
-                .map((value) => {
-                  const icon = getIcon(value);
-                  return icon ? `${icon}|||${value}` : null;
-                })
-                .filter((item): item is string => Boolean(item))
-            )
-          );
+          const gameIcons = getGameIconItems(game);
 
           return (
             <LongPressGameCard
@@ -877,22 +864,18 @@ function GameSection({
               imageUrl={image}
               footer={
                 <>
-                  {gameIcons.map((item) => {
-                    const [icon, value] = item.split("|||");
-
-                    return (
-                      <Image
-                        key={icon}
-                        src={icon}
-                        alt=""
-                        width={20}
-                        height={20}
-                        sizes="20px"
-                        className="h-5 w-5 object-contain"
-                        title={value}
-                      />
-                    );
-                  })}
+                  {gameIcons.map(({ icon, value }) => (
+                    <Image
+                      key={icon}
+                      src={icon}
+                      alt=""
+                      width={20}
+                      height={20}
+                      sizes="20px"
+                      className="h-5 w-5 object-contain"
+                      title={value}
+                    />
+                  ))}
                 </>
               }
               onEdit={() => onEdit(game)}
@@ -900,7 +883,9 @@ function GameSection({
             >
               <Link
                 href={`/game/${game.id}`}
-              className={`group w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:w-auto ${
+                aria-label={game.Title}
+                title={game.Title}
+              className={`group block w-[155px] shrink-0 overflow-hidden rounded-[1.5rem] border bg-zinc-950/90 shadow-xl transition duration-300 hover:-translate-y-1 md:w-auto ${
                 variant !== "wishlist" && hasGoldenAchievementBadge
                   ? "border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] hover:border-yellow-300 hover:shadow-[0_0_42px_rgba(250,204,21,0.38)]"
                   : variant === "wishlist"
@@ -938,11 +923,8 @@ function GameSection({
                   </span>
                 )}
 
-                {variant !== "wishlist" && Number(game["Hours Played"] || 0) > 0 && (
-                  <span className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
-                    {formatHours(game["Hours Played"])}h
-                  </span>
-                )}
+                {variant !== "wishlist" && <CoverBottomBadges game={game} />}
+
                 {variant === "wishlist" && (
   <span
     className={`absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border min-w-[96px] px-3 py-1 text-center text-[10px] font-black uppercase tracking-wide whitespace-nowrap backdrop-blur-md ${
@@ -956,34 +938,6 @@ function GameSection({
   </span>
 )}
               </div>
-
-              <div className="p-3">
-                <h3 className="line-clamp-2 h-10 text-sm font-black leading-5 text-white">
-                  {game.Title}
-                </h3>
-
-                {variant === "wishlist" ? null : (
-                  <div className="mt-2 flex h-5 items-center gap-2">
-                    {gameIcons.map((item) => {
-                      const [icon, value] = item.split("|||");
-
-                      return (
-                        <Image
-                          key={icon}
-                          src={icon}
-                          alt=""
-                          width={20}
-                          height={20}
-                          sizes="20px"
-                          className="h-5 w-5 object-contain"
-                          title={value}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
                           </Link>
             </LongPressGameCard>
           );

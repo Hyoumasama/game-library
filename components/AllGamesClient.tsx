@@ -6,6 +6,7 @@ import {
   GameFilterControls,
   useGameFilters,
 } from "@/components/games/GameFilters";
+import CoverBottomBadges, { getGameIconItems } from "@/components/games/CoverBottomBadges";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import SafeImage from "@/components/SafeImage";
 import {
@@ -15,10 +16,7 @@ import {
   type GameFilterOptions,
   type GameFilters,
 } from "@/lib/gameFilters";
-import {
-  formatHours,
-  getIcon,
-} from "@/lib/gameHelpers";
+import { getIcon } from "@/lib/gameHelpers";
 import { mapDbGameToUiGame } from "@/lib/gameMappers";
 import type { DbGame, UiGame } from "@/lib/gameTypes";
 import type { GamesLiteData } from "@/lib/server/gamesLite";
@@ -62,6 +60,25 @@ function scoreClass(score?: string | number | null) {
   if (value > 0) return "bg-red-400 text-black";
 
   return "bg-zinc-800 text-zinc-400";
+}
+
+function statusClass(status?: string | null) {
+  switch (status) {
+    case "Playing":
+      return "border-blue-400/40 text-blue-300";
+    case "Skipped":
+      return "border-zinc-500/40 text-zinc-300";
+    case "Dropped":
+      return "border-red-400/40 text-red-300";
+    case "Completed":
+      return "border-cyan-400/40 text-cyan-300";
+    case "Unplayed":
+      return "border-yellow-400/40 text-yellow-300";
+    case "Wishlist":
+      return "border-purple-500/40 text-purple-300";
+    default:
+      return "border-zinc-800 text-zinc-400";
+  }
 }
 
 function hasGoldenAchievement(game: UiGame) {
@@ -272,7 +289,7 @@ function AllGamesContent({
             </div>
           )}
 
-          <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 ${isLoading ? "opacity-70" : ""}`}>
+          <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ${isLoading ? "opacity-70" : ""}`}>
 {visibleGames.map((game, index) => {
   const hasGoldenAchievementBadge = hasGoldenAchievement(game);
   const gameId = Number(game.id);
@@ -286,32 +303,18 @@ function AllGamesContent({
     title={game.Title}
     footer={
       <>
-        {Array.from(
-          new Set(
-            [game.Store, game.Platform, game.Hardware]
-              .filter((value): value is string => Boolean(value))
-              .map((value) => {
-                const icon = getIcon(value);
-                return icon ? `${icon}|||${value}` : null;
-              })
-              .filter((item): item is string => Boolean(item))
-          )
-        ).map((item) => {
-          const [icon, value] = item.split("|||");
-
-          return (
-            <Image
-              key={icon}
-              src={icon}
-              alt=""
-              title={value}
-              width={20}
-              height={20}
-              sizes="20px"
-              className="h-5 w-5 object-contain"
-            />
-          );
-        })}
+        {getGameIconItems(game).map(({ icon, value }) => (
+          <Image
+            key={icon}
+            src={icon}
+            alt=""
+            title={value}
+            width={20}
+            height={20}
+            sizes="20px"
+            className="h-5 w-5 object-contain"
+          />
+        ))}
       </>
     }
     imageUrl={game.Cover}
@@ -326,13 +329,17 @@ className={`group relative overflow-hidden rounded-[1.6rem] border bg-zinc-950/9
 }`}  >
     <Link
     href={`/game/${game.id}`}
-className="flex h-full md:block"  >
-   <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-l-[1.6rem] bg-zinc-900 md:aspect-[2/3] md:h-auto md:w-auto md:rounded-t-[1.6rem] md:rounded-b-none">            {game.Cover ? (
+    aria-label={game.Title}
+    title={game.Title}
+    className="block"
+  >
+   <div className="relative aspect-[2/3] overflow-hidden bg-zinc-900">
+                {game.Cover ? (
                   <SafeImage
                     src={game.Cover}
                     alt={game.Title}
                     fill
-                    sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 112px"
+                    sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 50vw"
                     preload={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
@@ -356,10 +363,11 @@ className="flex h-full md:block"  >
   </div>
 )}
 
-                {Number(game["Hours Played"] || 0) > 0 && (
-                  <div className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300">
-                    {formatHours(game["Hours Played"] || 0)}h
-                  </div>
+                <div className="absolute right-3 top-3 z-40 flex flex-col items-end gap-1.5">
+                {game.Status && (
+                  <span className={`rounded-full border bg-black/70 px-2.5 py-1 text-[10px] font-black uppercase backdrop-blur-sm ${statusClass(game.Status)}`}>
+                    {game.Status}
+                  </span>
                 )}
 
                 {game.completed_elsewhere && (game.Status === "Unplayed" || game.Status === "Dropped") && (
@@ -392,7 +400,6 @@ className="flex h-full md:block"  >
                       <div
                         title={title}
                         aria-label={title}
-                        className="absolute right-3 top-3 z-40"
                       >
                         <div className="flex items-center whitespace-nowrap rounded-full bg-black/60 backdrop-blur-sm border border-cyan-400/20 px-2 py-1 text-xs shadow-sm text-zinc-100" style={{height: 30}}>
                           <span className="mr-2 text-cyan-300 font-black">✓</span>
@@ -415,68 +422,11 @@ className="flex h-full md:block"  >
                     );
                   })()
                 )}
-              </div>
-
-              <div className="flex flex-1 flex-col p-4 md:block">
-                <h3 className="line-clamp-2 h-12 text-base font-black leading-6 text-white md:h-10 md:text-sm md:leading-5">
-                  {game.Title}
-                </h3>
-
-                <div className="mt-2 flex items-center gap-2 text-xs font-bold text-zinc-400">
-                  
-                 <div className="flex h-5 items-center gap-2 md:h-6">
-  {Array.from(
-  new Set(
-    [game.Store, game.Platform, game.Hardware]
-      .filter((value): value is string => Boolean(value))
-      .map((value) => {
-        const icon = getIcon(value);
-        return icon ? `${icon}|||${value}` : null;
-      })
-      .filter((item): item is string => Boolean(item))
-  )
-).map((item) => {
-  const [icon, value] = item.split("|||");
-
-  return (
-    <Image
-      key={icon}
-      src={icon}
-      alt=""
-      width={20}
-      height={20}
-      sizes="20px"
-      className="h-5 w-5 object-contain"
-      title={value}
-    />
-  );
-})}
-</div>           
                 </div>
 
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span
-className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
-  game.Status === "Playing"
-    ? "border-blue-400/40 bg-blue-400/10 text-blue-300"
-    : game.Status === "Skipped"
-      ? "border-zinc-500/40 bg-zinc-500/10 text-zinc-300"
-    : game.Status === "Dropped"
-      ? "border-red-400/40 bg-red-400/10 text-red-300"
-      : game.Status === "Completed"
-        ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
-        : game.Status === "Unplayed"
-          ? "border-yellow-400/40 bg-yellow-400/10 text-yellow-300"
-          : game.Status === "Wishlist"
-            ? "border-purple-500/40 bg-purple-500/10 text-purple-300"
-            : "border-zinc-800 bg-black/60 text-zinc-400"
-}`}
->
-  {game.Status || "-"}
-</span>
-
-                </div>
+                <CoverBottomBadges game={game} />
               </div>
+
             </Link>
             {canManageGame && (
               <>
@@ -489,7 +439,7 @@ className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
                   />
                 )}
 
-                <div className="absolute bottom-3 right-3 z-30">
+                <div className="absolute bottom-12 right-2 z-30">
                   <button
                     type="button"
                     aria-expanded={actionsOpen}
@@ -499,10 +449,10 @@ className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase ${
                       event.stopPropagation();
                       setOpenActionGameId(actionsOpen ? null : gameId);
                     }}
-                    className={`flex h-9 w-9 items-center justify-center transition ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition ${
                       actionsOpen
                         ? "text-cyan-300 opacity-100"
-                        : "text-zinc-500 opacity-60 hover:text-cyan-300 hover:opacity-100 md:opacity-0 md:group-hover:opacity-60 md:hover:opacity-100"
+                        : "text-zinc-300 opacity-70 hover:text-cyan-300 hover:opacity-100 md:opacity-0 md:group-hover:opacity-60 md:hover:opacity-100"
                     }`}
                   >
                     <span className="flex flex-col items-center gap-0.5" aria-hidden="true">

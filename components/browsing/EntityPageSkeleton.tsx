@@ -28,7 +28,7 @@ export default function EntityPageSkeleton() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {Array.from({ length: 12 }).map((_, index) => (
             <GameCardSkeleton key={index} fixedWidth={false} />
           ))}
