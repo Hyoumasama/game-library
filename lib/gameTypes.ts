@@ -40,6 +40,12 @@ export type DbGame = {
   igdb_slug?: string | null;
   steam_appid?: number | null;
   screenshots?: string | null;
+  hltb_id?: number | null;
+  hltb_main?: number | string | null;
+  hltb_main_extra?: number | string | null;
+  hltb_completionist?: number | string | null;
+  hltb_main_count?: number | null;
+  hltb_locked?: boolean | null;
   game_achievements?: GameAchievementRelation;
   completed_elsewhere?: boolean;
   completed_elsewhere_locations?: {

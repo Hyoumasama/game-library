@@ -114,6 +114,32 @@ export function buildGamePayload(body: AdminGameBody) {
     screenshots: nullableText(body.screenshots),
     developer: nullableText(body.developer),
     publisher: nullableText(body.publisher),
+    ...buildHltbPayload(body),
+  };
+}
+
+// Only callers that send HLTB fields touch them, so saving from somewhere
+// that does not know about HLTB never wipes the stored times.
+function buildHltbPayload(body: AdminGameBody): Partial<{
+  hltb_id: number | null;
+  hltb_main: number | null;
+  hltb_main_extra: number | null;
+  hltb_completionist: number | null;
+  hltb_locked: boolean;
+}> {
+  if (!Object.hasOwn(body, "hltbLocked")) return {};
+
+  const hours = (value: unknown) => {
+    const number = nullableText(value) === null ? null : toNumber(value);
+    return number !== null && number > 0 ? Math.round(number * 10) / 10 : null;
+  };
+
+  return {
+    hltb_id: toNumber(nullableText(body.hltbId)) || null,
+    hltb_main: hours(body.hltbMain),
+    hltb_main_extra: hours(body.hltbMainExtra),
+    hltb_completionist: hours(body.hltbCompletionist),
+    hltb_locked: body.hltbLocked === true,
   };
 }
 

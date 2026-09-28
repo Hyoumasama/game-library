@@ -10,6 +10,7 @@
     "watch:match-preview": "node --experimental-strip-types --experimental-transform-types --import ./scripts/watch/node-loader.mjs scripts/watch/buildMatchReview.ts",
     "watch:build-holdings": "node --experimental-strip-types --experimental-transform-types scripts/watch/buildLocalHoldings.ts",
     "watch:import-items": "node --experimental-strip-types --experimental-transform-types scripts/watch/importWatchItems.ts",
+    "hltb:backfill": "node --env-file=.env.local --experimental-strip-types --import ./scripts/watch/node-loader.mjs scripts/backfill-hltb.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --import ./scripts/watch/node-loader.mjs --import ./tests/core/setup.mjs --test --test-isolation=none tests/core/*.test.mjs"
   },

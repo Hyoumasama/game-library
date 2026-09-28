@@ -8,6 +8,11 @@ import { formatGenres, parseGenreText } from "@/lib/genres";
 import type { UiGame } from "@/lib/gameTypes";
 import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
 import MetacriticScoreField from "@/components/games/MetacriticScoreField";
+import HltbField, {
+  toHltbPayload,
+  toHltbValue,
+  type HltbValue,
+} from "@/components/games/HltbField";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -106,6 +111,7 @@ export default function EditGameModal({
   );
   const [status, setStatus] = useState(game.Status || game.status || "Unplayed");
   const [score, setScore] = useState(game.Score || game.score || "");
+  const [hltb, setHltb] = useState<HltbValue>(() => toHltbValue(game));
   const [hoursPlayed, setHoursPlayed] = useState(
     game["Hours Played"] || game.hours_played || ""
   );
@@ -178,6 +184,7 @@ const [dateStarted, setDateStarted] = useState(
     setRelease(toDateInput(savedGame.Release || savedGame.release || ""));
     setStatus(savedGame.Status || savedGame.status || "Unplayed");
     setScore(savedGame.Score || savedGame.score || "");
+    setHltb(toHltbValue(savedGame));
     setHoursPlayed(savedGame["Hours Played"] || savedGame.hours_played || "");
     setPrice(savedGame.Price || savedGame.price || "");
     setStore(savedGame.Store || savedGame.store || "");
@@ -444,6 +451,7 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
         igdbId,
         igdbSlug,
         steamAppId,
+        ...toHltbPayload(hltb),
 
         coverUrl,
         heroUrl,
@@ -770,6 +778,13 @@ onChange={(e) => {
   placeholder="Genre"
   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
 />
+              <HltbField
+                value={hltb}
+                onChange={setHltb}
+                title={title}
+                release={release}
+              />
+
               <GameMetadataFields gameId={Number(game.id)} value={metadata} onChange={setMetadata} />
                                           <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
                 <p className="mb-3 text-sm font-bold text-zinc-300">Achievements</p>

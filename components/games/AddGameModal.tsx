@@ -5,6 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { formatGenres, parseGenreText } from "@/lib/genres";
 import GameMetadataFields, { type GameMetadataValue } from "@/components/games/GameMetadataFields";
 import MetacriticScoreField from "@/components/games/MetacriticScoreField";
+import HltbField, {
+  EMPTY_HLTB_VALUE,
+  toHltbPayload,
+  type HltbValue,
+} from "@/components/games/HltbField";
 
 const PLAYSTATION_VALUES = ["PSN", "PS1", "PS2", "PS3", "PS4", "PS5"];
 
@@ -76,6 +81,7 @@ const [ownedGames, setOwnedGames] = useState<OwnedGame[]>([]);
   const [release, setRelease] = useState("");
   const [status, setStatus] = useState("Unplayed");
   const [score, setScore] = useState("");
+  const [hltb, setHltb] = useState<HltbValue>(EMPTY_HLTB_VALUE);
   const [hoursPlayed, setHoursPlayed] = useState("");
   const [price, setPrice] = useState("Piracy");
   const [store, setStore] = useState("Piracy");
@@ -199,6 +205,8 @@ useEffect(() => {
 
   async function selectGame(game: SearchResult) {
   setSelectedGame(game);
+  // Times from a previously picked result belong to another game.
+  setHltb(EMPTY_HLTB_VALUE);
   setTitle(game.title);
   setRelease(game.releaseDate || "");
 
@@ -282,6 +290,7 @@ setSteamVerticalCoverOptions([]);
 
     setStatus("Unplayed");
     setScore("");
+    setHltb(EMPTY_HLTB_VALUE);
     setHoursPlayed("");
 
     setPrice("Piracy");
@@ -342,6 +351,7 @@ setCompletionPercentage("");
   igdbId,
   igdbSlug,
   steamAppId,
+  ...toHltbPayload(hltb),
 
 coverUrl,
 heroUrl,
@@ -417,6 +427,7 @@ onGameAdded?.();
     setRelease("");
     setStatus("Unplayed");
     setScore("");
+    setHltb(EMPTY_HLTB_VALUE);
     setHoursPlayed("");
     setPrice("Piracy");
     setStore("Piracy");
@@ -695,6 +706,18 @@ className="rounded-xl border border-zinc-700 bg-black px-4 py-3">
     <option key={item} value={item} />
   ))}
 </datalist>
+
+<HltbField
+  value={hltb}
+  onChange={setHltb}
+  title={title}
+  release={release}
+  autoFillKey={
+    selectedGame
+      ? String(selectedGame.igdbId ?? selectedGame.steamAppId ?? selectedGame.title)
+      : null
+  }
+/>
 
 <GameMetadataFields value={metadata} onChange={setMetadata} />
 

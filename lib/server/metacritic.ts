@@ -2,6 +2,8 @@
 // metacritic.com itself calls, so it can change or break without notice -
 // every failure path returns null and the admin types the score by hand.
 
+import { normalizeTitle, stripEditionWords } from "@/lib/server/titleMatching";
+
 const METACRITIC_BACKEND = "https://backend.metacritic.com";
 const GAME_TYPE_ID = 13;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -31,28 +33,6 @@ type MetacriticSearchItem = {
   releaseDate?: string | null;
   criticScoreSummary?: { score?: number | null } | null;
 };
-
-function normalizeTitle(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[™®©]/g, "")
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function stripEditionWords(value: string) {
-  return normalizeTitle(value)
-    .replace(/\b(the|a)\b/g, " ")
-    .replace(
-      /\b(tom clancy s|definitive|enhanced|ultimate|collector s|anniversary|remastered|remaster|hd|dx|edition)\b/g,
-      " "
-    )
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function toSearchQuery(title: string) {
   return title

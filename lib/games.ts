@@ -30,7 +30,13 @@ const gameColumns = `
   publisher,
   igdb_id,
   igdb_slug,
-  steam_appid
+  steam_appid,
+  hltb_id,
+  hltb_main,
+  hltb_main_extra,
+  hltb_completionist,
+  hltb_main_count,
+  hltb_locked
 `;
 
 /** Just the `games` row, mapped to UiGame shape. No franchise. */

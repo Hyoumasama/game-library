@@ -16,6 +16,7 @@ import SafeImage from "@/components/SafeImage";
 import RelatedEntries from "@/components/games/RelatedEntries";
 import { getRelatedEntries } from "@/lib/server/relatedEntries";
 import {
+  getHltbGameUrl,
   getIgdbGameUrl,
   getSteamStoreUrl,
 } from "@/lib/server/gameExternalLinks";
@@ -93,6 +94,8 @@ const gameGenres = Array.isArray(game.genres)
   : [];
 const steamUrl = getSteamStoreUrl(game.steam_appid);
 const igdbUrl = getIgdbGameUrl(game.igdb_slug);
+const hltbUrl = getHltbGameUrl(game.hltb_id);
+const hltbTimes = getHltbTimes(game);
 
     const daysToPurchase = getDaysBetween(
   game.Release,
@@ -192,6 +195,7 @@ const displayPrice =
             <GameExternalLinks
               steamUrl={steamUrl}
               igdbUrl={igdbUrl}
+              hltbUrl={hltbUrl}
             />
             </div>
           </div>
@@ -313,6 +317,12 @@ const displayPrice =
   <Info accent="amber" icon="tag" label="Price" value={displayPrice} highlight />
   <Info accent="amber" icon="store" label="Store" value={game.Store} logo={getIcon(game.Store)} />
   <Info accent="amber" icon="gamepad" label="Hardware" value={game["Hardware (1)"]} logo={getIcon(game["Hardware (1)"])} />
+
+  {hltbTimes
+    ? hltbTimes.map((time) => (
+        <Info key={time.label} accent="violet" icon="hourglass" label={`HLTB ${time.label}`} value={time.value} highlight />
+      ))
+    : null}
 </div>
         </section>
         {game.screenshots ? (
@@ -385,6 +395,7 @@ const displayPrice =
       <GameExternalLinks
         steamUrl={steamUrl}
         igdbUrl={igdbUrl}
+        hltbUrl={hltbUrl}
       />
 
       <div className="mt-3">
@@ -541,6 +552,23 @@ const displayPrice =
     </div>
   </section>
 
+  {hltbTimes ? (
+    <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4">
+      <h2 className="mb-4 text-xl font-bold">How Long To Beat</h2>
+
+      <div className="space-y-3 text-sm">
+        {hltbTimes.map((time, index) => (
+          <DetailRow
+            key={time.label}
+            label={time.label}
+            value={time.value}
+            last={index === hltbTimes.length - 1}
+          />
+        ))}
+      </div>
+    </section>
+  ) : null}
+
   {game.screenshots ? (
     <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4">
       <h2 className="mb-4 text-xl font-bold">Screenshots</h2>
@@ -608,7 +636,40 @@ const INFO_ACCENTS = {
     glow: "from-amber-400/10",
     value: "text-amber-200",
   },
+  violet: {
+    icon: "bg-violet-400/10 text-violet-300 ring-violet-400/20",
+    hover: "hover:border-violet-400/40",
+    glow: "from-violet-400/10",
+    value: "text-violet-200",
+  },
 } as const;
+
+// Below this many Main Story submissions HLTB times are a rough guess
+// (typical for games that just came out), so they are shown with a "~".
+const HLTB_RELIABLE_SUBMISSIONS = 5;
+
+function getHltbTimes(game: {
+  hltb_main?: number | string | null;
+  hltb_main_extra?: number | string | null;
+  hltb_completionist?: number | string | null;
+  hltb_main_count?: number | null;
+}) {
+  const times = [
+    { label: "Main Story", hours: game.hltb_main },
+    { label: "Main + Extra", hours: game.hltb_main_extra },
+    { label: "Completionist", hours: game.hltb_completionist },
+  ];
+
+  if (times.every((time) => !Number(time.hours))) return null;
+
+  const prefix =
+    Number(game.hltb_main_count || 0) < HLTB_RELIABLE_SUBMISSIONS ? "~" : "";
+
+  return times.map((time) => ({
+    label: time.label,
+    value: Number(time.hours) ? `${prefix}${formatHours(time.hours)}h` : "-",
+  }));
+}
 
 const INFO_ICONS = {
   calendar: "M8 2v3M16 2v3M3.5 9h17M5 4.5h14A1.5 1.5 0 0 1 20.5 6v13a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V6A1.5 1.5 0 0 1 5 4.5Z",
@@ -670,18 +731,21 @@ function Info({
 function GameExternalLinks({
   igdbUrl,
   steamUrl,
+  hltbUrl,
   className = "",
 }: {
   igdbUrl?: string | null;
   steamUrl?: string | null;
+  hltbUrl?: string | null;
   className?: string;
 }) {
-  if (!igdbUrl && !steamUrl) return null;
+  if (!igdbUrl && !steamUrl && !hltbUrl) return null;
 
   return (
     <div className={`mt-2 flex flex-wrap gap-2 ${className}`}>
       {steamUrl ? <ExternalGameLink href={steamUrl} label="Steam" /> : null}
       {igdbUrl ? <ExternalGameLink href={igdbUrl} label="IGDB" /> : null}
+      {hltbUrl ? <ExternalGameLink href={hltbUrl} label="HLTB" /> : null}
     </div>
   );
 }
