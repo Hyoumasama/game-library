@@ -8,6 +8,7 @@ import {
   type IgdbReleaseDate,
 } from "@/lib/igdb";
 import { fetchSteamAdultAppIds } from "@/lib/server/steamAdultContent";
+import { fetchSteamScreenshots } from "@/lib/server/steamScreenshots";
 
 type IgdbImage = { image_id?: string };
 type IgdbGenre = { name?: string };
@@ -233,6 +234,34 @@ export async function GET(request: Request) {
         .filter((appId): appId is number => !!appId)
     );
 
+    const isAdultGame = (game: IgdbGame) =>
+      !!game.themes?.some((theme) => theme.name === IGDB_EROTIC_THEME) ||
+      steamAdultAppIds.has(extractSteamAppId(game.websites) ?? 0);
+
+    // Adult games take their screenshots from Steam only, never IGDB; one
+    // without a Steam app gets none.
+    const steamScreenshotsById = new Map(
+      await Promise.all(
+        finalGames.filter(isAdultGame).map(async (game) => {
+          const steamAppId = extractSteamAppId(game.websites);
+
+          return [
+            game.id,
+            steamAppId ? await fetchSteamScreenshots(steamAppId) : null,
+          ] as const;
+        })
+      )
+    );
+
+    const igdbScreenshots = (game: IgdbGame) =>
+      game.screenshots
+        ?.slice(0, 8)
+        .map(
+          (screenshot) =>
+            `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
+        )
+        .join(",") || null;
+
     const results = finalGames.map((game: IgdbGame) => ({
     source: "igdb" as const,
     igdbId: game.id,
@@ -251,6 +280,8 @@ releaseDate: getIgdbExactReleaseDate(game) || "",
 heroUrl:
   game.artworks?.[0]?.image_id
     ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.artworks[0].image_id}.jpg`
+    : isAdultGame(game)
+    ? steamScreenshotsById.get(game.id)?.split(",")[0] || null
     : game.screenshots?.[0]?.image_id
     ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
     : null,
@@ -261,18 +292,12 @@ genres: withAdultGenre(
   game.genres
     ?.map((genre) => genre.name)
     .filter((genre): genre is string => !!genre) || [],
-  !!game.themes?.some((theme) => theme.name === IGDB_EROTIC_THEME) ||
-    steamAdultAppIds.has(extractSteamAppId(game.websites) ?? 0)
+  isAdultGame(game)
 ),
 
-screenshots:
-  game.screenshots
-    ?.slice(0, 8)
-    .map(
-      (screenshot) =>
-        `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
-    )
-    .join(",") || null,
+screenshots: isAdultGame(game)
+  ? steamScreenshotsById.get(game.id) || null
+  : igdbScreenshots(game),
 
 developer:
   game.involved_companies?.find((company) => company.developer)?.company?.name ||

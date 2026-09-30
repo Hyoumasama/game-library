@@ -7,6 +7,8 @@ import type { Asset } from "@/lib/assets";
 import { supabase } from "@/lib/supabase";
 import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { cookies } from "next/headers";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { unstable_cache } from "next/cache";
 
 function formatDate(date: string | null) {
   if (!date) return "-";
@@ -24,12 +26,8 @@ function formatDate(date: string | null) {
   return date;
 }
 
-export default async function AssetsPage() {
-  const cookieStore = await cookies();
-  const isAdmin = await verifyAdminSessionValue(
-    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
-  );
-  const { data, error } = await fetchAllRows((from, to) =>
+async function fetchAssets() {
+  return fetchAllRows((from, to) =>
     supabase
       .from("library_assets")
       .select("*")
@@ -37,6 +35,20 @@ export default async function AssetsPage() {
       .order("id")
       .range(from, to)
   );
+}
+
+// Cached on the assets tag, which the admin asset routes revalidate.
+const getAssets = unstable_cache(fetchAssets, ["assets", "v1"], {
+  tags: [CACHE_TAGS.assets],
+  revalidate: 300,
+});
+
+export default async function AssetsPage() {
+  const cookieStore = await cookies();
+  const isAdmin = await verifyAdminSessionValue(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  );
+  const { data, error } = await getAssets();
 
   if (error) {
     return (

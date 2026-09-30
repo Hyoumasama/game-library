@@ -1,3 +1,4 @@
+import { revalidateGameCaches } from "@/lib/server/cacheTags";
 import { getIgdbToken } from "@/lib/igdb";
 import { supabase } from "@/lib/supabase";
 
@@ -379,6 +380,8 @@ export async function POST(request: Request) {
         status: "matched",
       });
     }
+
+    revalidateGameCaches();
 
     return Response.json({
       success: true,

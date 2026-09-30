@@ -1,3 +1,4 @@
+import { revalidateGameCaches } from "@/lib/server/cacheTags";
 import { supabase } from "@/lib/supabase";
 import {
   HLTB_GAME_ROW_COLUMNS,
@@ -87,6 +88,8 @@ export async function POST(request: Request) {
       );
     }
   }
+
+  revalidateGameCaches();
 
   return Response.json(
     {

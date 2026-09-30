@@ -67,6 +67,8 @@ export async function POST(request: Request) {
   // A new game can carry a developer/publisher/franchise that an existing
   // /developer, /publisher, or /franchise page should now list.
   revalidateTag(CACHE_TAGS.browsingEntities, { expire: 0 });
+  // Purchases, completions and scores feed the /stats page.
+  revalidateTag(CACHE_TAGS.stats, { expire: 0 });
 
   return Response.json({ success: true });
 }

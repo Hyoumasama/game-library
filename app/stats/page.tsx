@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { fetchAllRows } from "@/lib/server/fetchAllRows";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { unstable_cache } from "next/cache";
 import { getIcon } from "@/lib/gameIcons";
 import StatsYearSelect from "./StatsYearSelect";
 import Image from "next/image";
@@ -991,12 +993,12 @@ function StoreBadge({ store }: { store: string | null }) {
   );
 }
 
-export default async function StatsPage({ searchParams }: StatsPageProps) {
-  const params = await searchParams;
-
-  const availableYears = await getAvailableStatsYears();
-  const selectedYear = Number(params.year || availableYears[0] || new Date().getFullYear());
-  const year = Number(selectedYear);
+// Every query for one stats year, in the order the page needs them. The
+// page ran all of them (4-6 round trips, several paged) on every visit, so
+// the result is cached per year like getHomeGames: routes that change games
+// or monthly logs call revalidateTag(CACHE_TAGS.stats, { expire: 0 }), and
+// the 5-minute revalidate is a safety net for other writers.
+async function fetchStatsYearData(year: number) {
   const useArchiveTimeline = year < 2024;
   const purchaseYearStart = `${year}-01-01`;
   const purchaseYearEnd = `${year + 1}-01-01`;
@@ -1183,6 +1185,44 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
       completionGamesResult.error.message || "Failed to load completed games"
     );
   }
+
+  return {
+    distRows,
+    distGameIds,
+    distGamesMap,
+    distributedErrorMessage,
+    logsResult: { data: logsResult.data },
+    libraryGamesResult: { data: libraryGamesResult.data },
+    completionGamesResult: { data: completionGamesResult.data },
+  };
+}
+
+const getStatsYearData = unstable_cache(fetchStatsYearData, ["stats-year-data", "v1"], {
+  tags: [CACHE_TAGS.stats],
+  revalidate: 300,
+});
+
+const getCachedStatsYears = unstable_cache(getAvailableStatsYears, ["stats-years", "v1"], {
+  tags: [CACHE_TAGS.stats],
+  revalidate: 300,
+});
+
+export default async function StatsPage({ searchParams }: StatsPageProps) {
+  const params = await searchParams;
+
+  const availableYears = await getCachedStatsYears();
+  const selectedYear = Number(params.year || availableYears[0] || new Date().getFullYear());
+  const year = Number(selectedYear);
+  const useArchiveTimeline = year < 2024;
+  const {
+    distRows,
+    distGameIds,
+    distGamesMap,
+    distributedErrorMessage,
+    logsResult,
+    libraryGamesResult,
+    completionGamesResult,
+  } = await getStatsYearData(year);
 
   const logs = (logsResult.data || []) as unknown as PlayLog[];
   const archiveGames = (completionGamesResult.data || []) as ArchiveGame[];

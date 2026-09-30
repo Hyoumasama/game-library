@@ -1,3 +1,5 @@
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
 import { supabase } from "@/lib/supabase";
 import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { buildAssetPayload } from "@/lib/assets";
@@ -67,6 +69,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  revalidateTag(CACHE_TAGS.assets, { expire: 0 });
 
   return Response.json({ asset: data }, { status: 201 });
 }

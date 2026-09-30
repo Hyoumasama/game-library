@@ -18,6 +18,8 @@ function revalidateHomeGames() {
   // membership (via sync_admin_game_metadata), which the cached
   // /developer, /publisher, and /franchise pages need to pick up too.
   revalidateTag(CACHE_TAGS.browsingEntities, { expire: 0 });
+  // Purchases, completions and scores feed the /stats page.
+  revalidateTag(CACHE_TAGS.stats, { expire: 0 });
 }
 
 export async function GET(

@@ -23,6 +23,58 @@ import {
 import ExpandableGameSummary from "@/components/games/ExpandableGameSummary";
 import GameSteamNews, { GameSteamNewsSkeleton } from "@/components/games/GameSteamNews";
 import { Suspense } from "react";
+import { unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+
+async function fetchGamePageData(numericId: number) {
+  // The game row and its identity link don't depend on each other, so
+  // fetch them together instead of one after the other.
+  const [gameRow, canonicalGameId] = await Promise.all([
+    getGameRow(numericId),
+    getGameIdentity(numericId),
+  ]);
+
+  if (!gameRow) return null;
+
+  const releaseYear = getYearFromDate(gameRow.Release);
+  const completedYear = getYearFromDate(gameRow["Completion Last Played"]);
+  const status = gameRow.Status?.trim();
+
+  // Franchise, related entries, and both ranks are all independent of each
+  // other once we have gameRow/canonicalGameId, so run them together too
+  // (getRelatedEntries reuses canonicalGameId instead of re-fetching the
+  // identity link itself).
+  const [franchiseRef, relatedEntries, scoreRank, completedRank] = await Promise.all([
+    canonicalGameId ? getFranchiseRef(canonicalGameId) : Promise.resolve(null),
+    getRelatedEntries(numericId, canonicalGameId),
+    getRankFromDatabase({
+      column: "score",
+      currentValue: Number(gameRow.Score || 0),
+      yearColumn: "release",
+      currentYear: releaseYear,
+    }),
+    status === "Completed"
+      ? getRankFromDatabase({
+          column: "hours_played",
+          currentValue: Number(gameRow["Hours Played"] || 0),
+          yearColumn: "completion_last_played",
+          currentYear: completedYear,
+          status: "Completed",
+        })
+      : Promise.resolve(undefined),
+  ]);
+
+  return { gameRow, franchiseRef, relatedEntries, scoreRank, completedRank };
+}
+
+// Two rounds of queries (the ranks scan every game) ran on every visit.
+// Everything here changes only through the admin game routes, which
+// already revalidate these tags, so the page data is cached per game; the
+// 5-minute revalidate is a safety net for other writers.
+const getGamePageData = unstable_cache(fetchGamePageData, ["game-page", "v1"], {
+  tags: [CACHE_TAGS.homeGames, CACHE_TAGS.browsingEntities],
+  revalidate: 300,
+});
 
 export default async function GamePage({
   params,
@@ -31,15 +83,9 @@ export default async function GamePage({
 }) {
   const { id } = await params;
   const numericId = Number(id);
+  const pageData = await getGamePageData(numericId);
 
-  // The game row and its identity link don't depend on each other, so
-  // fetch them together instead of one after the other.
-  const [gameRow, canonicalGameId] = await Promise.all([
-    getGameRow(numericId),
-    getGameIdentity(numericId),
-  ]);
-
-if (!gameRow) {
+if (!pageData) {
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       Game not found
@@ -47,33 +93,10 @@ if (!gameRow) {
   );
 }
 
+const { gameRow, franchiseRef, relatedEntries, scoreRank, completedRank } = pageData;
 const releaseYear = getYearFromDate(gameRow.Release);
 const completedYear = getYearFromDate(gameRow["Completion Last Played"]);
 const status = gameRow.Status?.trim();
-
-// Franchise, related entries, and both ranks are all independent of each
-// other once we have gameRow/canonicalGameId, so run them together too
-// (getRelatedEntries reuses canonicalGameId instead of re-fetching the
-// identity link itself).
-const [franchiseRef, relatedEntries, scoreRank, completedRank] = await Promise.all([
-  canonicalGameId ? getFranchiseRef(canonicalGameId) : Promise.resolve(null),
-  getRelatedEntries(numericId, canonicalGameId),
-  getRankFromDatabase({
-    column: "score",
-    currentValue: Number(gameRow.Score || 0),
-    yearColumn: "release",
-    currentYear: releaseYear,
-  }),
-  status === "Completed"
-    ? getRankFromDatabase({
-        column: "hours_played",
-        currentValue: Number(gameRow["Hours Played"] || 0),
-        yearColumn: "completion_last_played",
-        currentYear: completedYear,
-        status: "Completed",
-      })
-    : Promise.resolve(undefined),
-]);
 
 const game = { ...gameRow, franchise: franchiseRef?.name ?? null };
 // Whole stored developer/publisher string is treated as one entity for

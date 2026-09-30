@@ -2,7 +2,8 @@
 
 // Filters + Sort UI and URL-synced state shared by All Games
 // (components/AllGamesClient.tsx) and the franchise/developer/publisher
-// browsing pages (components/browsing/EntityPageLayout.tsx).
+// browsing pages (components/browsing/EntityPageLayout.tsx). The watch All
+// Works page reuses MultiSelectFilter.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_GAME_FILTERS,
@@ -123,7 +124,7 @@ export function useGameFilters({
 
 export type GameFiltersState = ReturnType<typeof useGameFilters>;
 
-function MultiSelectFilter({
+export function MultiSelectFilter({
   label,
   values,
   selectedValues,

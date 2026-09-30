@@ -1,12 +1,15 @@
+import { revalidateGameCaches } from "@/lib/server/cacheTags";
 import { supabase } from "@/lib/supabase";
 import { getIgdbGame } from "@/lib/igdb";
+import { hasAdultGenre } from "@/lib/adultContent";
+import { fetchSteamScreenshots } from "@/lib/server/steamScreenshots";
 
 type IgdbScreenshot = { image_id?: string };
 
 export async function POST() {
   const { data: games, error } = await supabase
     .from("games")
-    .select("id, title, release, screenshots")
+    .select("id, title, release, screenshots, genres, steam_appid")
     .is("screenshots", null)
     .order("id", { ascending: true })
     .limit(800);
@@ -31,16 +34,18 @@ export async function POST() {
         ? String(game.release).slice(0, 4)
         : undefined;
 
-      const igdbGame = await getIgdbGame(game.title, year);
-
-      const screenshots =
-        igdbGame?.screenshots
-          ?.slice(0, 8)
-          .map(
-            (screenshot: IgdbScreenshot) =>
-              `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
-          )
-          .join(",") || null;
+      // Adult games take screenshots from Steam only, never IGDB.
+      const screenshots = hasAdultGenre(game.genres)
+        ? game.steam_appid
+          ? await fetchSteamScreenshots(Number(game.steam_appid))
+          : null
+        : (await getIgdbGame(game.title, year))?.screenshots
+            ?.slice(0, 8)
+            .map(
+              (screenshot: IgdbScreenshot) =>
+                `https://images.igdb.com/igdb/image/upload/t_1080p/${screenshot.image_id}.jpg`
+            )
+            .join(",") || null;
 
       const { error: updateError } = await supabase
         .from("games")
@@ -65,6 +70,8 @@ export async function POST() {
       });
     }
   }
+
+  revalidateGameCaches();
 
   return Response.json({
     done: false,

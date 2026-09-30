@@ -2,39 +2,13 @@ import "server-only";
 
 import type {
   TmdbMovieDetails,
-  TmdbSearchCandidate,
   TmdbSeasonDetails,
   TmdbTvDetails,
   TmdbType,
 } from "@/lib/server/watch/types";
-import { WatchSourceError } from "@/lib/server/watch/types";
 
 const TMDB_API_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
-const TMDB_REVALIDATE_SECONDS = 60 * 60 * 24;
-
-type RawTmdbSearchResult = {
-  id?: number;
-  media_type?: string;
-  title?: string;
-  name?: string;
-  original_title?: string;
-  original_name?: string;
-  overview?: string;
-  poster_path?: string | null;
-  backdrop_path?: string | null;
-  release_date?: string;
-  first_air_date?: string;
-  original_language?: string;
-  popularity?: number;
-  vote_average?: number;
-  vote_count?: number;
-  genre_ids?: number[];
-};
-
-type RawTmdbSearchResponse = {
-  results?: RawTmdbSearchResult[];
-};
 
 export function getTmdbImageUrl(
   path?: string | null,
@@ -49,16 +23,14 @@ function getTmdbToken() {
   const token = process.env.TMDB_READ_ACCESS_TOKEN;
 
   if (!token) {
-    throw new WatchSourceError({
-      source: "tmdb",
-      status: 500,
-      message: "TMDB_READ_ACCESS_TOKEN is not configured",
-    });
+    throw new Error("TMDB_READ_ACCESS_TOKEN is not configured");
   }
 
   return token;
 }
 
+// TMDB_READ_ACCESS_TOKEN may hold either a v4 read access token (a long JWT,
+// sent as a bearer header) or a short v3 API key (sent as a query parameter).
 function getTmdbRequestPath(path: string, token: string) {
   if (token.includes(".") || token.length > 80) {
     return path;
@@ -82,101 +54,62 @@ async function fetchTmdb<T>(path: string): Promise<T> {
 
   const response = await fetch(`${TMDB_API_BASE_URL}${requestPath}`, {
     headers,
-    cache: "force-cache",
-    next: { revalidate: TMDB_REVALIDATE_SECONDS },
   });
 
   if (!response.ok) {
-    throw new WatchSourceError({
-      source: "tmdb",
-      status: response.status,
-      message: `TMDB request failed with status ${response.status}`,
-      retryAfter: response.headers.get("retry-after"),
-    });
+    throw new Error(`TMDB request ${path} failed with status ${response.status}`);
   }
 
   return response.json() as Promise<T>;
 }
 
-function numberOrNull(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
+type RawTmdbSearchResult = {
+  id?: number;
+  title?: string;
+  name?: string;
+  original_title?: string;
+  original_name?: string;
+  overview?: string;
+  poster_path?: string | null;
+  release_date?: string;
+  first_air_date?: string;
+  popularity?: number;
+};
 
-function stringOrNull(value: unknown) {
-  return typeof value === "string" && value.trim() ? value : null;
-}
+export type TmdbSearchResult = {
+  id: number;
+  type: TmdbType;
+  title: string;
+  originalTitle: string | null;
+  year: number | null;
+  overview: string | null;
+  posterUrl: string | null;
+};
 
-function normalizeTmdbResult(
-  result: RawTmdbSearchResult,
-  tmdbType: TmdbType
-): TmdbSearchCandidate | null {
-  if (!Number.isSafeInteger(result.id)) return null;
-
-  const title =
-    tmdbType === "movie"
-      ? stringOrNull(result.title)
-      : stringOrNull(result.name);
-
-  if (!title) return null;
-
-  return {
-    tmdb_id: result.id!,
-    tmdb_type: tmdbType,
-    title,
-    original_title:
-      tmdbType === "movie"
-        ? stringOrNull(result.original_title)
-        : stringOrNull(result.original_name),
-    overview: stringOrNull(result.overview),
-    poster_path: result.poster_path || null,
-    poster_url: getTmdbImageUrl(result.poster_path),
-    backdrop_path: result.backdrop_path || null,
-    backdrop_url: getTmdbImageUrl(result.backdrop_path, "w1280"),
-    release_date: stringOrNull(result.release_date),
-    first_air_date: stringOrNull(result.first_air_date),
-    original_language: stringOrNull(result.original_language),
-    popularity: numberOrNull(result.popularity),
-    vote_average: numberOrNull(result.vote_average),
-    vote_count: numberOrNull(result.vote_count),
-    genre_ids: Array.isArray(result.genre_ids) ? result.genre_ids : [],
-  };
-}
-
-export async function searchTmdbByTitle(title: string) {
-  const query = encodeURIComponent(title.trim());
-  const [movieData, tvData] = await Promise.all([
-    fetchTmdb<RawTmdbSearchResponse>(
-      `/search/movie?query=${query}&include_adult=false&language=en-US&page=1`
-    ),
-    fetchTmdb<RawTmdbSearchResponse>(
-      `/search/tv?query=${query}&include_adult=false&language=en-US&page=1`
-    ),
-  ]);
-
-  const movieResults = (movieData.results || [])
-    .map((result) => normalizeTmdbResult(result, "movie"))
-    .filter((result): result is TmdbSearchCandidate => Boolean(result));
-  const tvResults = (tvData.results || [])
-    .map((result) => normalizeTmdbResult(result, "tv"))
-    .filter((result): result is TmdbSearchCandidate => Boolean(result));
-
-  return [...movieResults, ...tvResults].sort(
-    (a, b) => (b.popularity || 0) - (a.popularity || 0)
+export async function searchTmdb(query: string, type: TmdbType) {
+  const data = await fetchTmdb<{ results?: RawTmdbSearchResult[] }>(
+    `/search/${type}?query=${encodeURIComponent(query.trim())}&include_adult=true&language=en-US&page=1`
   );
-}
-
-export async function searchTmdbByTitleAndType(title: string, tmdbType: TmdbType) {
-  const query = encodeURIComponent(title.trim());
-  const path =
-    tmdbType === "movie"
-      ? `/search/movie?query=${query}&include_adult=false&language=en-US&page=1`
-      : `/search/tv?query=${query}&include_adult=false&language=en-US&page=1`;
-  const data = await fetchTmdb<RawTmdbSearchResponse>(path);
 
   return (data.results || [])
-    .map((result) => normalizeTmdbResult(result, tmdbType))
-    .filter((result): result is TmdbSearchCandidate => Boolean(result))
-    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    .filter((result): result is RawTmdbSearchResult & { id: number } =>
+      Number.isSafeInteger(result.id)
+    )
+    .map((result): TmdbSearchResult => {
+      const date = type === "movie" ? result.release_date : result.first_air_date;
+      const year = Number(date?.slice(0, 4));
+
+      return {
+        id: result.id,
+        type,
+        title: (type === "movie" ? result.title : result.name) || `TMDB ${result.id}`,
+        originalTitle:
+          (type === "movie" ? result.original_title : result.original_name) || null,
+        year: Number.isFinite(year) && year > 0 ? year : null,
+        overview: result.overview || null,
+        posterUrl: getTmdbImageUrl(result.poster_path, "w185"),
+      };
+    });
 }
 
 export function getTmdbMovieDetails(tmdbId: number) {

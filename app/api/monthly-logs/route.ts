@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { revalidateGameCaches } from "@/lib/server/cacheTags";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
 
@@ -85,6 +86,10 @@ export async function POST(request: Request) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
+  // A log feeds the /stats timeline and can also set the game's start and
+  // completion dates (home, All Games, game page), so drop all game caches.
+  revalidateGameCaches();
+
   return Response.json({ data: Array.isArray(data) ? data[0] : data });
 }
 export async function DELETE(request: Request) {
@@ -108,6 +113,8 @@ export async function DELETE(request: Request) {
       { status: 500 }
     );
   }
+
+  revalidateGameCaches();
 
   return Response.json({
     success: true,

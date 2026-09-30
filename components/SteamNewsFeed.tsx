@@ -12,6 +12,8 @@ import {
   type NewsFilters,
 } from "@/lib/newsFilters";
 
+const NEWS_PAGE_SIZE = 40;
+
 const KIND_BADGES = {
   update: { label: "Update", className: "bg-emerald-400 text-black" },
   news: { label: "News", className: "bg-cyan-300 text-black" },
@@ -76,18 +78,24 @@ export default function SteamNewsFeed({
     [items, normalizedQuery]
   );
 
-  const visibleCount = useMemo(
-    () => searchedItems.filter((item) => matchesNewsFilters(item, filters)).length,
+  const filteredItems = useMemo(
+    () => searchedItems.filter((item) => matchesNewsFilters(item, filters)),
     [searchedItems, filters]
   );
+  const visibleCount = filteredItems.length;
+
+  // Rendering every post at once (200+ cards, two images each) made this the
+  // heaviest page on the site, so it shows NEWS_PAGE_SIZE at a time. The
+  // count resets whenever the filters or the search change.
+  const filterKey = `${JSON.stringify(filters)}|${normalizedQuery}`;
+  const [shown, setShown] = useState({ key: filterKey, count: NEWS_PAGE_SIZE });
+  const shownCount = shown.key === filterKey ? shown.count : NEWS_PAGE_SIZE;
 
   const groups = useMemo(() => {
     const now = new Date(nowIso);
     const byDay = new Map<string, { label: string; items: SteamNewsTickerItem[] }>();
 
-    for (const item of searchedItems) {
-      if (!matchesNewsFilters(item, filters)) continue;
-
+    for (const item of filteredItems.slice(0, shownCount)) {
       const published = new Date(item.publishedAt);
       const key = dayKeyFormat.format(published);
       const group = byDay.get(key) || { label: getDayLabel(published, now), items: [] };
@@ -97,7 +105,7 @@ export default function SteamNewsFeed({
 
     // Items arrive newest first, so insertion order is already day order.
     return [...byDay.entries()];
-  }, [searchedItems, filters, nowIso]);
+  }, [filteredItems, shownCount, nowIso]);
 
   function applyFilters(next: NewsFilters) {
     setFilters(next);
@@ -284,6 +292,18 @@ export default function SteamNewsFeed({
           </div>
         </section>
       ))}
+
+      {shownCount < visibleCount && (
+        <div className="mb-12 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShown({ key: filterKey, count: shownCount + NEWS_PAGE_SIZE })}
+            className="rounded-2xl border border-zinc-800 bg-zinc-950 px-6 py-3 text-sm font-black text-white hover:border-cyan-300"
+          >
+            Show more ({visibleCount - shownCount} left)
+          </button>
+        </div>
+      )}
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { revalidateGameCaches } from "@/lib/server/cacheTags";
 import { supabase } from "@/lib/supabase";
 
 type IgdbWebsite = { url?: string };
@@ -144,6 +145,8 @@ export async function GET() {
       }
     }
   }
+
+  revalidateGameCaches();
 
   return Response.json({
     message: "IGDB sync completed",

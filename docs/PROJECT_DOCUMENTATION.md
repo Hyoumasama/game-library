@@ -4,7 +4,7 @@
 
 Game Library is a personal media-tracking application built with Next.js, React, Tailwind CSS, and Supabase. The primary feature set tracks a video game collection, including game metadata, ownership details, play status, playtime, completion dates, achievements, screenshots, cover art, purchase price, platforms, hardware, stores, genres, and yearly statistics.
 
-The project also includes a watch library for movies, TV, anime, OVAs, local holdings, episode ownership, and assisted imports from TMDB and AniList. A smaller assets section tracks hardware, subscriptions, and services related to the library.
+The project also includes a watch library for the anime series, movies, and OVAs on a local hard disk, with episode ownership and metadata from TMDB. A smaller assets section tracks hardware, subscriptions, and services related to the library.
 
 The application is server-heavy: most public pages load their initial data in server components through the Supabase service-role client, while client components provide filtering, modals, admin actions, responsive navigation, and interactive review workflows.
 
@@ -21,8 +21,7 @@ The application is server-heavy: most public pages load their initial data in se
   - IGDB for game metadata
   - Steam and SteamGridDB for Steam app IDs and image assets
   - RAWG for fallback game metadata
-  - TMDB for movie and TV metadata
-  - AniList for anime metadata
+  - TMDB for watch-library (anime) metadata
 
 Important local instruction: this repository uses a newer Next.js version with changed APIs and conventions. Before changing Next.js-specific behavior, read the relevant files under `node_modules/next/dist/docs/`.
 
@@ -44,8 +43,8 @@ scripts/
   One-off and repeatable import/export/backfill scripts.
 
 scripts/watch/
-  Watch-library import tooling for local inventory summaries, match review,
-  and import item creation.
+  Watch-library tooling: `matchImportItem.ts` matches a pending import item
+  to TMDB, and `node-loader.mjs` lets Node scripts import `@/` modules.
 
 supabase/migrations/
   SQL migrations for database functions, indexes, watch-library schema,
@@ -77,7 +76,7 @@ TMDB_READ_ACCESS_TOKEN=
 CRON_SECRET=
 ```
 
-`TMDB_READ_ACCESS_TOKEN` is required by the watch import and TMDB lookup flow. It is used in `lib/server/watch/tmdb.ts`.
+`TMDB_READ_ACCESS_TOKEN` is required by `npm run watch:match`. It accepts either a v4 read access token or a v3 API key, and is used in `lib/server/watch/tmdb.ts`.
 
 `CRON_SECRET` authorizes the scheduled Steam news sync (`GET /api/cron/steam-news` with `Authorization: Bearer <CRON_SECRET>`). Without it, only a logged-in admin can trigger the sync.
 
@@ -135,17 +134,9 @@ Starts the built production app.
 
 Runs ESLint across the project.
 
-`npm run watch:match-preview`
+`npm run watch:match -- <importItemId> <tv|movie> <tmdbId> [owned...] [--apply]`
 
-Runs `scripts/watch/buildMatchReview.ts` with the project loader. It creates a review set for matching local watch-library inventory to TMDB and AniList candidates.
-
-`npm run watch:build-holdings`
-
-Runs `scripts/watch/buildLocalHoldings.ts`. It builds local holdings data from local watch inventory inputs.
-
-`npm run watch:import-items`
-
-Runs `scripts/watch/importWatchItems.ts`. By default it is a dry run that writes preview files. Add `--apply` when the script should upsert valid rows into Supabase.
+Runs `scripts/watch/matchImportItem.ts`. It matches one pending `watch_import_items` row to a TMDB entry and records the owned episodes. Each owned token covers one season: `1` owns all of season 1, and `2:13` owns episodes 1–13 of season 2. Without `--apply` it only prints what would be saved. The items still pending are listed in `docs/WATCH_PENDING_REVIEW.md`.
 
 ## Application Routes
 
@@ -159,6 +150,19 @@ Data is loaded by `getHomeGames()` in `lib/server/homeGames.ts`. The route is dy
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 ```
+
+Page data is cached with `unstable_cache` and tags from `lib/server/cacheTags.ts`, and every route that writes the underlying tables calls `revalidateTag(tag, { expire: 0 })` so the next request is fresh. Each cache also has a 5-minute `revalidate` as a safety net.
+
+| Tag | Cached data | Revalidated by |
+| --- | --- | --- |
+| `home-games` | home, wishlist, All Games (`lib/server/gamesLite.ts`), game pages | admin game routes, wishlist refresh, backfills, HLTB refresh, IGDB sync, monthly log routes |
+| `browsing-entities` | franchise/developer/publisher pages, game pages | admin game routes and the same batch jobs |
+| `stats` | `/stats` per year, `/monthly-log` | admin game routes, monthly log routes, batch jobs |
+| `watch-library` | `/watch`, `/watch/all-works`, `/watch/[id]` | `/api/admin/watch/works*` |
+| `assets` | `/assets` | `/api/admin/assets*` |
+| `steam-news` | Steam news ticker and feed | `/api/cron/steam-news` |
+
+Batch jobs that rewrite `games` call `revalidateGameCaches()`, which drops the `home-games`, `browsing-entities` and `stats` tags together.
 
 The home page shows:
 
@@ -284,24 +288,25 @@ Admin users can add and delete monthly logs. Writes go through `/api/monthly-log
 - `insert_monthly_play_log`
 - `delete_monthly_play_log`
 
+The site has two sections, games and watch. `components/AppNav.tsx` shows a Games/Watch switch plus the links of the current section; on watch pages the game search and Add Game button are replaced by a watch-library search.
+
 ### `/watch`
 
-Watch-library overview for anime, TV, movies, and OVAs.
+Watch home, laid out like the games home:
 
-Data is loaded by `getWatchLibrary()` from `lib/server/watch/library.ts`. The client UI receives:
+- What's New: the latest five news stories, with an Anime / Live Action switch (see `/watch/news`).
+- Continue Watching: works with status Watching or Rewatching, each showing its next episode.
+- Recently Added: the newest library entries.
 
-- Library items.
-- Distinct watch statuses.
-- Aggregate stats for total works, anime, TV, movies, and owned episodes.
+Library data comes from `getWatchLibrary()` in `lib/server/watch/library.ts`.
 
-Filters include:
+### `/watch/all-works`
 
-- Type.
-- Search.
-- Status.
-- Sort.
+The watch counterpart of All Games. The whole library is loaded once and filtered in the browser with the helpers in `lib/watchFilters.ts`: multi-select Status, Format, Genre, Release, Source and Owned (complete/partial/none) filters, a sort select, search, and 24-per-page paging, all mirrored to the URL.
 
-The page is dynamic and disables revalidation.
+### `/watch/news`
+
+General anime, TV, and movie news, regardless of what is in the library. `lib/server/watch/news.ts` reads the MyAnimeList news feed and Variety's TV and film feeds, merges them newest first, and caches the result for 30 minutes with `unstable_cache`. Nothing is stored in the database. A feed that fails is skipped. The page has Anime and Live Action tabs (`?group=live-action`); live action can be narrowed to TV or movies (`?type=tv,movie`), and both can be searched by title, all in the browser.
 
 ### `/watch/[id]`
 
@@ -338,12 +343,6 @@ Successful login calls `/api/admin/login`, which creates a signed `admin_auth` c
 ### `/admin`
 
 Redirects to `/admin-login`.
-
-### `/admin/watch-import`
-
-Admin-only watch import review UI.
-
-The page checks the signed admin cookie server-side before rendering. It is backed by `/api/admin/watch/import-items/*` route handlers and the matching helpers under `lib/server/watch`.
 
 ## Navigation and Shared UI
 
@@ -383,9 +382,6 @@ Admin authentication is intentionally simple and local to this app.
 - `/api/admin/:path*`, except login and me.
 - POST and DELETE requests to `/api/monthly-logs`.
 - `/admin-login` redirect behavior for already logged-in users.
-
-Some admin watch import routes also perform explicit cookie checks inside the route handler.
-
 ## Data Model
 
 The project relies on Supabase tables and functions. Not all base table creation is present in this repository, but the application clearly expects the following main tables.
@@ -536,7 +532,15 @@ Created by `20260926120000_create_steam_news.sql`. Holds the last 7 days of `ste
 
 `watch_library_entries` stores personal watch status, score, progress, dates, rewatch count, and notes.
 
-`watch_files` stores local file metadata and relationships to media, seasons, and episodes.
+`watch_files` was never written to and is dropped by `20260929120000_watch_sources_and_cleanup.sql`, together with the unused `confirm_watch_import_match` RPC.
+
+Every title in the watch library is anime, so `media_type` is always `anime` and only `format` (`series`, `movie`, `ova`) varies.
+
+Genres are cleaned by `lib/watchGenres.ts` when a work is saved: TMDB movie genres are folded into its TV pairs (`Action` and `Adventure` become `Action & Adventure`, `Fantasy` and `Science Fiction` become `Sci-Fi & Fantasy`, `War` becomes `War & Politics`), and `Animation` is dropped. Scores are stored 0-10 (`tmdb_score`, `my_score`) but shown and edited out of 100, like game scores.
+
+`watch_library_entries.watch_sources` lists where a work is watched from: `Hard Disk` and/or streaming services such as Netflix or OSN+ (`lib/watchSources.ts`). `Hard Disk` is toggled by hand, and the forms show the "Episodes on Hard Disk" editor only while it is on. Owned episodes record the files kept, not viewing progress. Turning `Hard Disk` off clears a series' owned episodes, and a series left with no owned episodes loses `Hard Disk`. Movies have no episodes, so for them `Hard Disk` alone means the file is kept.
+
+`watch_watched_episodes` records which episodes have been watched, independently of ownership. `episodes_watched` on the library entry is kept equal to its row count by the server. Viewing progress and the next episode count regular seasons only (specials excluded). Marking an episode watched from the work page moves "Plan to Watch" to "Watching"; watching the last regular episode moves an in-progress work to "Completed" dated today.
 
 Additional migrations add:
 
@@ -584,6 +588,12 @@ Key migrations:
 
 - `20260730_add_distributed_hours_stats.sql`
   - Adds distributed-hour stats behavior.
+
+- `20260930120000_watch_watched_episodes.sql`
+  - Adds `watch_watched_episodes` for per-episode viewing progress.
+
+- `20260929120000_watch_sources_and_cleanup.sql`
+  - Adds `watch_library_entries.watch_sources` (existing works get `Hard Disk`) and drops the unused `watch_files` table and `confirm_watch_import_match` RPC.
 
 - `20260730_add_games_igdb_status_index.sql`
   - Adds an index for `igdb_id` and status queries.
@@ -745,36 +755,6 @@ Returns asset options/data for asset administration.
 
 Creates a library asset.
 
-### Watch Import Routes
-
-`GET /api/admin/watch/match-preview`
-
-Runs a server-side preview of watch-title matching.
-
-`GET /api/admin/watch/import-items`
-
-Lists staged watch import items.
-
-`GET /api/admin/watch/import-items/[id]`
-
-Returns one staged import item.
-
-`GET /api/admin/watch/import-items/[id]/candidate`
-
-Loads a candidate preview for a staged item.
-
-`GET /api/admin/watch/import-items/[id]/search`
-
-Manually searches TMDB or AniList candidates for a staged item.
-
-`GET /api/admin/watch/import-items/[id]/season`
-
-Loads TMDB season details for review.
-
-`POST /api/admin/watch/import-items/[id]/confirm`
-
-Confirms a staged match and calls `confirm_watch_import_match`.
-
 ## Data Mapping Conventions
 
 The database uses snake_case column names. Some UI components still expect historical spreadsheet-style names. `lib/gameMappers.ts` bridges this mismatch.
@@ -831,17 +811,11 @@ Required env var:
 
 ### TMDB
 
-Used for movies and TV in the watch library.
+Used for watch-library metadata, seasons, and episodes. It is only called from `npm run watch:match`, never at page render time.
 
 Required env var:
 
 - `TMDB_READ_ACCESS_TOKEN`
-
-TMDB requests use a one-day Next.js fetch revalidation window in the helper layer.
-
-### AniList
-
-Used for anime search and details. AniList requests are GraphQL calls and do not require a project-specific API key in the current implementation.
 
 ## Import and Backfill Workflows
 
@@ -932,47 +906,20 @@ date_started.csv
 
 These scripts preview and apply `date_started` updates to existing game rows.
 
-### Watch Import Items
+### Adding and Editing Watch Works
 
-Script:
+Admins add works from the "+ Add Work" button in the watch section's nav (`components/watch/AddWorkModal.tsx`): search TMDB, pick a result, set format, status, source (Hard Disk and/or streaming services), and watched and owned episodes per season (`all`, empty, or ranges like `1-12, 14`). The Edit button on `/watch/[id]` (`components/watch/EditWorkModal.tsx`) changes the library entry and those episode sets, or deletes the work. On the work page each episode has a ✓ button and each season a "Mark season watched" button (`POST /api/admin/watch/works/[id]/watched`). Both go through `/api/admin/watch/*` and `lib/server/watch/works.ts`. A failed add deletes the half-written work.
 
-```bash
-npm run watch:import-items
-```
+### Watch Matching
 
-Dry-run inputs and outputs:
-
-- Reads `data/watch-import/watch_library_summary.csv`.
-- Writes `data/watch-import/watch_import_items_preview.json`.
-- Writes `data/watch-import/watch_import_items_preview.csv`.
-
-Apply:
+`watch_import_items` holds one row per work found by the original hard-disk scan (title, type, and file counts). The scan's source CSVs are no longer available. To match a pending row:
 
 ```bash
-npm run watch:import-items -- --apply
+npm run watch:match -- 38 tv <tmdbId> 1:7          # dry run
+npm run watch:match -- 38 tv <tmdbId> 1:7 --apply  # save
 ```
 
-Apply mode upserts valid records into `watch_import_items` by `source_key`.
-
-### Watch Match Review
-
-Script:
-
-```bash
-npm run watch:match-preview
-```
-
-This generates review data for matching local watch inventory titles against TMDB and AniList.
-
-### Watch Holdings Build
-
-Script:
-
-```bash
-npm run watch:build-holdings
-```
-
-This builds local holdings from watch inventory inputs.
+The script saves through the same `addWatchWork()` as the Add Work modal and then marks the import row matched. Deleting a work sets its import row back to pending.
 
 ## Image Configuration
 
@@ -986,7 +933,9 @@ Remote images are allowed in `next.config.ts` for:
 - `cdn2.steamgriddb.com`
 - `i.playground.ru`
 
-If new external image providers are introduced, add their hostnames to `images.remotePatterns`.
+If new external image providers are introduced, add their hostnames to `images.remotePatterns` and to `nextImageHosts` in `components/SafeImage.tsx` (other hosts render as a plain `<img>`).
+
+`images.imageSizes` and `images.deviceSizes` are trimmed to the widths the site renders, because next/image lists every configured width in each image's `srcset` and the defaults made those lists a large share of the page HTML. Watch cards load TMDB posters at `w342`; the work page uses the stored `w500`.
 
 ## Styling and UI Conventions
 
@@ -1020,8 +969,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 ```
 
-External API helper functions may still use Next.js fetch revalidation internally, such as TMDB and AniList lookups.
-
 ## Security Notes
 
 - The Supabase service-role key is used server-side. Never expose it to client components.
@@ -1049,12 +996,7 @@ For data-affecting work:
 - For admin flows, log in at `/admin-login`.
 - For import scripts, run dry-run modes before `--apply`.
 
-For watch import work:
-
-- Generate preview files.
-- Review validation notes.
-- Resolve duplicates and invalid rows.
-- Confirm matches in `/admin/watch-import`.
+For watch work, run `npm run watch:match` without `--apply` first and check the TMDB title it prints.
 
 ## Development Guidelines
 

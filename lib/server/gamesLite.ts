@@ -1,6 +1,8 @@
 import { getAchievementBadge, stripGameAchievements } from "@/lib/gameMappers";
 import type { DbGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { unstable_cache } from "next/cache";
 
 export const GAMES_LITE_PAGE_SIZE = 24;
 const SUPABASE_PAGE_SIZE = 1000;
@@ -376,7 +378,7 @@ function applyNeverPlayedToQuery<T>(
   return q;
 }
 
-export async function getGamesLiteData({
+async function fetchGamesLiteData({
   filters,
   sort,
   page,
@@ -576,3 +578,13 @@ export async function getGamesLiteData({
     },
   };
 }
+
+// All Games (page and /api/games-lite, which the filters call) ran its
+// page, stats and filter-options queries on every visit and every filter
+// change. Cached per filters/sort/page combination on the same tag the
+// admin game routes already revalidate; the 5-minute revalidate is a
+// safety net for other writers.
+export const getGamesLiteData = unstable_cache(fetchGamesLiteData, ["games-lite", "v1"], {
+  tags: [CACHE_TAGS.homeGames],
+  revalidate: 300,
+});

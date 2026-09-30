@@ -2,6 +2,8 @@ import "server-only";
 
 import { supabase } from "@/lib/supabase";
 import { fetchAllRows } from "@/lib/server/fetchAllRows";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { unstable_cache } from "next/cache";
 
 export type WatchMediaType = "anime" | "tv" | "movie";
 
@@ -44,6 +46,8 @@ export type WatchLibraryEntry = {
   completion_last_watched: string | null;
   rewatch_count: number;
   notes: string | null;
+  // "Hard Disk" and/or streaming services; see lib/watchSources.ts.
+  watch_sources: string[];
   created_at: string;
   updated_at: string;
 };
@@ -57,6 +61,15 @@ export type WatchLibraryItem = {
   officialEpisodesCount: number;
   ownedEpisodesCount: number;
   ownershipPercentage: number;
+  // Viewing progress counts regular episodes only (specials excluded).
+  regularEpisodesCount: number;
+  watchedEpisodesCount: number;
+  watchedPercentage: number;
+  nextEpisode: {
+    seasonNumber: number;
+    episodeNumber: number;
+    title: string | null;
+  } | null;
 };
 
 export type WatchLibraryData = {
@@ -64,9 +77,9 @@ export type WatchLibraryData = {
   statuses: string[];
   stats: {
     totalWorks: number;
-    anime: number;
-    tv: number;
+    series: number;
     movies: number;
+    ovas: number;
     ownedEpisodes: number;
   };
 };
@@ -84,7 +97,9 @@ export type WatchEpisode = {
   duration: number | null;
   created_at: string;
   updated_at: string;
+  // On the hard disk / watched; independent of each other.
   owned: boolean;
+  watched: boolean;
 };
 
 export type WatchSeason = {
@@ -103,6 +118,7 @@ export type WatchSeason = {
   episodes: WatchEpisode[];
   officialEpisodesCount: number;
   ownedEpisodesCount: number;
+  watchedEpisodesCount: number;
 };
 
 export type WatchMediaDetails = WatchLibraryItem & {
@@ -122,6 +138,7 @@ const libraryEntryColumns = [
   "completion_last_watched",
   "rewatch_count",
   "notes",
+  "watch_sources",
   "created_at",
   "updated_at",
 ].join(", ");
@@ -219,6 +236,7 @@ function mapEntry(row: RawRecord): WatchLibraryEntry {
     completion_last_watched: row.completion_last_watched || null,
     rewatch_count: asNumber(row.rewatch_count),
     notes: row.notes || null,
+    watch_sources: asStringArray(row.watch_sources),
     created_at: String(row.created_at || ""),
     updated_at: String(row.updated_at || ""),
   };
@@ -271,10 +289,15 @@ function mapSeason(row: RawRecord): WatchSeason {
     episodes: [],
     officialEpisodesCount: 0,
     ownedEpisodesCount: 0,
+    watchedEpisodesCount: 0,
   };
 }
 
-function mapEpisode(row: RawRecord, ownedEpisodeIds: Set<number>): WatchEpisode {
+function mapEpisode(
+  row: RawRecord,
+  ownedEpisodeIds: Set<number>,
+  watchedEpisodeIds: Set<number>
+): WatchEpisode {
   const id = asNumber(row.id);
 
   return {
@@ -291,6 +314,7 @@ function mapEpisode(row: RawRecord, ownedEpisodeIds: Set<number>): WatchEpisode 
     created_at: String(row.created_at || ""),
     updated_at: String(row.updated_at || ""),
     owned: ownedEpisodeIds.has(id),
+    watched: watchedEpisodeIds.has(id),
   };
 }
 
@@ -300,10 +324,10 @@ function uniqueValues(values: string[]) {
   );
 }
 
-function ownershipPercentage(owned: number, official: number) {
-  if (official <= 0) return 0;
+function percentage(part: number, total: number) {
+  if (total <= 0) return 0;
 
-  return Math.round((owned / official) * 100);
+  return Math.round((part / total) * 100);
 }
 
 function sortSeasons(seasons: WatchSeason[]) {
@@ -315,25 +339,53 @@ function sortSeasons(seasons: WatchSeason[]) {
   });
 }
 
+// The episode after the furthest watched one, in season/episode order
+// (specials excluded). null when every regular episode is watched.
+function findNextEpisode(seasons: WatchSeason[]) {
+  const episodes = seasons
+    .filter((season) => season.season_number > 0)
+    .flatMap((season) =>
+      season.episodes.map((episode) => ({ season, episode }))
+    );
+  let lastWatchedIndex = -1;
+
+  episodes.forEach(({ episode }, index) => {
+    if (episode.watched) lastWatchedIndex = index;
+  });
+
+  const next = episodes[lastWatchedIndex + 1];
+
+  return next
+    ? {
+        seasonNumber: next.season.season_number,
+        episodeNumber: next.episode.episode_number,
+        title: next.episode.title,
+      }
+    : null;
+}
+
+type SeasonCountField =
+  | "officialEpisodesCount"
+  | "ownedEpisodesCount"
+  | "watchedEpisodesCount";
+
 function buildLibraryItem({
   entry,
   media,
   seasons,
-  ownedEpisodeIds,
 }: {
   entry: WatchLibraryEntry;
   media: WatchMedia;
   seasons: WatchSeason[];
-  ownedEpisodeIds: Set<number>;
 }): WatchLibraryItem {
-  const officialEpisodesCount = seasons.reduce(
-    (total, season) => total + season.officialEpisodesCount,
-    0
-  );
-  const ownedEpisodesCount = seasons.reduce(
-    (total, season) => total + season.ownedEpisodesCount,
-    0
-  );
+  const sum = (field: SeasonCountField, regularOnly = false) =>
+    seasons
+      .filter((season) => !regularOnly || season.season_number > 0)
+      .reduce((total, season) => total + season[field], 0);
+  const officialEpisodesCount = sum("officialEpisodesCount");
+  const ownedEpisodesCount = sum("ownedEpisodesCount");
+  const regularEpisodesCount = sum("officialEpisodesCount", true);
+  const watchedEpisodesCount = sum("watchedEpisodesCount", true);
 
   return {
     entry,
@@ -344,10 +396,11 @@ function buildLibraryItem({
     hasSpecials: seasons.some((season) => season.season_number === 0),
     officialEpisodesCount,
     ownedEpisodesCount,
-    ownershipPercentage: ownershipPercentage(
-      ownedEpisodesCount,
-      officialEpisodesCount
-    ),
+    ownershipPercentage: percentage(ownedEpisodesCount, officialEpisodesCount),
+    regularEpisodesCount,
+    watchedEpisodesCount,
+    watchedPercentage: percentage(watchedEpisodesCount, regularEpisodesCount),
+    nextEpisode: media.format === "movie" ? null : findNextEpisode(seasons),
   };
 }
 
@@ -386,7 +439,6 @@ async function fetchLibraryBase({
       entries,
       mediaById: new Map<number, WatchMedia>(),
       seasonsByMediaId: new Map<number, WatchSeason[]>(),
-      ownedEpisodeIdsByEntryId: new Map<number, Set<number>>(),
     };
   }
 
@@ -416,58 +468,43 @@ async function fetchLibraryBase({
   const seasonIds = seasons.map((season) => season.id);
   const seasonById = new Map(seasons.map((season) => [season.id, season]));
   const entryIds = entries.map((entry) => entry.id);
+  const entryEpisodeIds = async (table: string) => {
+    const { data: rows, error: rowsError } = await fetchAllRows((from, to) =>
+      supabase
+        .from(table)
+        .select("episode_id")
+        .in("library_entry_id", entryIds)
+        .order("id")
+        .range(from, to)
+    );
 
-  const [episodesResult, ownedResult] = await Promise.all([
+    if (rowsError) throw rowsError;
+
+    // Each season belongs to one media and so to one library entry, so one
+    // set across entries is enough for mapping episodes.
+    return new Set((rows || []).map((row: RawRecord) => asNumber(row.episode_id)));
+  };
+
+  const [episodesResult, ownedEpisodeIds, watchedEpisodeIds] = await Promise.all([
     seasonIds.length
       ? fetchAllRows((from, to) =>
           supabase
             .from("watch_episodes")
-            .select(includeEpisodeDetails ? episodeColumns : "id, season_id")
+            // The list pages only need numbering (for the next episode).
+            .select(includeEpisodeDetails ? episodeColumns : "id, season_id, episode_number")
             .in("season_id", seasonIds)
             .order("id")
             .range(from, to)
         )
       : Promise.resolve({ data: [], error: null }),
-    entryIds.length
-      ? fetchAllRows((from, to) =>
-          supabase
-            .from("watch_owned_episodes")
-            .select("library_entry_id, episode_id")
-            .in("library_entry_id", entryIds)
-            .order("id")
-            .range(from, to)
-        )
-      : Promise.resolve({ data: [], error: null }),
+    entryEpisodeIds("watch_owned_episodes"),
+    entryEpisodeIds("watch_watched_episodes"),
   ]);
 
   if (episodesResult.error) throw episodesResult.error;
-  if (ownedResult.error) throw ownedResult.error;
-
-  const ownedEpisodeIds = new Set(
-    (ownedResult.data || []).map((row: RawRecord) => asNumber(row.episode_id))
-  );
-  const ownedEpisodeIdsByEntryId = new Map<number, Set<number>>();
-
-  for (const row of ownedResult.data || []) {
-    const entryId = asNumber((row as RawRecord).library_entry_id);
-    const episodeId = asNumber((row as RawRecord).episode_id);
-    const existing = ownedEpisodeIdsByEntryId.get(entryId) || new Set<number>();
-
-    existing.add(episodeId);
-    ownedEpisodeIdsByEntryId.set(entryId, existing);
-  }
 
   for (const row of episodesResult.data || []) {
-    const record = row as RawRecord;
-    const episode = includeEpisodeDetails
-      ? mapEpisode(record, ownedEpisodeIds)
-      : mapEpisode(
-          {
-            ...record,
-            episode_number: 0,
-          },
-          ownedEpisodeIds
-        );
+    const episode = mapEpisode(row as RawRecord, ownedEpisodeIds, watchedEpisodeIds);
     const season = seasonById.get(episode.season_id);
 
     if (!season) continue;
@@ -485,6 +522,9 @@ async function fetchLibraryBase({
     season.ownedEpisodesCount = season.episodes.filter(
       (episode) => episode.owned
     ).length;
+    season.watchedEpisodesCount = season.episodes.filter(
+      (episode) => episode.watched
+    ).length;
 
     const list = seasonsByMediaId.get(season.media_id) || [];
     list.push(season);
@@ -499,17 +539,11 @@ async function fetchLibraryBase({
     entries,
     mediaById,
     seasonsByMediaId,
-    ownedEpisodeIdsByEntryId,
   };
 }
 
-export async function getWatchLibrary(): Promise<WatchLibraryData> {
-  const {
-    entries,
-    mediaById,
-    seasonsByMediaId,
-    ownedEpisodeIdsByEntryId,
-  } = await fetchLibraryBase();
+async function fetchWatchLibrary(): Promise<WatchLibraryData> {
+  const { entries, mediaById, seasonsByMediaId } = await fetchLibraryBase();
 
   const items = entries
     .map((entry) => {
@@ -521,7 +555,6 @@ export async function getWatchLibrary(): Promise<WatchLibraryData> {
         entry,
         media,
         seasons: seasonsByMediaId.get(entry.media_id) || [],
-        ownedEpisodeIds: ownedEpisodeIdsByEntryId.get(entry.id) || new Set(),
       });
     })
     .filter((item): item is WatchLibraryItem => Boolean(item));
@@ -531,9 +564,9 @@ export async function getWatchLibrary(): Promise<WatchLibraryData> {
     statuses: uniqueValues(items.map((item) => item.entry.watch_status)),
     stats: {
       totalWorks: items.length,
-      anime: items.filter((item) => item.media.media_type === "anime").length,
-      tv: items.filter((item) => item.media.media_type === "tv").length,
-      movies: items.filter((item) => item.media.media_type === "movie").length,
+      series: items.filter((item) => item.media.format === "series").length,
+      movies: items.filter((item) => item.media.format === "movie").length,
+      ovas: items.filter((item) => item.media.format === "ova").length,
       ownedEpisodes: items.reduce(
         (total, item) => total + item.ownedEpisodesCount,
         0
@@ -542,17 +575,12 @@ export async function getWatchLibrary(): Promise<WatchLibraryData> {
   };
 }
 
-export async function getWatchMediaDetails(
+async function fetchWatchMediaDetails(
   mediaId: number
 ): Promise<WatchMediaDetails | null> {
   if (!Number.isSafeInteger(mediaId) || mediaId <= 0) return null;
 
-  const {
-    entries,
-    mediaById,
-    seasonsByMediaId,
-    ownedEpisodeIdsByEntryId,
-  } = await fetchLibraryBase({
+  const { entries, mediaById, seasonsByMediaId } = await fetchLibraryBase({
     includeEpisodeDetails: true,
     mediaId,
   });
@@ -564,12 +592,25 @@ export async function getWatchMediaDetails(
   const seasons = seasonsByMediaId.get(mediaId) || [];
 
   return {
-    ...buildLibraryItem({
-      entry,
-      media,
-      seasons,
-      ownedEpisodeIds: ownedEpisodeIdsByEntryId.get(entry.id) || new Set(),
-    }),
+    ...buildLibraryItem({ entry, media, seasons }),
     seasons,
   };
 }
+
+// Loading the library pages runs several paged queries in a row (every
+// episode, owned and watched row), which took over two seconds per visit.
+// Cached like getHomeGames (lib/server/homeGames.ts): every
+// /api/admin/watch/works* route calls
+// revalidateTag(CACHE_TAGS.watchLibrary, { expire: 0 }) after a write, and
+// the 5-minute revalidate is only a safety net for writes made elsewhere
+// (e.g. npm run watch:match).
+export const getWatchLibrary = unstable_cache(fetchWatchLibrary, ["watch-library", "v1"], {
+  tags: [CACHE_TAGS.watchLibrary],
+  revalidate: 300,
+});
+
+export const getWatchMediaDetails = unstable_cache(
+  fetchWatchMediaDetails,
+  ["watch-media-details", "v1"],
+  { tags: [CACHE_TAGS.watchLibrary], revalidate: 300 }
+);

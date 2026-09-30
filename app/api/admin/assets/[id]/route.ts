@@ -1,3 +1,5 @@
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
 import { buildAssetPayload } from "@/lib/assets";
 import { supabase } from "@/lib/supabase";
 
@@ -34,6 +36,8 @@ export async function PATCH(
   if (error) return Response.json({ error: error.message }, { status: 500 });
   if (!data) return Response.json({ error: "Asset not found" }, { status: 404 });
 
+  revalidateTag(CACHE_TAGS.assets, { expire: 0 });
+
   return Response.json({ asset: data });
 }
 
@@ -57,6 +61,8 @@ export async function DELETE(
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
   if (!data) return Response.json({ error: "Asset not found" }, { status: 404 });
+
+  revalidateTag(CACHE_TAGS.assets, { expire: 0 });
 
   return Response.json({ success: true });
 }

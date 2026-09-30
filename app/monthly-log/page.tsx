@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { fetchAllRows } from "@/lib/server/fetchAllRows";
+import { CACHE_TAGS } from "@/lib/server/cacheTags";
+import { unstable_cache } from "next/cache";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
 import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
@@ -56,15 +58,7 @@ type MonthlyLogPageProps = {
   }>;
 };
 
-export default async function MonthlyLogPage({
-  searchParams,
-}: MonthlyLogPageProps) {
-  const params = await searchParams;
-  const cookieStore = await cookies();
-  const isAdmin = await verifyAdminSessionValue(
-    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
-  );
-
+async function fetchMonthlyLogYears() {
   // Paged: monthly_play_logs grows every month and Supabase silently caps
   // an unpaginated select at 1000 rows, which would drop older years.
   const { data: yearsData, error: yearsError } = await fetchAllRows(
@@ -81,19 +75,19 @@ export default async function MonthlyLogPage({
     throw yearsError;
   }
 
-  const availableYears = Array.from(
-    new Set((yearsData || []).map((item) => item.year))
+  return Array.from(
+    new Set((yearsData || []).map((item) => Number(item.year)))
   ).sort((a, b) => b - a);
+}
 
-  const selectedYear = Number(params.year || availableYears[0]);
-
+async function fetchMonthlyLogsForYear(year: number) {
   const { data: rawLogs, error } = await fetchAllRows((from, to) =>
     supabase
       .from("monthly_play_logs")
       .select(
         "log_id, game_id, title, hours, month, year, created_at, games(steam_vertical_cover)"
       )
-      .eq("year", selectedYear)
+      .eq("year", year)
       .order("month", { ascending: false })
       .order("hours", { ascending: false })
       .order("log_id")
@@ -103,7 +97,35 @@ export default async function MonthlyLogPage({
   if (error) {
     throw error;
   }
-const logs = (rawLogs || []) as unknown as MonthlyLog[];
+
+  return (rawLogs || []) as unknown as MonthlyLog[];
+}
+
+// The year list scanned every log row and the logs query ran again on every
+// visit. Both are cached on the stats tag, which the monthly log routes and
+// the admin game routes revalidate (game covers show here too).
+const getMonthlyLogYears = unstable_cache(fetchMonthlyLogYears, ["monthly-log-years", "v1"], {
+  tags: [CACHE_TAGS.stats],
+  revalidate: 300,
+});
+
+const getMonthlyLogsForYear = unstable_cache(fetchMonthlyLogsForYear, ["monthly-logs", "v1"], {
+  tags: [CACHE_TAGS.stats],
+  revalidate: 300,
+});
+
+export default async function MonthlyLogPage({
+  searchParams,
+}: MonthlyLogPageProps) {
+  const params = await searchParams;
+  const cookieStore = await cookies();
+  const isAdmin = await verifyAdminSessionValue(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value
+  );
+
+  const availableYears = await getMonthlyLogYears();
+  const selectedYear = Number(params.year || availableYears[0]);
+  const logs = await getMonthlyLogsForYear(selectedYear);
   const logsByMonth = (logs || []).reduce<Record<number, typeof logs>>(
     (groups, log) => {
       if (!groups[log.month]) {

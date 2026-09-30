@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // next/image lists every width below (plus deviceSizes) in each image's
+    // srcset. The defaults (16 widths, 16px-3840px) made srcsets alone over
+    // 40% of the home and news page HTML. These cover what the site
+    // actually renders: icons/thumbnails (16-116px, 1x and 2x), cards
+    // (~155-300px) and full-width heroes.
+    imageSizes: [32, 64, 128, 256],
+    deviceSizes: [384, 640, 1080, 1920],
     remotePatterns: [
       {
         protocol: "https",

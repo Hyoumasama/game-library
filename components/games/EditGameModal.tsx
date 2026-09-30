@@ -360,7 +360,17 @@ setCompletionPercentage(String(achievements.completion_percentage || ""));
     );
     setDeveloper(selected.developer || "");
     setPublisher(selected.publisher || "");
-    setScreenshots(selected.screenshots || "");
+    // Adult games take screenshots from Steam only. An IGDB match that
+    // doesn't flag the game as adult would bring IGDB screenshots, so a
+    // manually marked adult game keeps its current ones instead.
+    const keepsAdultScreenshots =
+      selected.source === "igdb" &&
+      hasAdultGenre(parseGenreText(genre)) &&
+      !hasAdultGenre(selected.genres);
+
+    if (!keepsAdultScreenshots) {
+      setScreenshots(selected.screenshots || "");
+    }
     setIgdbId(selected.igdbId || null);
     setIgdbSlug(selected.igdbSlug || null);
     setSteamAppId(selected.steamAppId || null);
