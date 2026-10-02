@@ -12,9 +12,10 @@ import { watchStatusOptions } from "@/lib/watchFilters";
 import { HARD_DISK } from "@/lib/watchSources";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 type TmdbType = "tv" | "movie";
+type WatchSearchResult = TmdbSearchResult & { existingMediaId: number | null };
 
 const inputClass = "mt-2 w-full rounded-xl border border-zinc-700 bg-black px-4 py-3 font-normal";
 
@@ -26,7 +27,10 @@ export default function AddWorkModal() {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<TmdbType>("tv");
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<TmdbSearchResult[]>([]);
+  const [results, setResults] = useState<WatchSearchResult[]>([]);
+  const searchController = useRef<AbortController | null>(null);
+  const seasonsController = useRef<AbortController | null>(null);
+  const [searchMessage, setSearchMessage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [selected, setSelected] = useState<TmdbSearchResult | null>(null);
   const [seasons, setSeasons] = useState<EpisodeEditorSeason[]>([]);
@@ -42,6 +46,11 @@ export default function AddWorkModal() {
   const [existingId, setExistingId] = useState<number | null>(null);
 
   function reset() {
+    searchController.current?.abort();
+    seasonsController.current?.abort();
+    setIsLoadingSeasons(false);
+    setIsSearching(false);
+    setSearchMessage("");
     setType("tv");
     setQuery("");
     setResults([]);
@@ -61,33 +70,58 @@ export default function AddWorkModal() {
     setOpen(false);
   }
 
-  async function search() {
-    if (query.trim().length < 2) return;
+  const search = useCallback(async () => {
+    searchController.current?.abort();
+    if (query.trim().length < 3) return;
+    const controller = new AbortController();
+    searchController.current = controller;
 
     setIsSearching(true);
-    setMessage("");
+    setSearchMessage("");
 
     try {
       const params = new URLSearchParams({ q: query.trim(), type });
-      const response = await fetch(`/api/admin/watch/search?${params}`);
+      const response = await fetch(`/api/admin/watch/search?${params}`, { signal: controller.signal });
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.error || "Search failed");
 
+      if (controller.signal.aborted) return;
       setResults(data.results || []);
-      if (!data.results?.length) setMessage("No results.");
+      if (!data.results?.length) setSearchMessage("No results.");
     } catch (error) {
-      setMessage((error as Error).message);
+      if (controller.signal.aborted) return;
+      setResults([]);
+      setSearchMessage((error as Error).message);
     } finally {
-      setIsSearching(false);
+      if (!controller.signal.aborted) setIsSearching(false);
     }
+  }, [query, type]);
+
+  useEffect(() => {
+    if (!open || query.trim().length < 3) return;
+    const timeout = window.setTimeout(() => { void search(); }, 400);
+    return () => {
+      window.clearTimeout(timeout);
+      searchController.current?.abort();
+    };
+  }, [open, query, type, search]);
+
+  function clearSearch() {
+    searchController.current?.abort();
+    setResults([]);
+    setSearchMessage("");
+    setIsSearching(false);
   }
 
-  async function select(result: TmdbSearchResult) {
+  async function select(result: WatchSearchResult) {
+    clearSearch();
+    seasonsController.current?.abort();
+    setIsLoadingSeasons(false);
     setSelected(result);
     setResults([]);
     setMessage("");
-    setExistingId(null);
+    setExistingId(result.existingMediaId);
     setFormat(result.type === "movie" ? "movie" : "series");
     setSeasons([]);
     setOwned({});
@@ -95,15 +129,23 @@ export default function AddWorkModal() {
     // Most works come from the hard disk; turn it off for streaming-only ones.
     setSources([HARD_DISK]);
 
+    if (result.existingMediaId) {
+      setMessage("This work is already in the library.");
+      return;
+    }
+
     if (result.type !== "tv") return;
 
+    const controller = new AbortController();
+    seasonsController.current = controller;
     setIsLoadingSeasons(true);
 
     try {
-      const response = await fetch(`/api/admin/watch/seasons?tmdbId=${result.id}`);
+      const response = await fetch(`/api/admin/watch/seasons?tmdbId=${result.id}`, { signal: controller.signal });
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.error || "Could not load seasons");
+      if (controller.signal.aborted) return;
 
       const outline: EpisodeEditorSeason[] = (data.seasons || []).map(
         (season: { seasonNumber: number; title: string | null; episodeCount: number }) => ({
@@ -117,16 +159,17 @@ export default function AddWorkModal() {
       // Regular seasons default to fully owned; specials default to none.
       setOwned(allRegularSeasons(outline));
     } catch (error) {
+      if (controller.signal.aborted) return;
       setMessage((error as Error).message);
     } finally {
-      setIsLoadingSeasons(false);
+      if (!controller.signal.aborted) setIsLoadingSeasons(false);
     }
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!selected) return;
+    if (!selected || existingId) return;
 
     setIsSaving(true);
     setMessage("");
@@ -199,7 +242,7 @@ export default function AddWorkModal() {
                   value={type}
                   onChange={(event) => {
                     setType(event.target.value as TmdbType);
-                    setResults([]);
+                    clearSearch();
                   }}
                   className="rounded-xl border border-zinc-700 bg-black px-4 py-3"
                 >
@@ -209,7 +252,10 @@ export default function AddWorkModal() {
 
                 <input
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => {
+                    clearSearch();
+                    setQuery(event.target.value);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
@@ -223,12 +269,14 @@ export default function AddWorkModal() {
                 <button
                   type="button"
                   onClick={search}
-                  disabled={isSearching}
+                  disabled={isSearching || query.trim().length < 3}
                   className="rounded-xl bg-white px-5 py-3 font-bold text-black disabled:opacity-60"
                 >
                   {isSearching ? "..." : "Search"}
                 </button>
               </div>
+
+              {searchMessage && <p role="status" className="mt-3 text-sm text-zinc-400">{searchMessage}</p>}
 
               {results.length > 0 && (
                 <div className="mt-5 grid grid-cols-1 gap-3">
@@ -253,6 +301,9 @@ export default function AddWorkModal() {
 
                       <div className="min-w-0">
                         <p className="font-bold">{result.title}</p>
+                        {result.existingMediaId && (
+                          <p className="text-sm font-bold text-yellow-300">Already in your library</p>
+                        )}
                         <p className="text-sm text-zinc-400">
                           {result.year || "Unknown year"} · TMDB ID: {result.id}
                           {result.originalTitle && result.originalTitle !== result.title
@@ -365,6 +416,7 @@ export default function AddWorkModal() {
                 <button
                   type="submit"
                   disabled={
+                    existingId !== null ||
                     isSaving ||
                     isLoadingSeasons ||
                     hasRangeErrors(seasons, watched) ||

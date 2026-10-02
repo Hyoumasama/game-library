@@ -1,0 +1,1073 @@
+[
+  {
+    "id": 1025,
+    "title": "Super Mario 3D World + Bowser's Fury",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1026,
+    "title": "Metroid Dread",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1027,
+    "title": "Metroid Prime Remastered",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1028,
+    "title": "Kirby's Return to Dream Land Deluxe",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1029,
+    "title": "Donkey Kong Country Tropical Freeze",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1030,
+    "title": "Luigi's Mansion 3",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1032,
+    "title": "The Legend of Zelda: Skyward Sword HD",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1033,
+    "title": "Super Mario Bros. Wonder",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1034,
+    "title": "Luigi's Mansion",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1035,
+    "title": "The Legend of Zelda: The Twilight Princess",
+    "store": "CEMU",
+    "platform": "CEMU",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1036,
+    "title": "Mario vs. Donkey Kong",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1037,
+    "title": "Pikmin 3 Deluxe",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1038,
+    "title": "Super Mario Sunshine",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1039,
+    "title": "Super Mario 64",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1040,
+    "title": "The Legend of Zelda: Majora's Mask 3D",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1041,
+    "title": "Kirby and the Forgotten Land",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1042,
+    "title": "Pikmin 4",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1043,
+    "title": "Kirby Star Allies",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1044,
+    "title": "Super Mario RPG",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1045,
+    "title": "Bayonetta 3",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1046,
+    "title": "New Super Mario Bros. U Deluxe",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1047,
+    "title": "The Legend of Zelda: The Wind Waker",
+    "store": "CEMU",
+    "platform": "CEMU",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1048,
+    "title": "Paper Mario: The Origami King",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1049,
+    "title": "Pikmin",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1050,
+    "title": "Super Mario Galaxy",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1051,
+    "title": "Bayonetta 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1053,
+    "title": "Pikmin 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1054,
+    "title": "The Legend of Zelda: Link's Awakening",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1056,
+    "title": "Super Smash Bros. Ultimate",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1057,
+    "title": "Mario Kart 8 Deluxe",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1058,
+    "title": "Super Mario Maker 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1059,
+    "title": "Super Mario Party",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1060,
+    "title": "Splatoon 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1061,
+    "title": "Splatoon 3",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1062,
+    "title": "Mario Strikers Battle League",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1063,
+    "title": "Mario Party Superstars",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1066,
+    "title": "Super Mario Galaxy 2",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1067,
+    "title": "Super Mario 3D Land",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1068,
+    "title": "Xenoblade Chronicles 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1069,
+    "title": "Astral Chain",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1070,
+    "title": "Xenoblade Chronicles 3",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1071,
+    "title": "Xenoblade Chronicles Definitive Edition",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1072,
+    "title": "Fire Emblem Three Houses",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1073,
+    "title": "Fire Emblem Engage",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1074,
+    "title": "Bayonetta Origins: Cereza and the Lost Demon",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1075,
+    "title": "Princess Peach: Showtime!",
+    "store": "Ryujinx",
+    "platform": "Ryujinx",
+    "hardware": "PC"
+  },
+  {
+    "id": 1076,
+    "title": "Asura's Wrath",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1077,
+    "title": "Pepsiman",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1078,
+    "title": "Ape Escape 2",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1079,
+    "title": "Xenogears",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1080,
+    "title": "Onimusha Blade Warriors",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1082,
+    "title": "Lollipop Chainsaw",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1083,
+    "title": "Driver 2",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1084,
+    "title": "Ape Escape 3",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1085,
+    "title": "Dino Crisis",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1087,
+    "title": "Tenchu 2 Birth of the Stealth Assassin",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1088,
+    "title": "Onimusha 2: Samurai's Destiny",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1089,
+    "title": "Dino Crisis 2",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1090,
+    "title": "Ape Escape: On the Loose",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1091,
+    "title": "Onimusha 3: Demon Siege",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1092,
+    "title": "Heavenly Sword",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1093,
+    "title": "Silent Hill 3",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1094,
+    "title": "The Legend of Zelda: Tears of the Kingdom",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 1095,
+    "title": "Silent Hill",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1096,
+    "title": "Onimusha: Dawn of Dreams",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1097,
+    "title": "Tenchu Stealth Assassin",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1098,
+    "title": "Onimusha: Warlords",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1099,
+    "title": "Silent Hill 2",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1100,
+    "title": "Driver",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1101,
+    "title": "Ape Escape",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1102,
+    "title": "Metroid Prime",
+    "store": "PrimeHACK",
+    "platform": "PrimeHACK",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1103,
+    "title": "Metroid Prime 2: Echoes",
+    "store": "PrimeHACK",
+    "platform": "PrimeHACK",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1107,
+    "title": "Metroid Prime 3",
+    "store": "PrimeHACK",
+    "platform": "PrimeHACK",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1108,
+    "title": "New Super Mario Bros. 2",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1109,
+    "title": "New Super Mario Bros. Wii",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1110,
+    "title": "New Super Mario Bros.",
+    "store": "melonDS",
+    "platform": "melonDS",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1112,
+    "title": "Kirby Triple Deluxe",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1113,
+    "title": "Jackie Chan Stuntmaster",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1114,
+    "title": "Mario & Luigi - Paper Jam",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1115,
+    "title": "Super Paper Mario",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1116,
+    "title": "Lost Odyssey",
+    "store": "Xenia",
+    "platform": "XEMU",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1117,
+    "title": "Windjammers 2",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1118,
+    "title": "Kirby Planet Robobot",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1119,
+    "title": "Maximo",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1120,
+    "title": "Darkwatch",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1121,
+    "title": "Donkey Kong Country Returns 3D",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1122,
+    "title": "Jackie Chan Adventures",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1123,
+    "title": "Crash Bandicoot™ The Huge Adventure",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1124,
+    "title": "Mario & Luigi - Superstar Saga + Bowser's Minions",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1125,
+    "title": "Mario & Luigi - Dream Team",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1127,
+    "title": "God Hand",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1129,
+    "title": "Maximo Army of Zin",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1130,
+    "title": "Nightmare Creatures",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1131,
+    "title": "A Bug's Life",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1132,
+    "title": "Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1133,
+    "title": "Unicorn Overlord",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1134,
+    "title": "Paper Mario",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1135,
+    "title": "Nightmare Creatures",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1136,
+    "title": "Prince of Persia: The Lost Crown",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1137,
+    "title": "Kid Icarus Uprising",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1138,
+    "title": "Mario & Luigi - Partners in Time",
+    "store": "melonDS",
+    "platform": "melonDS",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1139,
+    "title": "Red Dead Revolver",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1140,
+    "title": "Punch-Out!! (2009)",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1141,
+    "title": "Nightmare Creatures 2",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1142,
+    "title": "Kirby's Extra Epic Yarn",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1143,
+    "title": "Metal Gear Solid 2: Sons of Liberty HD",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1144,
+    "title": "Metal Gear Solid ",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "PC"
+  },
+  {
+    "id": 1146,
+    "title": "Metal Gear Solid: Peace Walker HD",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1147,
+    "title": "Mario Tennis Aces",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1148,
+    "title": "Mario Golf: Super Rush ",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1151,
+    "title": "Metal Gear Solid: Portable",
+    "store": "PPSSPP",
+    "platform": "PPSSPP",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1154,
+    "title": "Metal Gear 2: Solid Snake",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1155,
+    "title": "Metal Gear Solid 3: Snake Eater HD",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1156,
+    "title": "Metal Gear",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "PC"
+  },
+  {
+    "id": 1160,
+    "title": "Muramasa Rebirth",
+    "store": "Vita3k",
+    "platform": "Vita3k",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1161,
+    "title": "Star Fox Adventures",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1162,
+    "title": "Radiant Historia: Perfect Chronology",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1163,
+    "title": "The Legend of Zelda: Phantom Hourglass",
+    "store": "melonDS",
+    "platform": "melonDS",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1164,
+    "title": "The Legend of Zelda: Oracle of Ages",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1165,
+    "title": "Odin Sphere: Leifthrasir ",
+    "store": "RPCS3",
+    "platform": "RPCS3",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1166,
+    "title": "The Legend of Zelda",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1167,
+    "title": "The Legend of Zelda: The Minish Cap",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1168,
+    "title": "The Legend of Zelda: A Link Between Worlds",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1169,
+    "title": "The Legend of Zelda: Oracle of Seasons",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1170,
+    "title": "Paper Mario: The Thousand-Year Door",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1171,
+    "title": "The Legend of Zelda: Spirit Tracks",
+    "store": "melonDS",
+    "platform": "melonDS",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1172,
+    "title": "The Legend of Zelda: A Link to the Past",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1173,
+    "title": "The Legend of Zelda: Ocarina of Time",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1174,
+    "title": "Star Fox 64",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1175,
+    "title": "Luigi's Mansion",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1176,
+    "title": "Shin Megami Tensei: Digital Devil Saga 2",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1177,
+    "title": "Luigi's Mansion: Dark Moon",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1178,
+    "title": "The Legend of Zelda: Four Swords Adventures",
+    "store": "melonDS",
+    "platform": "melonDS",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1179,
+    "title": "Vagrant Story",
+    "store": "Duckstation",
+    "platform": "Duckstation",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1180,
+    "title": "Paper Mario: Color Splash",
+    "store": "CEMU",
+    "platform": "CEMU",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1181,
+    "title": "Shin Megami Tensei: Digital Devil Saga",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1182,
+    "title": "Zelda II: The Adventure of Link",
+    "store": "RetroARCH",
+    "platform": "RetroARCH",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1183,
+    "title": "Star Fox: Assault",
+    "store": "Dolphin",
+    "platform": "Dolphin",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1184,
+    "title": "The Legend of Zelda: Link's Awakening",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1185,
+    "title": "Paper Mario: Sticker Star",
+    "store": "Citra",
+    "platform": "Citra",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1375,
+    "title": "Luigi's Mansion 2 HD",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1378,
+    "title": "The Legend of Zelda: Echoes of Wisdom",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1379,
+    "title": "Super Mario Party Jamboree",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1382,
+    "title": "Mario & Luigi: Brothership",
+    "store": "Ryujinx",
+    "platform": "Ryujinx",
+    "hardware": "Steamdeck"
+  },
+  {
+    "id": 1587,
+    "title": "Fatal Frame II: Crimson Butterfly",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  },
+  {
+    "id": 1588,
+    "title": "Fatal Frame",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  },
+  {
+    "id": 1589,
+    "title": "Fatal Frame III: The Tormented",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  },
+  {
+    "id": 2065,
+    "title": "The Last Story",
+    "store": "Azahar",
+    "platform": "Azahar",
+    "hardware": "PC"
+  },
+  {
+    "id": 2070,
+    "title": "13 Sentinels: Aegis Rim",
+    "store": "Yuzu",
+    "platform": "Yuzu",
+    "hardware": "PC"
+  },
+  {
+    "id": 2071,
+    "title": "Silent Hill 4: The Room",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  },
+  {
+    "id": 2619,
+    "title": "Magna Carta: Tears of Blood",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  },
+  {
+    "id": 2620,
+    "title": "MagnaCarta 2",
+    "store": "Xenia",
+    "platform": "Xenia",
+    "hardware": "PC"
+  },
+  {
+    "id": 2621,
+    "title": "Chaos Legion",
+    "store": "PCSX2",
+    "platform": "PCSX2",
+    "hardware": "PC"
+  }
+]

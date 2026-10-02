@@ -4,6 +4,7 @@ import { fetchAllRows } from "@/lib/server/fetchAllRows";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
 import { unstable_cache } from "next/cache";
 import { getIcon } from "@/lib/gameIcons";
+import { getGameIconItems } from "@/components/games/CoverBottomBadges";
 import StatsYearSelect from "./StatsYearSelect";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
@@ -180,7 +181,8 @@ type TopGame = {
   hours: number;
   percent: number;
   cover: string | null;
-  platform: string | null;
+  store: string | null;
+  hardware: string | null;
   months: number[];
 };
 
@@ -497,7 +499,8 @@ function getTopGames(
         title: game.title,
         hours: 0,
         cover: game.cover,
-        platform: game.platform,
+        store: game.store,
+        hardware: game.hardware,
         months: new Set<number>(),
       };
     }
@@ -505,9 +508,8 @@ function getTopGames(
     groups[game.id].hours += game.hours;
     groups[game.id].months.add(game.month);
     if (!groups[game.id].cover && game.cover) groups[game.id].cover = game.cover;
-    if (!groups[game.id].platform && game.platform) {
-      groups[game.id].platform = game.platform;
-    }
+    if (!groups[game.id].store && game.store) groups[game.id].store = game.store;
+    if (!groups[game.id].hardware && game.hardware) groups[game.id].hardware = game.hardware;
 
     return groups;
   }, {});
@@ -891,7 +893,7 @@ function TopGameCard({
 }: {
   game: TopGame;
 }) {
-  const platformIcon = getIcon(game.platform);
+  const icons = getGameIconItems({ Store: game.store, Hardware: game.hardware });
 
   return (
     <Link
@@ -913,19 +915,18 @@ function TopGameCard({
       )}
 
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-        {platformIcon ? (
-          <Image
-            src={platformIcon}
+        <span className="flex items-center gap-1.5">
+          {icons.map(({ icon, value }) => <Image
+            key={icon}
+            src={icon}
             alt=""
-            title={game.platform || ""}
+            title={value}
             width={20}
             height={20}
             sizes="20px"
             className="h-5 w-5 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]"
-          />
-        ) : (
-          <div />
-        )}
+          />)}
+        </span>
         <div className="rounded-full border border-white/15 bg-black/70 px-3 py-1 text-xs font-black text-white backdrop-blur">
           {formatPercent(game.percent)}
         </div>

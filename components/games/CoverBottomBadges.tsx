@@ -1,8 +1,9 @@
 // Bottom overlay for cover-only game cards: a soft gradient, a pill of
-// store/platform/hardware icons on the left, and the hours pill on the right.
+// store/hardware icons on the left, and the hours pill on the right.
 // Shared by the Home sections, All Games grid, and entity browsing pages.
 import Image from "next/image";
 import { formatHours, getIcon } from "@/lib/gameHelpers";
+import { getIconBadgeWidth } from "@/lib/gameIcons";
 
 type IconSource = {
   Store?: string | null;
@@ -14,7 +15,7 @@ type IconSource = {
 export function getGameIconItems(game: IconSource) {
   return Array.from(
     new Set(
-      [game.Store, game.Platform, game.Hardware]
+      [game.Store, game.Hardware]
         .filter((value): value is string => Boolean(value))
         .map((value) => {
           const icon = getIcon(value);
@@ -38,17 +39,19 @@ export default function CoverBottomBadges({ game }: { game: IconSource }) {
     <>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 to-transparent" />
 
+      <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center justify-between gap-1.5">
       {icons.length > 0 && (
-        <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-black/70 px-2 py-1 backdrop-blur-sm">
+        <span className="flex items-center gap-1 rounded-full border border-cyan-400/40 bg-black/70 px-2 py-1 backdrop-blur-sm">
           {icons.map(({ icon, value }) => (
             <Image
               key={icon}
               src={icon}
               alt=""
-              width={16}
+              width={getIconBadgeWidth(icon)}
               height={16}
-              sizes="16px"
-              className="h-4 w-4 object-contain"
+              sizes={`${getIconBadgeWidth(icon)}px`}
+              className="h-4 shrink-0 object-contain"
+              style={{ width: getIconBadgeWidth(icon) }}
               title={value}
             />
           ))}
@@ -56,10 +59,11 @@ export default function CoverBottomBadges({ game }: { game: IconSource }) {
       )}
 
       {hours > 0 && (
-        <span className="absolute bottom-3 right-3 rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300 backdrop-blur-sm">
+        <span className="ml-auto rounded-full border border-cyan-400/40 bg-black/70 px-3 py-1 text-xs font-black text-cyan-300 backdrop-blur-sm">
           {formatHours(game["Hours Played"])}h
         </span>
       )}
+      </div>
     </>
   );
 }

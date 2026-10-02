@@ -908,6 +908,8 @@ These scripts preview and apply `date_started` updates to existing game rows.
 
 ### Adding and Editing Watch Works
 
+Add Work searches automatically after three characters and a 400 ms pause, matching Add Game. Search results are checked against `watch_media` by both TMDB type and ID and label existing works. Selecting an existing work shows a warning and a link to its page and disables adding it again. Superseded search and season requests are cancelled to prevent stale results.
+
 Admins add works from the "+ Add Work" button in the watch section's nav (`components/watch/AddWorkModal.tsx`): search TMDB, pick a result, set format, status, source (Hard Disk and/or streaming services), and watched and owned episodes per season (`all`, empty, or ranges like `1-12, 14`). The Edit button on `/watch/[id]` (`components/watch/EditWorkModal.tsx`) changes the library entry and those episode sets, or deletes the work. On the work page each episode has a ✓ button and each season a "Mark season watched" button (`POST /api/admin/watch/works/[id]/watched`). Both go through `/api/admin/watch/*` and `lib/server/watch/works.ts`. A failed add deletes the half-written work.
 
 ### Watch Matching

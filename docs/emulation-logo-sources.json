@@ -1,0 +1,257 @@
+[
+  {
+    "path": "public/platforms/xemu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Xemu_logo_green.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Xemu_logo_green.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/wii.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Wii.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Wii.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/wiiu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:WiiU.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/7/7e/WiiU.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/gamecube.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:GC_Logo.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/7/79/GC_Logo.svg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  {
+    "path": "public/hardware/nintendo3ds.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo_3DS_logo.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/8/89/Nintendo_3DS_logo.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/nintendods.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo_DS_Logo.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/a/af/Nintendo_DS_Logo.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/gba.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Game_Boy_Advance_logo.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/5/50/Game_Boy_Advance_logo.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/gbc.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Game_Boy_Color_logo.svg",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Game_Boy_Color_logo.svg",
+    "license": "Public domain"
+  },
+  {
+    "path": "public/hardware/nintendo3ds-light.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/n3ds.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/n3ds.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/nintendods-light.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nds.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nds.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/gbc-light.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gbc.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gbc.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/nintendo64.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/n64.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/n64.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/gameboy.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gb.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gb.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/nes.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nes.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nes.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/snes.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/snes.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/snes.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/famicom.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/famicom.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/famicom.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/superfamicom.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/sfc.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/sfc.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/psp.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/psp.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/psp.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/psvita.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/psvita.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/psvita.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/xbox360.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/xbox360.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/xbox360.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/msx2.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/msx2.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/msx2.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/xbox-original.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/xbox.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/xbox.svg",
+    "license": "CC BY-NC-SA 2.0 (theme collection)",
+    "attribution": "Art Book Next by Anthony Caccese; system trademarks belong to their respective owners",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/platforms/azahar.svg",
+    "source": "https://github.com/azahar-emu/azahar/blob/662d412123305a9f4be94dd3dc73ddf91a18c55e/dist/azahar.svg",
+    "download": "https://raw.githubusercontent.com/azahar-emu/azahar/662d412123305a9f4be94dd3dc73ddf91a18c55e/dist/azahar.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Azahar Emu Logo (c) 2024 by angyartanddraw and PabloMK7",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "path": "public/hardware/ps2-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/ps2.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/ps2.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/wii-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/wii.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/wii.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/wiiu-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/wiiu.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/wiiu.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/nds-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nds.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/nds.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/gba-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gba.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gba.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/gbc-badge.svg",
+    "source": "https://github.com/anthonycaccese/art-book-next-es-de/blob/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gbc.svg",
+    "download": "https://raw.githubusercontent.com/anthonycaccese/art-book-next-es-de/d772d07109701d9bd7c9fda305bfef6601105ab8/_inc/systems/logos/gbc.svg",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/3ds-badge.svg",
+    "derivedFrom": "public/hardware/nintendo3ds-light.svg",
+    "modification": "Cropped viewBox to 3DS glyphs",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/ds-badge.svg",
+    "derivedFrom": "public/hardware/nds-badge.svg",
+    "modification": "Cropped viewBox to DS glyphs",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/snes-emblem.svg",
+    "derivedFrom": "public/hardware/superfamicom.svg",
+    "modification": "Cropped viewBox to original emblem",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/ps2-compact.svg",
+    "derivedFrom": "public/hardware/ps2-badge.svg",
+    "modification": "Extra 2-unit white stroke for small size readability",
+    "license": "CC BY-NC-SA 2.0",
+    "attribution": "Art Book Next by Anthony Caccese",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/"
+  },
+  {
+    "path": "public/hardware/n64-logo.svg",
+    "source": "https://en.wikipedia.org/wiki/File:Nintendo_64_(logo).svg",
+    "download": "https://upload.wikimedia.org/wikipedia/en/2/2d/Nintendo_64_%28logo%29.svg",
+    "note": "Nintendo 64 N logo, unchanged"
+  }
+]
