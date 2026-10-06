@@ -1,6 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { displayState, orderedGames } from "../../lib/constellations.ts";
+import {
+  displayState,
+  orderedGames,
+  getConnectionState,
+} from "../../lib/constellations.ts";
+
+test("connections use either endpoint status with current taking priority", () => {
+  assert.equal(getConnectionState("completed", "current"), "current");
+  assert.equal(getConnectionState("current", "normal"), "current");
+  assert.equal(getConnectionState("completed", "normal"), "completed");
+  assert.equal(getConnectionState("normal", "completed"), "completed");
+  assert.equal(getConnectionState("normal", "current"), "current");
+  assert.equal(getConnectionState("normal", "normal"), "normal");
+});
 const entries = (statuses) =>
   statuses.map((status, i) => ({
     game_id: i + 1,
@@ -8,19 +21,26 @@ const entries = (statuses) =>
     status,
     game: { id: i + 1 },
   }));
-test("no current is inferred; first unfinished game is visually next", () => {
+test("library Playing and Completed drive node states without writing route data", () => {
+  const games = entries(["upcoming", "upcoming", "upcoming", "upcoming"]);
+  games[0].game.status = "Completed";
+  games[1].game.status = "Playing";
+  assert.deepEqual(games.map((_, i) => displayState(games, i)), ["completed", "current", "normal", "normal"]);
+  assert.ok(games.every(g => g.status === "upcoming"));
+});
+test("unplayed games remain normal without choosing a next game", () => {
   const games = entries(["completed", "upcoming", "upcoming"]);
   assert.deepEqual(
     games.map((_, i) => displayState(games, i)),
-    ["completed", "next", "upcoming"],
+    ["completed", "normal", "normal"],
   );
   assert.equal(games[1].status, "upcoming");
 });
-test("next follows explicit current and skips completed games", () => {
+test("current does not promote another game to a next state", () => {
   const games = entries(["upcoming", "current", "completed", "upcoming"]);
   assert.deepEqual(
     games.map((_, i) => displayState(games, i)),
-    ["upcoming", "current", "completed", "next"],
+    ["normal", "current", "completed", "normal"],
   );
 });
 test("reordering retains route statuses and assigns contiguous positions", () => {

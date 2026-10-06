@@ -36,7 +36,7 @@ export default function GameDetailsPanel({
   return (
     <aside className="game-details" aria-label="Game details">
       <header>
-        <span>YOUR NEXT ADVENTURES</span>
+        <span>YOUR COLLECTION</span>
         <button onClick={onClose} aria-label="Close game details">
           ×
         </button>
@@ -53,7 +53,7 @@ export default function GameDetailsPanel({
         )}
       </div>
       <p className="eyebrow">
-        {route.name} · #{index + 1}
+        {route.name}
       </p>
       <h2>{game.title}</h2>
       <p className="details-state">
@@ -86,7 +86,7 @@ export default function GameDetailsPanel({
               value={entry.status}
               onChange={(e) => onStatus(e.target.value as RouteStatus)}
             >
-              <option value="upcoming">Upcoming</option>
+              <option value="upcoming">Unplayed / Normal</option>
               <option value="current">Now Playing</option>
               <option value="completed">Completed</option>
             </select>
@@ -99,13 +99,13 @@ export default function GameDetailsPanel({
           </button>
           <div>
             <button disabled={busy || index === 0} onClick={() => onMove(-1)}>
-              ↑ Move Up
+              ↑ Move Visually Up
             </button>
             <button
               disabled={busy || index === route.games.length - 1}
               onClick={() => onMove(1)}
             >
-              ↓ Move Down
+              ↓ Move Visually Down
             </button>
           </div>
           <button className="danger" disabled={busy} onClick={onRemove}>
@@ -114,22 +114,19 @@ export default function GameDetailsPanel({
         </div>
       )}
       <h3>In This Route</h3>
-      <ol className="details-order">
+      <ul className="details-order">
         {route.games.map((g, i) => (
           <li key={g.game_id}>
             <button
               aria-current={g.game_id === gameId ? "true" : undefined}
               onClick={() => onSelect(g.game_id)}
             >
-              <span>{i + 1}</span>
               <span>
                 {g.game.title}
                 <small>
                   {displayState(route.games, i) === "current"
                     ? "NOW PLAYING"
-                    : displayState(route.games, i) === "next"
-                      ? "NEXT"
-                      : g.status === "completed"
+                    : displayState(route.games, i) === "completed"
                         ? "✓ COMPLETED"
                         : ""}
                 </small>
@@ -137,7 +134,7 @@ export default function GameDetailsPanel({
             </button>
           </li>
         ))}
-      </ol>
+      </ul>
     </aside>
   );
 }

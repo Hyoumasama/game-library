@@ -1,6 +1,8 @@
 "use client";
-import { useRef, useState } from "react";
-import { arrayMove } from "@dnd-kit/sortable";
+import { useRef, useState, type ComponentProps } from "react";
+import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable, rectSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import AppNav from "@/components/AppNav";
 import { useIsAdmin } from "@/lib/useAdminStatus";
 import { orderedGames, type PlayRoute } from "@/lib/constellations";
@@ -8,6 +10,12 @@ import ConstellationRoute from "./ConstellationRoute";
 import GameDetailsPanel from "./GameDetailsPanel";
 import { AddGamesToRouteModal, EditRouteModal } from "./RouteModals";
 import "./constellations.css";
+function SortableRoute(props: ComponentProps<typeof ConstellationRoute>) {
+  const {setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: props.route.id, disabled: !props.isAdmin || props.disabled});
+  return <div ref={setNodeRef} className={`sortable-route ${isDragging ? "dragging" : ""}`} style={{transform: CSS.Transform.toString(transform), transition}}>
+    <ConstellationRoute {...props} dragHandle={props.isAdmin ? <button ref={setActivatorNodeRef} className="route-drag-handle" {...attributes} {...listeners} disabled={props.disabled} aria-label={`Drag to arrange ${props.route.name}`} title="Drag to arrange">⠿</button> : undefined} />
+  </div>;
+}
 export default function PlayConstellationsPage({
   initialRoutes,
   initialError,
@@ -33,12 +41,22 @@ export default function PlayConstellationsPage({
   const [refreshRequired, setRefreshRequired] = useState(false);
   const blocked = !!initialError || refreshRequired;
   const isAdmin = useIsAdmin();
+  const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 8}}), useSensor(KeyboardSensor, {coordinateGetter: sortableKeyboardCoordinates}));
+  async function reorderRoutes({active, over}: DragEndEvent) {
+    if (!over || active.id === over.id || !isAdmin || saving.current || blocked) return;
+    const from = routes.findIndex(r => r.id === active.id), to = routes.findIndex(r => r.id === over.id);
+    if (from < 0 || to < 0) return;
+    const before = routes, arranged = arrayMove(routes, from, to);
+    setRoutes(arranged);
+    if (!await mutate("reorder", undefined, undefined, arranged.map(r => ({id: r.id, revision: r.revision})))) setRoutes(before);
+  }
   const selectedRoute = routes.find((r) => r.id === selection?.routeId),
     modalRoute = routes.find((r) => r.id === modal?.id);
   async function mutate(
     action: string,
     route?: PlayRoute,
     data?: Partial<PlayRoute>,
+    order?: {id: string; revision: number}[],
   ) {
     if (saving.current || blocked) return false;
     saving.current = true;
@@ -53,6 +71,7 @@ export default function PlayConstellationsPage({
           ...route,
           ...data,
           action,
+          routes: order,
           games: (data?.games || route?.games)?.map((g) => ({
             game_id: g.game_id,
             status: g.status,
@@ -115,7 +134,7 @@ export default function PlayConstellationsPage({
             <h1>
               Play Constellations<span>✦</span>
             </h1>
-            <p>Chart your next adventures across curated game routes.</p>
+            <p>Explore your game collections. Play whichever adventure you choose.</p>
           </div>
           <div className="header-actions">
             <span>
@@ -150,7 +169,7 @@ export default function PlayConstellationsPage({
           />
           <div className="state-legend">
             <span>● Now playing</span>
-            <span>◉ Next</span>
+            <span>◉ Normal</span>
             <span>✓ Completed</span>
           </div>
         </div>
@@ -189,9 +208,11 @@ export default function PlayConstellationsPage({
               Every game, a new destination.
             </p>
           </nav>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderRoutes}>
+          <SortableContext items={shown.map(r => r.id)} strategy={rectSortingStrategy}>
           <div className="routes-area">
             {shown.map((route) => (
-              <ConstellationRoute
+              <SortableRoute
                 key={route.id}
                 route={route}
                 selected={
@@ -204,6 +225,13 @@ export default function PlayConstellationsPage({
                 }
                 onEdit={() => open("edit", route.id)}
                 onAdd={() => open("games", route.id)}
+                onReorder={(games) => {
+                  if (saving.current || blocked) return;
+                  const before = routes;
+                  const ordered = orderedGames(games);
+                  setRoutes(current => current.map(r => r.id === route.id ? {...r, games: ordered} : r));
+                  void mutate("save", route, {games: ordered}).then(saved => {if (!saved) setRoutes(before);});
+                }}
               />
             ))}
             {!shown.length && (
@@ -222,6 +250,8 @@ export default function PlayConstellationsPage({
               </div>
             )}
           </div>
+          </SortableContext>
+          </DndContext>
           {selectedRoute && selection && (
             <GameDetailsPanel
               route={selectedRoute}

@@ -10,16 +10,19 @@ are reused.
   creation timestamps and revisions.
 - `play_route_games` references existing `games`; membership and positions are
   unique within each route. A game may belong to multiple routes.
-- Routes support up to 100 games. SVG curves connect percentage-based slots in
-  groups of six, with horizontal overflow and connections between groups.
+- Routes support up to 100 games. Vertical route cards sit side by side in a
+  responsive grid, expanding to show every game without internal scrolling. SVG curves
+  connect vertical slots in groups of six, including connections between groups.
   Mobile renders a vertical path.
-- Explicit route statuses are `upcoming`, `current` and `completed`. Only one
-  current game is allowed per route. NEXT is computed visually, skipping completed
-  entries. No current status is inferred or written automatically.
+- Routes are collections, with no required play sequence or automatically chosen
+  next game. Visual states are current, completed and normal. Existing stored
+  `upcoming` values map to normal; the database schema is unchanged. Library
+  Playing/Completed states are also reflected visually, without writing them back.
 - Editing supports pointer and keyboard drag-and-drop through existing
   `@dnd-kit` dependencies, plus arrows. Multi-select additions preserve selection order.
 - Details show route status, completion, move/remove actions, platform, playtime,
-  genre tags and the ordered route list.
+  genre tags and an unnumbered collection list. Positions are retained internally
+  for visual arrangement only; drag-and-drop does not imply play priority.
 
 ## Migration and security
 
@@ -59,3 +62,25 @@ Run HTTP verification against a production server on port 3100:
 npm.cmd run start -- --port 3100
 node --env-file=.env.local --experimental-strip-types scripts/verify-constellations.mjs
 ```
+
+## Visual refinement
+
+Nodes and SVG connections derive their tint from the saved `--route-color`.
+Current nodes use silver/white, completed nodes use gold, and normal nodes use
+the route accent. Each SVG connection is white if either endpoint is current,
+otherwise gold if either endpoint is completed, otherwise the route accent.
+This also applies across six-node groups. A
+single SVG glow filter is reused within each group. Only current nodes and their
+adjacent line glows breathe gently over 3.2 seconds; reduced-motion disables all
+decorative animation and transitions.
+
+Cover heights were restored to the original dimensions at the user's request.
+There is no outer frame around the cover and title; glow and selection outlines
+apply to the cover only. Hover scales to 1.03 without changing layout geometry.
+
+All 51 tests pass, including real component rendering for all three visual states,
+five saved accent colors, selection, local hover emphasis, unique filter IDs,
+and state handling across groups. A five-game fixture verifies gold, white,
+white, route-accent segments without hovering and moving-light overlays only
+on current segments. Fixtures do not write database data. Browser visual checks, motion and
+performance measurements remain unavailable without a connected browser.

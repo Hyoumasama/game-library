@@ -117,10 +117,13 @@
   color: #8899ae;
 }
 .state-legend span:first-child {
-  color: #c4b5fd;
+  color: #edf4ff;
 }
 .state-legend span:nth-child(2) {
   color: #67e8f9;
+}
+.state-legend span:nth-child(3) {
+  color: #e9be70;
 }
 .save-message {
   height: 25px;
@@ -177,7 +180,9 @@
 .routes-area {
   min-width: 0;
   display: grid;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 18px;
+  align-items: start;
 }
 .constellation-route {
   border: 1px solid #ffffff12;
@@ -186,7 +191,7 @@
   background:
     radial-gradient(
       ellipse at 50% 50%,
-      color-mix(in srgb, var(--accent) 4%, transparent),
+      color-mix(in srgb, var(--route-color) 4%, transparent),
       transparent 65%
     ),
     radial-gradient(circle at 12% 22%, #e5edff80 0 0.7px, transparent 1px),
@@ -202,8 +207,10 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 23px 24px;
+  padding: 16px 24px;
   border-bottom: 1px solid #ffffff08;
+  position: relative;
+  z-index: 10;
 }
 .route-heading {
   display: flex;
@@ -211,7 +218,7 @@
   align-items: center;
 }
 .route-symbol {
-  color: var(--accent);
+  color: var(--route-color);
   font-size: 27px;
 }
 .route-heading h2 {
@@ -225,13 +232,51 @@
   max-width: 500px;
 }
 .route-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  position: relative;
+  align-self: center;
 }
-.route-actions button {
-  font-size: 11px;
-  background: #ffffff04;
+.route-action-trigger {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #0009;
+  color: #d4d4d8;
+  cursor: pointer;
+  list-style: none;
+  opacity: 0.7;
+  transition: opacity .2s, color .2s;
+}
+.route-action-trigger::-webkit-details-marker { display: none; }
+.route-action-trigger > span { display: flex; flex-direction: column; gap: 2px; }
+.route-action-trigger i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.route-action-trigger:hover,
+.route-actions[open] .route-action-trigger { color: #67e8f9; opacity: 1; }
+.route-action-menu {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  width: 144px;
+  padding: 4px;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  background: #09090bf2;
+  box-shadow: 0 12px 30px #0008;
+  backdrop-filter: blur(8px);
+}
+.route-action-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .route-action-trigger { opacity: 0; }
+  .constellation-route:hover .route-action-trigger,
+  .route-action-trigger:focus-visible,
+  .route-actions[open] .route-action-trigger { opacity: 0.7; }
 }
 .constellation-scroll {
   overflow-x: auto;
@@ -242,7 +287,7 @@
   min-width: calc(var(--pages) * 850px);
 }
 .constellation-segment {
-  height: 380px;
+  height: 330px;
   position: relative;
   flex: 1;
   min-width: 0;
@@ -256,19 +301,87 @@
 }
 .constellation-lines path {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  opacity: 0.25;
-  transition: opacity 0.2s;
+  transition:
+    opacity 0.25s,
+    stroke-width 0.25s;
 }
-.constellation-lines circle {
-  fill: var(--accent);
-  opacity: 0.45;
+.line-stop {
+  stop-color: var(--state-color);
+  stop-opacity: var(--line-intensity);
 }
-.constellation-lines .lit path {
+.state-normal {
+  --state-color: var(--route-color);
+  --line-intensity: 0.28;
+  --glow-strength: 12%;
+}
+.state-completed {
+  --state-color: #e9be70;
+  --line-intensity: 0.85;
+  --glow-strength: 23%;
+}
+.state-current {
+  --state-color: #edf4ff;
+  --line-intensity: 0.95;
+  --glow-strength: 28%;
+}
+.connection-stroke {
+  stroke-width: 1.1;
   opacity: 0.85;
-  stroke-width: 1.5;
+}
+.connection-glow {
+  stroke-width: 3;
+  opacity: 0.35;
+}
+.connection-segment circle {
+  opacity: 0.8;
+}
+.connection-segment.lit .connection-stroke {
+  opacity: 1;
+  stroke-width: 1.6;
+}
+.connection-segment.lit .connection-glow {
+  opacity: 0.6;
+}
+.connection-segment.has-current .connection-glow {
+  animation: current-line-breathe 3.2s ease-in-out infinite;
+}
+.connection-current .connection-stroke {
+  stroke-width: 1.9;
+  opacity: 0.95;
+}
+.connection-completed .connection-stroke {
+  stroke-width: 1.6;
+  opacity: 0.9;
+}
+.connection-completed .connection-glow {
+  opacity: 0.5;
+}
+.connection-normal .connection-stroke {
+  opacity: 0.28;
+}
+.connection-normal .connection-glow {
+  opacity: 0.12;
+}
+.connection-energy {
+  stroke-width: 2.2;
+  stroke-dasharray: 3 97;
+  opacity: 0.45;
+  animation: connection-energy-flow 5s linear infinite;
+}
+@keyframes connection-energy-flow {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes current-line-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 .star-slot {
   position: absolute;
@@ -280,18 +393,30 @@
 }
 .constellations-page .star-node {
   width: 100%;
-  padding: 0;
+  padding: 5px 5px 4px;
   border: 0;
-  background: none;
+  border-radius: 15px;
+  background: transparent;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: transform 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
-.constellations-page .star-node:hover {
-  background: none;
-  transform: scale(1.055);
+.constellations-page .star-node:hover,
+.constellations-page .star-node:focus-visible {
+  background: transparent;
+  transform: scale(1.03);
+  box-shadow: none;
+}
+.star-node:hover .star-cover,
+.star-node:focus-visible .star-cover {
+  border-color: var(--state-color);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--state-color) 30%, transparent);
 }
 .star-cover {
   display: block;
@@ -299,23 +424,30 @@
   width: 80px;
   height: 110px;
   border-radius: 12px;
-  border: 1px solid #ffffff30;
-  box-shadow: 0 12px 25px #0008;
+  border: 1px solid color-mix(in srgb, var(--state-color) 40%, transparent);
+  box-shadow:
+    0 8px 18px #0006,
+    0 0 16px
+      color-mix(in srgb, var(--state-color) var(--glow-strength), transparent);
   transition: box-shadow 0.2s;
 }
 .star-cover img {
   border-radius: 11px;
 }
-.star-position {
+.star-completed {
   position: absolute;
   top: -10px;
   left: -8px;
   min-width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #122137;
-  border: 1px solid #536882;
-  color: #e4eaf5;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--route-color) 15%, #101827),
+    #101827
+  );
+  border: 1px solid var(--state-color);
+  color: color-mix(in srgb, var(--state-color) 60%, white);
   font-size: 10px;
   font-weight: 700;
   display: grid;
@@ -325,39 +457,56 @@
 .star-title {
   font-size: 11px;
   font-weight: 600;
-  margin-top: 11px;
+  margin-top: 6px;
   line-height: 1.4;
   max-width: 115px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 2.8em;
+  color: #edf2fa;
 }
 .star-status {
-  font-size: 8px;
-  letter-spacing: 1px;
-  margin-top: 7px;
-  min-height: 15px;
-  color: #8394a9;
+  font-size: 7px;
+  letter-spacing: 0.7px;
+  margin-top: 3px;
+  min-height: 12px;
+  color: color-mix(in srgb, var(--state-color) 65%, white);
 }
 .state-current .star-cover {
   width: 90px;
   height: 124px;
-  border-color: #c4b5fd;
-  box-shadow: 0 0 30px #a78bfa30;
 }
-.state-current .star-status {
-  color: #c4b5fd;
+.constellations-page .star-node.state-current .star-cover {
+  animation: current-node-breathe 3.2s ease-in-out infinite;
 }
-.state-next .star-cover {
-  border-color: #67e8f9;
-  box-shadow: 0 0 20px #67e8f918;
+@keyframes current-node-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 14px #edf4ff24;
+  }
+  50% {
+    box-shadow: 0 0 20px #edf4ff38;
+  }
 }
-.state-next .star-status {
-  color: #67e8f9;
+.constellations-page .star-node.state-current:hover .star-cover {
+  animation-play-state: paused;
 }
-.state-completed {
-  opacity: 0.5;
+.state-completed .star-cover img {
+  opacity: 0.82;
 }
-.selected .star-cover {
-  outline: 2px solid var(--accent);
-  outline-offset: 5px;
+.state-current .star-cover,
+.state-completed .star-cover {
+  border-color: var(--state-color);
+}
+.state-completed .star-cover {
+  box-shadow: 0 0 18px #f5c45155, 0 8px 18px #0006;
+}
+.constellations-page .star-node.selected .star-cover {
+  outline: 1px solid color-mix(in srgb, var(--state-color) 75%, transparent);
+  outline-offset: 3px;
+  border-color: var(--state-color);
 }
 .route-continuation {
   position: absolute;
@@ -368,7 +517,7 @@
 }
 .route-empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 20px;
   color: #778aa3;
 }
 .route-empty > span {
@@ -498,10 +647,6 @@
 }
 .details-order button[aria-current] {
   background: #67e8f90c;
-}
-.details-order button > span:first-child {
-  color: #6d829b;
-  font-size: 11px;
 }
 .details-order small {
   display: block;
@@ -666,7 +811,7 @@
     min-width: calc(var(--pages) * 950px);
   }
   .constellation-segment {
-    height: 420px;
+    height: 370px;
   }
   .star-slot {
     width: 125px;
@@ -758,10 +903,6 @@
     padding: 18px 15px;
     align-items: start;
   }
-  .route-actions {
-    flex-direction: column;
-    align-items: end;
-  }
   .route-heading h2 {
     font-size: 15px;
   }
@@ -795,11 +936,11 @@
     content: "";
     position: absolute;
     left: 40px;
-    top: 65px;
+    top: 52px;
     height: 90px;
     width: 1px;
-    background: var(--accent);
-    opacity: 0.25;
+    background: linear-gradient(to bottom, var(--connection-color), var(--connection-end-color));
+    opacity: 0.65;
     z-index: -1;
   }
   .star-slot:last-child::after {
@@ -807,7 +948,7 @@
   }
   .constellations-page .star-node {
     flex-direction: row;
-    gap: 18px;
+    gap: 12px;
     text-align: left;
     flex-wrap: wrap;
     position: relative;
@@ -828,8 +969,8 @@
   }
   .star-status {
     position: absolute;
-    left: 86px;
-    bottom: 5px;
+    left: 85px;
+    bottom: 7px;
   }
   .route-continuation {
     position: static;
@@ -850,5 +991,47 @@
   .constellations-page *,
   .route-modal * {
     transition: none !important;
+    animation: none !important;
   }
 }
+@media (min-width: 701px) {
+  .constellation-route > header { padding: 16px; }
+  .route-heading { min-width: 0; gap: 9px; }
+  .route-heading h2 { font-size: 15px; overflow-wrap: anywhere; }
+  .route-heading p { font-size: 10px; }
+  .constellation-scroll {
+    overflow: visible;
+  }
+  .constellation-track { display: block; width: 100%; min-width: 0; }
+  .constellation-segment { height: var(--segment-height); }
+  .star-slot { width: 85%; }
+  .constellations-page .star-node {
+    flex-direction: row;
+    text-align: left;
+    gap: 12px;
+    position: relative;
+  }
+  .star-cover { flex-shrink: 0; }
+  .star-title { max-width: calc(100% - 104px); margin: 0; }
+  .star-status { position: absolute; left: 105px; bottom: 12px; }
+  .state-current .star-status { left: 115px; }
+  .routes-area > .route-empty { grid-column: 1 / -1; }
+}
+@media (min-width: 1700px) {
+  .star-title { max-width: calc(100% - 118px); }
+  .star-status { left: 119px; }
+  .state-current .star-status { left: 129px; }
+}
+
+.sortable-route { min-width: 0; }
+.sortable-route.dragging { position: relative; z-index: 30; opacity: 0.8; }
+.route-drag-handle { cursor: grab; touch-action: none; flex-shrink: 0; border: 0 !important; background: transparent !important; color: #718096; padding: 4px !important; font-size: 22px; }
+.route-drag-handle:hover, .route-drag-handle:focus-visible { color: #67e8f9; }
+.route-drag-handle:active { cursor: grabbing; }
+.sortable-game.can-drag .star-node { cursor: grab; touch-action: none; }
+.sortable-game.dragging { position: relative; z-index: 20; }
+.sortable-game.dragging .star-node { cursor: grabbing; }
+.star-slot:has(.sortable-game.dragging) { z-index: 20; }
+.connection-blended .connection-stroke { opacity: 1; stroke-width: 1.6; }
+.connection-blended .connection-glow { opacity: 0.4; animation: none; }
+

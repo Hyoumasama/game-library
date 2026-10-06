@@ -111,7 +111,7 @@ function SortableGame({
         ⠿
       </button>
       <span>
-        {index + 1}. {entry.game.title}
+        {entry.game.title}
       </span>
       <button
         type="button"
@@ -232,8 +232,8 @@ export function EditRouteModal({
         </fieldset>
         {route && (
           <>
-            <h3>Game order</h3>
-            <p className="muted">Drag to reorder, or use the arrow buttons.</p>
+            <h3>Visual arrangement</h3>
+            <p className="muted">Drag or use the arrows to arrange the stars. Play in any order.</p>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -252,7 +252,7 @@ export function EditRouteModal({
                 items={games.map((g) => g.game_id)}
                 strategy={verticalListSortingStrategy}
               >
-                <ol>
+                <ul>
                   {games.map((entry, i) => (
                     <SortableGame
                       key={entry.game_id}
@@ -270,7 +270,7 @@ export function EditRouteModal({
                       }
                     />
                   ))}
-                </ol>
+                </ul>
               </SortableContext>
             </DndContext>
           </>
@@ -364,7 +364,7 @@ export function AddGamesToRouteModal({
         }}
       />
       <p className="muted">
-        {selected.length} selected · added in selection order ·{" "}
+        {selected.length} selected ·{" "}
         {100 - route.games.length} spaces available
       </p>
       <div className="library-results" aria-busy={loading}>
@@ -425,7 +425,7 @@ export function AddGamesToRouteModal({
           disabled={busy || loading || !result?.hasMore}
           onClick={() => setPage(page + 1)}
         >
-          Next
+          More results →
         </button>
       </div>
       <footer>
