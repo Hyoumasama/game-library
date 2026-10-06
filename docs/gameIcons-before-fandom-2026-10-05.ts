@@ -45,7 +45,6 @@ export function getIcon(value?: string | null) {
     "playstation 3": "/hardware/playstation3.png",
     ps4: "/hardware/playstation4.png",
     ps5: "/hardware/playstation5.png",
-    "playstation 5": "/hardware/playstation5.png",
     "nintendo switch": "/platforms/switch.png",
     wii: "/hardware/wii-badge.svg",
     "nintendo wii": "/hardware/wii-badge.svg",
@@ -96,7 +95,6 @@ export function getIcon(value?: string | null) {
 export function getIconBadgeWidth(icon: string) {
   if (["/hardware/gamecube.svg", "/hardware/n64-logo.svg", "/hardware/snes-emblem.svg"].includes(icon)) return 18;
   if (icon === "/hardware/ps2-compact.svg") return 42;
-  if (icon === "/platforms/fandom/ps5.png") return 28;
   if (icon.startsWith("/hardware/") && icon.endsWith(".svg") && !icon.endsWith("/gamecube.svg")) return 40;
   if (icon === "/platforms/xemu.svg") return 40;
   return 16;

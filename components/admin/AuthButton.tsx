@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { setAdminStatus, useIsAdmin } from "@/lib/useAdminStatus";
 
-export default function AuthButton() {
+export default function AuthButton({ className, onAction }: { className?: string; onAction?: () => void } = {}) {
   const isAdmin = useIsAdmin();
 
   async function logout() {
@@ -12,13 +12,14 @@ export default function AuthButton() {
     });
 
     setAdminStatus(false);
+    onAction?.();
   }
 
   if (isAdmin) {
     return (
       <button
         onClick={logout}
-        className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
+        className={className || "rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"}
       >
         Logout
       </button>
@@ -28,7 +29,8 @@ export default function AuthButton() {
   return (
     <Link
       href="/admin-login"
-      className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"
+      onClick={onAction}
+      className={className || "rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:border-zinc-500"}
     >
       Login
     </Link>

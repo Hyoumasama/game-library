@@ -3,6 +3,7 @@ import type { DbGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
 import { unstable_cache } from "next/cache";
+import { resolvePlayHistoryFilter, applyNeverPlayedFilter } from "@/lib/playHistoryFilters";
 
 export const GAMES_LITE_PAGE_SIZE = 24;
 const SUPABASE_PAGE_SIZE = 1000;
@@ -163,14 +164,15 @@ function normalizeYearFilters(values: string[]) {
 }
 
 function normalizeGamesLiteFilters(filters: GamesLiteFilters): GamesLiteFilters {
+  const playHistory = resolvePlayHistoryFilter(uniqueStrings(filters.statuses), filters.playHistory);
   return {
     search: filters.search.trim().slice(0, 120),
-    statuses: uniqueStrings(filters.statuses),
+    statuses: playHistory.statuses,
     stores: uniqueStrings(filters.stores),
     releases: normalizeYearFilters(filters.releases),
     completions: normalizeYearFilters(filters.completions),
     genres: uniqueStrings(filters.genres),
-    playHistory: (filters.playHistory || "").trim() || null,
+    playHistory: playHistory.playHistory,
   };
 }
 
@@ -365,17 +367,11 @@ async function fetchCompletedIgdbIds() {
   return Array.from(ids);
 }
 
-function applyNeverPlayedToQuery<T>(
+function applyNeverPlayedToQuery<T extends GamesLiteFilterableQuery<T>>(
   query: T,
   completedIds: number[]
 ) {
-  let q: any = query;
-  q = q.eq("status", "Unplayed");
-  if (completedIds.length > 0) {
-    const list = completedIds.join(",");
-    q = q.not("igdb_id", "in", `(${list})`);
-  }
-  return q;
+  return applyNeverPlayedFilter(query, completedIds);
 }
 
 async function fetchGamesLiteData({
@@ -584,7 +580,7 @@ async function fetchGamesLiteData({
 // change. Cached per filters/sort/page combination on the same tag the
 // admin game routes already revalidate; the 5-minute revalidate is a
 // safety net for other writers.
-export const getGamesLiteData = unstable_cache(fetchGamesLiteData, ["games-lite", "v1"], {
+export const getGamesLiteData = unstable_cache(fetchGamesLiteData, ["games-lite", "v2-play-history"], {
   tags: [CACHE_TAGS.homeGames],
   revalidate: 300,
 });

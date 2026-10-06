@@ -1,3 +1,4 @@
+import { getIconBadgeWidth } from "@/lib/gameIcons";
 import AppNav from "@/components/AppNav";
 import GameHeroActions from "@/components/games/GameHeroActions";
 import { getFranchiseRef, getGameIdentity, getGameRow } from "@/lib/games";
@@ -529,10 +530,11 @@ const displayPrice =
             <Image
               src={getIcon(game.Platform)!}
               alt=""
-              width={16}
+              width={getIconBadgeWidth(getIcon(game.Platform)!)}
               height={16}
-              sizes="16px"
-              className="h-4 w-4 object-contain"
+              sizes={`${getIconBadgeWidth(getIcon(game.Platform)!)}px`}
+              className="h-4 shrink-0 object-contain"
+              style={{ width: getIconBadgeWidth(getIcon(game.Platform)!) }}
             />
           </span>
         )}
@@ -542,10 +544,11 @@ const displayPrice =
             <Image
               src={getIcon(game["Hardware (1)"])!}
               alt=""
-              width={16}
+              width={getIconBadgeWidth(getIcon(game["Hardware (1)"])!)}
               height={16}
-              sizes="16px"
-              className="h-4 w-4 object-contain"
+              sizes={`${getIconBadgeWidth(getIcon(game["Hardware (1)"])!)}px`}
+              className="h-4 shrink-0 object-contain"
+              style={{ width: getIconBadgeWidth(getIcon(game["Hardware (1)"])!) }}
             />
           </span>
         )}
@@ -733,7 +736,7 @@ function Info({
 
       <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${a.icon}`}>
         {logo ? (
-          <Image src={logo} alt="" width={20} height={20} sizes="20px" className="h-5 w-5 object-contain" />
+          <Image src={logo} alt="" width={Math.min(32, getIconBadgeWidth(logo))} height={20} sizes="32px" className="h-5 object-contain" style={{ width: Math.min(32, getIconBadgeWidth(logo)) }} />
         ) : (
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d={INFO_ICONS[icon]} />

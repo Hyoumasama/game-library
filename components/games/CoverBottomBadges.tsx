@@ -26,7 +26,7 @@ export function getGameIconItems(game: IconSource) {
   ).map((item) => {
     const [icon, value] = item.split("|||");
     return { icon, value };
-  });
+  }).filter((item, index, items) => items.findIndex(({ icon }) => icon === item.icon) === index);
 }
 
 export default function CoverBottomBadges({ game }: { game: IconSource }) {

@@ -1,0 +1,548 @@
+[
+  {
+    "name": "ps1",
+    "title": "PS.svg",
+    "source": "https://commons.fandom.com/wiki/File:PS.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/c/c0/PS.svg/revision/latest?cb=20200818143234",
+    "original": "public/platforms/fandom/originals/ps1.svg",
+    "path": "public/platforms/fandom/ps1.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:32:34Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PS",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "ps2",
+    "title": "PS2.svg",
+    "source": "https://commons.fandom.com/wiki/File:PS2.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/9/9f/PS2.svg/revision/latest?cb=20200929195421",
+    "original": "public/platforms/fandom/originals/ps2.svg",
+    "path": "public/platforms/fandom/ps2.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:54:21Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PS2",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "ps3",
+    "title": "PS3.svg",
+    "source": "https://commons.fandom.com/wiki/File:PS3.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/c/c6/PS3.svg/revision/latest?cb=20200818143816",
+    "original": "public/platforms/fandom/originals/ps3.svg",
+    "path": "public/platforms/fandom/ps3.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:38:16Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PS3",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "ps4",
+    "title": "PS4.svg",
+    "source": "https://commons.fandom.com/wiki/File:PS4.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/2/21/PS4.svg/revision/latest?cb=20200818143903",
+    "original": "public/platforms/fandom/originals/ps4.svg",
+    "path": "public/platforms/fandom/ps4.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:39:03Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PS4",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "ps5",
+    "title": "PS5.svg",
+    "source": "https://commons.fandom.com/wiki/File:PS5.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/1/1c/PS5.svg/revision/latest?cb=20200929195431",
+    "original": "public/platforms/fandom/originals/ps5.svg",
+    "path": "public/platforms/fandom/ps5.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:54:31Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PS5",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "psp",
+    "title": "PSP.svg",
+    "source": "https://commons.fandom.com/wiki/File:PSP.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/9/93/PSP.svg/revision/latest?cb=20200929195439",
+    "original": "public/platforms/fandom/originals/psp.svg",
+    "path": "public/platforms/fandom/psp.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:54:39Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PSP",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "psvita",
+    "title": "PSVita.svg",
+    "source": "https://commons.fandom.com/wiki/File:PSVita.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/d/dd/PSVita.svg/revision/latest?cb=20200818142739",
+    "original": "public/platforms/fandom/originals/psvita.svg",
+    "path": "public/platforms/fandom/psvita.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:27:39Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "PSVita",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "switch",
+    "title": "Nintendo Switch.svg",
+    "source": "https://commons.fandom.com/wiki/File:Nintendo_Switch.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/f/f1/Nintendo_Switch.svg/revision/latest?cb=20200818142943",
+    "original": "public/platforms/fandom/originals/switch.svg",
+    "path": "public/platforms/fandom/switch.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:29:43Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Nintendo Switch",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "wii",
+    "title": "Wii.svg",
+    "source": "https://commons.fandom.com/wiki/File:Wii.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/b/bc/Wii.svg/revision/latest?cb=20200929195507",
+    "original": "public/platforms/fandom/originals/wii.svg",
+    "path": "public/platforms/fandom/wii.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:55:07Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Wii",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "wiiu",
+    "title": "WiiU.svg",
+    "source": "https://commons.fandom.com/wiki/File:WiiU.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/7/7e/WiiU.svg/revision/latest?cb=20200818143453",
+    "original": "public/platforms/fandom/originals/wiiu.svg",
+    "path": "public/platforms/fandom/wiiu.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:34:53Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "WiiU",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "gamecube",
+    "title": "GameCube.svg",
+    "source": "https://commons.fandom.com/wiki/File:GameCube.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/1/15/GameCube.svg/revision/latest?cb=20200929195332",
+    "original": "public/platforms/fandom/originals/gamecube.svg",
+    "path": "public/platforms/fandom/gamecube.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:32Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "GameCube",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "3ds",
+    "title": "3DS.svg",
+    "source": "https://commons.fandom.com/wiki/File:3DS.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/8/8d/3DS.svg/revision/latest?cb=20200818143028",
+    "original": "public/platforms/fandom/originals/3ds.svg",
+    "path": "public/platforms/fandom/3ds.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:30:28Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "3DS",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "ds",
+    "title": "Nintendo DS.svg",
+    "source": "https://commons.fandom.com/wiki/File:Nintendo_DS.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/4/4e/Nintendo_DS.svg/revision/latest?cb=20200929195344",
+    "original": "public/platforms/fandom/originals/ds.svg",
+    "path": "public/platforms/fandom/ds.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:44Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Nintendo DS",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "n64",
+    "title": "Nintendo 64.svg",
+    "source": "https://commons.fandom.com/wiki/File:Nintendo_64.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/1/12/Nintendo_64.svg/revision/latest?cb=20200929195338",
+    "original": "public/platforms/fandom/originals/n64.svg",
+    "path": "public/platforms/fandom/n64.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:38Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Nintendo 64",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "gba",
+    "title": "Game Boy Advance.svg",
+    "source": "https://commons.fandom.com/wiki/File:Game_Boy_Advance.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/a/a4/Game_Boy_Advance.svg/revision/latest?cb=20200929195318",
+    "original": "public/platforms/fandom/originals/gba.svg",
+    "path": "public/platforms/fandom/gba.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:18Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Game Boy Advance",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "gbc",
+    "title": "Game Boy Color.svg",
+    "source": "https://commons.fandom.com/wiki/File:Game_Boy_Color.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/1/16/Game_Boy_Color.svg/revision/latest?cb=20200929195326",
+    "original": "public/platforms/fandom/originals/gbc.svg",
+    "path": "public/platforms/fandom/gbc.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:26Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Game Boy Color",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "gb",
+    "title": "Game Boy.svg",
+    "source": "https://commons.fandom.com/wiki/File:Game_Boy.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/0/01/Game_Boy.svg/revision/latest?cb=20200929195311",
+    "original": "public/platforms/fandom/originals/gb.svg",
+    "path": "public/platforms/fandom/gb.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:11Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Game Boy",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "nes",
+    "title": "Nintendo Entertainment System.svg",
+    "source": "https://commons.fandom.com/wiki/File:Nintendo_Entertainment_System.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/2/2c/Nintendo_Entertainment_System.svg/revision/latest?cb=20200929195351",
+    "original": "public/platforms/fandom/originals/nes.svg",
+    "path": "public/platforms/fandom/nes.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:51Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Nintendo Entertainment System",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "snes",
+    "title": "Super Nintendo Entertainment System.svg",
+    "source": "https://commons.fandom.com/wiki/File:Super_Nintendo_Entertainment_System.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/f/f7/Super_Nintendo_Entertainment_System.svg/revision/latest?cb=20200929195502",
+    "original": "public/platforms/fandom/originals/snes.svg",
+    "path": "public/platforms/fandom/snes.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:55:02Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Super Nintendo Entertainment System",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "xbox-original",
+    "title": "Xbox.svg",
+    "source": "https://commons.fandom.com/wiki/File:Xbox.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/3/33/Xbox.svg/revision/latest?cb=20200929195514",
+    "original": "public/platforms/fandom/originals/xbox-original.svg",
+    "path": "public/platforms/fandom/xbox-original.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:55:14Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Xbox",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "xbox360",
+    "title": "Xbox 360.svg",
+    "source": "https://commons.fandom.com/wiki/File:Xbox_360.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/a/a4/Xbox_360.svg/revision/latest?cb=20200818142751",
+    "original": "public/platforms/fandom/originals/xbox360.svg",
+    "path": "public/platforms/fandom/xbox360.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:27:51Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Xbox 360",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "xboxone",
+    "title": "Xbox One.svg",
+    "source": "https://commons.fandom.com/wiki/File:Xbox_One.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/9/98/Xbox_One.svg/revision/latest?cb=20200818142406",
+    "original": "public/platforms/fandom/originals/xboxone.svg",
+    "path": "public/platforms/fandom/xboxone.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-08-18T14:24:06Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Xbox One",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "xboxseries",
+    "title": "Xbox Series.svg",
+    "source": "https://commons.fandom.com/wiki/File:Xbox_Series.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/6/6b/Xbox_Series.svg/revision/latest?cb=20200929195521",
+    "original": "public/platforms/fandom/originals/xboxseries.svg",
+    "path": "public/platforms/fandom/xboxseries.png",
+    "modification": "Trimmed transparent margins; original colors; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:55:21Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Xbox Series",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "dreamcast",
+    "title": "Dreamcast.svg",
+    "source": "https://commons.fandom.com/wiki/File:Dreamcast.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/f/f2/Dreamcast.svg/revision/latest?cb=20200929195303",
+    "original": "public/platforms/fandom/originals/dreamcast.svg",
+    "path": "public/platforms/fandom/dreamcast.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:53:03Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Dreamcast",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "genesis",
+    "title": "Sega Genesis.svg",
+    "source": "https://commons.fandom.com/wiki/File:Sega_Genesis.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/a/aa/Sega_Genesis.svg/revision/latest?cb=20200929195451",
+    "original": "public/platforms/fandom/originals/genesis.svg",
+    "path": "public/platforms/fandom/genesis.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:54:51Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Sega Genesis",
+        "source": "mediawiki-metadata"
+      }
+    }
+  },
+  {
+    "name": "atari",
+    "title": "Atari.svg",
+    "source": "https://commons.fandom.com/wiki/File:Atari.svg",
+    "download": "https://static.wikia.nocookie.net/ucp-internal-test-starter-commons/images/6/62/Atari.svg/revision/latest?cb=20200929195253",
+    "original": "public/platforms/fandom/originals/atari.svg",
+    "path": "public/platforms/fandom/atari.png",
+    "modification": "Trimmed transparent margins; white RGB with original alpha; padded to badge aspect ratio at 4x resolution",
+    "license": "See source file page; Fandom community content CC BY-SA unless otherwise noted",
+    "metadata": {
+      "DateTime": {
+        "value": "2020-09-29T19:52:53Z",
+        "source": "mediawiki-metadata",
+        "hidden": ""
+      },
+      "ObjectName": {
+        "value": "Atari",
+        "source": "mediawiki-metadata"
+      }
+    }
+  }
+]
