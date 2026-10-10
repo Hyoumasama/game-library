@@ -22,9 +22,9 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
-  if (!body || !["create", "save", "delete", "reorder"].includes(body.action))
+  if (!body || !["create", "save", "delete", "reorder", "move"].includes(body.action))
     return Response.json({ error: "Invalid action." }, { status: 400 });
-  const { data, error } = await supabase.rpc(body.action === "reorder" ? "reorder_play_routes" : "mutate_play_route", {
+  const { data, error } = await supabase.rpc(body.action === "move" ? "move_play_route_game" : body.action === "reorder" ? "reorder_play_routes" : "mutate_play_route", {
     payload: body,
   });
   if (error)
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         error:
           error.code === "PT409"
             ? "Route changed in another tab. Reload before editing."
-            : "Unable to save. Check your route and library games.",
+            : error.code === "PT422" ? error.message : "Unable to save. Check your route and library games.",
       },
       { status: error.code === "PT409" ? 409 : 400 },
     );

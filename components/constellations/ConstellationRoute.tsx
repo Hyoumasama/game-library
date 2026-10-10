@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type ComponentProps, type ButtonHTMLAttributes } from "react";
-import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type ComponentProps } from "react";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import SafeImage from "@/components/SafeImage";
 import { getBestCover } from "@/lib/gameMappers";
@@ -9,6 +9,7 @@ import {
   verticalConstellationSlots,
   displayState,
   getConnectionState,
+  routeGameDragId,
   type PlayRoute,
   type RouteGame,
 } from "@/lib/constellations";
@@ -57,7 +58,7 @@ export function ConstellationGameNode({
   selected: boolean;
   onSelect: () => void;
   onHover: (index: number | null) => void;
-  dragProps?: ButtonHTMLAttributes<HTMLButtonElement>;
+  dragProps?: ComponentProps<"button">;
 }) {
   const cover = getBestCover(entry.game);
   return (
@@ -91,10 +92,10 @@ export function ConstellationGameNode({
     </button>
   );
 }
-function SortableGameNode({enabled, ...props}: ComponentProps<typeof ConstellationGameNode> & {enabled: boolean}) {
-  const {setNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: props.entry.game_id, disabled: !enabled});
+function SortableGameNode({enabled, routeId, ...props}: ComponentProps<typeof ConstellationGameNode> & {enabled: boolean; routeId: string}) {
+  const {setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: routeGameDragId(routeId, props.entry.game_id), data: {kind: "game", routeId, gameId: props.entry.game_id}, disabled: !enabled});
   return <div ref={setNodeRef} className={`sortable-game ${enabled ? "can-drag" : ""} ${isDragging ? "dragging" : ""}`} style={{transform: CSS.Transform.toString(transform), transition}}>
-    <ConstellationGameNode {...props} dragProps={enabled ? {...attributes, ...listeners} : undefined} />
+    <ConstellationGameNode {...props} dragProps={enabled ? {...attributes, ...listeners, ref: setActivatorNodeRef} : undefined} />
   </div>;
 }
 export function ConstellationConnections({
@@ -240,7 +241,8 @@ export default function ConstellationRoute({
   onEdit,
   onAdd,
   dragHandle,
-  onReorder,
+  dropState,
+  dropBeforeGameId,
 }: {
   route: PlayRoute;
   selected: number | undefined;
@@ -250,20 +252,16 @@ export default function ConstellationRoute({
   onEdit: () => void;
   onAdd: () => void;
   dragHandle?: ReactNode;
-  onReorder?: (games: RouteGame[]) => void;
+  dropState?: "allowed" | "blocked";
+  dropBeforeGameId?: number;
 }) {
   const [active, setActive] = useState<number | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 8}}), useSensor(KeyboardSensor, {coordinateGetter: sortableKeyboardCoordinates}));
-  function reorder({active: dragged, over}: DragEndEvent) {
-    setActive(null);
-    if (!isAdmin || disabled || !over || dragged.id === over.id) return;
-    const from = route.games.findIndex(g => g.game_id === dragged.id), to = route.games.findIndex(g => g.game_id === over.id);
-    if (from >= 0 && to >= 0) onReorder?.(arrayMove(route.games, from, to));
-  }
+  const {setNodeRef} = useDroppable({id: `route-drop:${route.id}`, data: {kind: "route-target", routeId: route.id, keyboardTarget: !route.games.length}, disabled: !isAdmin || disabled});
   const pages = Math.max(1, Math.ceil(route.games.length / 6));
   return (
     <section
-      className="constellation-route"
+      ref={setNodeRef}
+      className={`constellation-route ${dropState ? `drop-${dropState}` : ""}`}
       style={{ "--route-color": route.accent } as CSSProperties}
       aria-label={route.name}
     >
@@ -285,6 +283,7 @@ export default function ConstellationRoute({
           <RouteActions name={route.name} disabled={disabled} onAdd={onAdd} onEdit={onEdit} />
         )}
       </header>
+      {dropState && <p className="route-drop-hint">{dropState === "blocked" ? "Cannot move here" : dropBeforeGameId ? "Drop to insert here" : "Drop to add at the end"}</p>}
       {!route.games.length ? (
         <div className="route-empty">
           <span>✧</span>
@@ -292,8 +291,7 @@ export default function ConstellationRoute({
           <p>Add games from your library to connect your first stars.</p>
         </div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorder} onDragCancel={() => setActive(null)}>
-        <SortableContext items={route.games.map(g => g.game_id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={route.games.map(g => routeGameDragId(route.id, g.game_id))} strategy={verticalListSortingStrategy}>
         <div className="constellation-scroll">
           <div
             className="constellation-track"
@@ -322,7 +320,7 @@ export default function ConstellationRoute({
                   />
                   {batch.map((entry, i) => (
                     <div
-                      className="star-slot"
+                      className={`star-slot ${dropBeforeGameId === entry.game_id && dropState === "allowed" ? "drop-before" : ""}`}
                       key={entry.game_id}
                       style={
                         {
@@ -335,7 +333,8 @@ export default function ConstellationRoute({
                       }
                     >
                       <SortableGameNode
-                        enabled={isAdmin && !disabled && !!onReorder}
+                        enabled={isAdmin && !disabled}
+                        routeId={route.id}
                         entry={entry}
                         index={page * 6 + i}
                         state={displayState(route.games, page * 6 + i)}
@@ -351,7 +350,6 @@ export default function ConstellationRoute({
           </div>
         </div>
         </SortableContext>
-        </DndContext>
       )}
     </section>
   );

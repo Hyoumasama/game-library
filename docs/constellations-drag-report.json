@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "pointer transfer inserts before target, preserves status and survives refresh",
+    "pointer transfer to empty route",
+    "sidebar transfer while viewing one route",
+    "same-route reordering still works",
+    "route reordering still works",
+    "keyboard cross-route transfer",
+    "keyboard transfer to empty route",
+    "shared game memberships remain distinct and duplicate transfer is blocked",
+    "Escape and dropping outside targets leave membership unchanged",
+    "failed save restores visible membership",
+    "successful save with failed reload blocks edits and refresh recovers persisted transfer",
+    "stale revision restores membership and blocks edits until refresh",
+    "390px sidebar transfer without page overflow",
+    "write API requires admin session"
+  ],
+  "pageErrors": [],
+  "productionWrites": 0
+}

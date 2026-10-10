@@ -20,6 +20,12 @@ are reused.
   Playing/Completed states are also reflected visually, without writing them back.
 - Editing supports pointer and keyboard drag-and-drop through existing
   `@dnd-kit` dependencies, plus arrows. Multi-select additions preserve selection order.
+- Games can be dragged between route cards, including empty routes, or onto a
+  route name in the sidebar while viewing a single route. Drop on a game to
+  insert before it; drop on the card background or sidebar to append. Keyboard:
+  Space picks up/drops, left/right move between routes, up/down navigate stars,
+  and Escape cancels. Game drag IDs include the route, so shared memberships
+  remain distinct.
 - Details show route status, completion, move/remove actions, platform, playtime,
   genre tags and an unnumbered collection list. Positions are retained internally
   for visual arrangement only; drag-and-drop does not imply play priority.
@@ -84,3 +90,39 @@ and state handling across groups. A five-game fixture verifies gold, white,
 white, route-accent segments without hovering and moving-light overlays only
 on current segments. Fixtures do not write database data. Browser visual checks, motion and
 performance measurements remain unavailable without a connected browser.
+
+## Cross-route dragging — 2026-10-08
+
+`20261008185222_move_play_route_game.sql` adds `move_play_route_game`, called by
+the existing admin-only API. This migration is prepared for review and **has not
+been applied to production**. Apply it in an authorized test database before
+testing persistent transfers there; the UI requires this RPC for cross-route saves.
+
+The transfer updates both routes in one transaction, checks both revisions,
+preserves membership IDs, timestamps and route statuses, and renumbers positions.
+Duplicate destinations, full routes and two explicitly current games are rejected
+without changes. Change one route's current status before attempting the latter.
+Tables retain their existing service-only RLS/grants; the new RPC uses security
+invoker and is executable only by `service_role`. Other memberships and library
+game records are unchanged. Save failures restore the visible arrangement; stale
+revisions and failures to reload saved data block further edits until refresh.
+
+The disposable PGlite tests exercise the real migrations, including rollback
+after a forced insert failure, empty routes, ordering, statuses, limits, duplicate
+membership, revisions and access grants. Browser checks use headless Edge against
+an isolated Next preview and disposable loopback API; see
+`docs/constellations-drag-report.json`. No production connection is used.
+
+```powershell
+# Terminal 1: disposable fixture API
+node scripts/constellations/preview.mjs
+# Terminal 2: isolated app preview; keep production credentials out of this shell
+$env:SUPABASE_URL='http://127.0.0.1:4402'
+$env:SUPABASE_SERVICE_ROLE_KEY='isolated-preview-key'
+$env:ADMIN_SESSION_SECRET='isolated-constellations-test'
+$env:AWARDS_PREVIEW_BUILD_DIR='.next-awards-preview'
+npm.cmd run dev -- --port 3101
+# Terminal 3: headless interaction checks
+$env:ADMIN_SESSION_SECRET='isolated-constellations-test'
+node --experimental-strip-types scripts/constellations/browser-check.mjs
+```

@@ -1035,3 +1035,13 @@
 .connection-blended .connection-stroke { opacity: 1; stroke-width: 1.6; }
 .connection-blended .connection-glow { opacity: 0.4; animation: none; }
 
+.constellation-route { position: relative; }
+.constellation-route.drop-allowed, .routes-sidebar button.drop-allowed { outline: 2px solid #67e8f9; outline-offset: 2px; }
+.constellation-route.drop-blocked, .routes-sidebar button.drop-blocked { outline: 2px solid #fb7185; outline-offset: 2px; }
+.route-drop-hint { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); z-index: 35; margin: 0; padding: 5px 9px; border-radius: 6px; background: #101e32; color: #a5f3fc; font-size: 10px; white-space: nowrap; pointer-events: none; }
+.drop-blocked .route-drop-hint { color: #fda4af; }
+.star-slot.drop-before::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; border-top: 2px solid #67e8f9; pointer-events: none; }
+.sortable-game.dragging { opacity: 0.25; }
+.constellation-drag-preview { padding: 12px; border-radius: 12px; background: #101e32f2; box-shadow: 0 12px 40px #0008; pointer-events: none; }
+.constellation-drag-preview .star-node { cursor: grabbing; }
+
