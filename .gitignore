@@ -45,6 +45,10 @@ next-env.d.ts
 
 # Private local database backups
 /backups/
+data/awards/*.local.json
+data/awards/*.html
+data/awards/*.js
 
 # Supabase CLI cache
 supabase/.temp/
+.next-awards-preview/

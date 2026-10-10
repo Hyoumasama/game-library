@@ -1,5 +1,7 @@
 import { getIconBadgeWidth } from "@/lib/gameIcons";
 import AppNav from "@/components/AppNav";
+import GameAwards from "@/components/awards/GameAwards";
+import { getAwards } from "@/lib/server/awards";
 import GameHeroActions from "@/components/games/GameHeroActions";
 import { getFranchiseRef, getGameIdentity, getGameRow } from "@/lib/games";
 import {
@@ -84,7 +86,7 @@ export default async function GamePage({
 }) {
   const { id } = await params;
   const numericId = Number(id);
-  const pageData = await getGamePageData(numericId);
+  const [pageData, awards] = await Promise.all([getGamePageData(numericId), getAwards(null, [numericId])]);
 
 if (!pageData) {
   return (
@@ -319,6 +321,7 @@ const displayPrice =
   </div>
 ) : null}
 
+            <GameAwards awards={awards} />
             <RelatedEntries entries={relatedEntries} />
           </div>
         </div>
@@ -515,6 +518,7 @@ const displayPrice =
       </p>
     )}
   </div>
+  <GameAwards awards={awards} />
   <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
   {/* No price (e.g. wishlist games) would render an empty "-" chip here;

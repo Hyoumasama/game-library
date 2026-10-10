@@ -4,6 +4,7 @@ import { revalidateTag } from "next/cache";
 // fetchers, so a mutating route and the fetcher it needs to invalidate
 // agree on the exact tag string.
 export const CACHE_TAGS = {
+  awards: "awards",
   homeGames: "home-games",
   // Franchise/developer/publisher browsing pages (lib/server/browsingEntities.ts).
   // Franchise membership and the developer/publisher text fields only change

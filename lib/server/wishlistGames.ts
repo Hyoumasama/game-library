@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { mapDbGameToUiGame } from "@/lib/gameMappers";
+import { withAwardBadges } from "@/lib/server/awards";
 import type { DbGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
@@ -42,7 +43,7 @@ async function fetchWishlistGames() {
 
   if (error) throw new Error(error.message);
 
-  return (data as DbGame[]).map(mapDbGameToUiGame);
+  return (await withAwardBadges(data as DbGame[])).map(mapDbGameToUiGame);
 }
 
 // Wishlist membership and release dates change through exactly the routes

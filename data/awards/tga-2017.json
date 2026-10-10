@@ -1,0 +1,1472 @@
+{
+  "organization": "tga",
+  "year": 2017,
+  "ceremony_name": "The Game Awards 2017",
+  "ceremony_date": null,
+  "status": "published",
+  "verified": true,
+  "verification_notes": "Verified 2026-10-08. Category and entry evidence: data/awards/verification/report.json; sources: data/awards/verification/sources.json. Industry Icon confirmed by the official rewind highlight and Atari Women. Historical esport and streamer handles retain correct identities despite reporting variations.",
+  "source_url": "https://en.wikipedia.org/wiki/The_Game_Awards_2017",
+  "official_source_url": "https://thegameawards.com/rewind/year-2017",
+  "data_notes": "Industry Icon confirmed by the official rewind highlight and Atari Women. Historical esport and streamer handles retain correct identities despite reporting variations.",
+  "source_sha256": "f617411c901c7a0f41ad78c3dbdb8dee8848bf63afbf2609aeea03412e8483b1",
+  "categories": [
+    {
+      "key": "game-of-the-year",
+      "name": "Game of the Year",
+      "honorary": false,
+      "display_order": 0,
+      "entries": [
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "c9cd5f75e23d5b73a8d86cfd",
+          "nominee_name": "Horizon Zero Dawn",
+          "nominee_type": "game",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "584fe50cb14955949b69136b",
+          "nominee_name": "Persona 5",
+          "nominee_type": "game",
+          "game_title": "Persona 5",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "1adbff935c28d3f297188a25",
+          "nominee_name": "PlayerUnknown's Battlegrounds",
+          "nominee_type": "game",
+          "game_title": "PlayerUnknown's Battlegrounds",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-game-direction",
+      "name": "Best Game Direction",
+      "honorary": false,
+      "display_order": 1,
+      "entries": [
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "c9cd5f75e23d5b73a8d86cfd",
+          "nominee_name": "Horizon Zero Dawn",
+          "nominee_type": "game",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "77f895b06b6cd2af93059172",
+          "nominee_name": "Resident Evil 7: Biohazard",
+          "nominee_type": "game",
+          "game_title": "Resident Evil 7: Biohazard",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b2de88f73a534a3c4dd604d2",
+          "nominee_name": "Wolfenstein II: The New Colossus",
+          "nominee_type": "game",
+          "game_title": "Wolfenstein II: The New Colossus",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-narrative",
+      "name": "Best Narrative",
+      "honorary": false,
+      "display_order": 2,
+      "entries": [
+        {
+          "key": "9df74d519cc92527408e5582",
+          "nominee_name": "What Remains of Edith Finch",
+          "nominee_type": "game",
+          "game_title": "What Remains of Edith Finch",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "ebf63173fb6d944d11262b12",
+          "nominee_name": "Hellblade: Senua's Sacrifice",
+          "nominee_type": "game",
+          "game_title": "Hellblade: Senua's Sacrifice",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c9cd5f75e23d5b73a8d86cfd",
+          "nominee_name": "Horizon Zero Dawn",
+          "nominee_type": "game",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "cb205b68892cb71d7f572048",
+          "nominee_name": "Nier: Automata",
+          "nominee_type": "game",
+          "game_title": "Nier: Automata",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b2de88f73a534a3c4dd604d2",
+          "nominee_name": "Wolfenstein II: The New Colossus",
+          "nominee_type": "game",
+          "game_title": "Wolfenstein II: The New Colossus",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-art-direction",
+      "name": "Best Art Direction",
+      "honorary": false,
+      "display_order": 3,
+      "entries": [
+        {
+          "key": "2c09a9a11e9e1e037a9ae325",
+          "nominee_name": "Cuphead",
+          "nominee_type": "game",
+          "game_title": "Cuphead",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c9cd5f75e23d5b73a8d86cfd",
+          "nominee_name": "Horizon Zero Dawn",
+          "nominee_type": "game",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "584fe50cb14955949b69136b",
+          "nominee_name": "Persona 5",
+          "nominee_type": "game",
+          "game_title": "Persona 5",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-score-and-music",
+      "name": "Best Score/Music",
+      "honorary": false,
+      "display_order": 4,
+      "entries": [
+        {
+          "key": "cb205b68892cb71d7f572048",
+          "nominee_name": "Nier: Automata",
+          "nominee_type": "game",
+          "game_title": "Nier: Automata",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "2c09a9a11e9e1e037a9ae325",
+          "nominee_name": "Cuphead",
+          "nominee_type": "game",
+          "game_title": "Cuphead",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "584fe50cb14955949b69136b",
+          "nominee_name": "Persona 5",
+          "nominee_type": "game",
+          "game_title": "Persona 5",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-audio-design",
+      "name": "Best Audio Design",
+      "honorary": false,
+      "display_order": 5,
+      "entries": [
+        {
+          "key": "ebf63173fb6d944d11262b12",
+          "nominee_name": "Hellblade: Senua's Sacrifice",
+          "nominee_type": "game",
+          "game_title": "Hellblade: Senua's Sacrifice",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "77f895b06b6cd2af93059172",
+          "nominee_name": "Resident Evil 7: Biohazard",
+          "nominee_type": "game",
+          "game_title": "Resident Evil 7: Biohazard",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-performance",
+      "name": "Best Performance",
+      "honorary": false,
+      "display_order": 6,
+      "entries": [
+        {
+          "key": "9e75fe575a019a3764fadba9",
+          "nominee_name": "Melina Juergens as Senua",
+          "nominee_type": "person",
+          "game_title": "Hellblade: Senua's Sacrifice",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "437832be7a66c1bda4337cca",
+          "nominee_name": "Ashly Burch as Aloy",
+          "nominee_type": "person",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "5c8852b26113874791244782",
+          "nominee_name": "Brian Bloom as B.J. Blazkowicz",
+          "nominee_type": "person",
+          "game_title": "Wolfenstein II: The New Colossus",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "ae208c6c597de795c2dcd8e2",
+          "nominee_name": "Claudia Black as Chloe Frazer",
+          "nominee_type": "person",
+          "game_title": "Uncharted: The Lost Legacy",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "5930053872cb369999932701",
+          "nominee_name": "Laura Bailey as Nadine Ross",
+          "nominee_type": "person",
+          "game_title": "Uncharted: The Lost Legacy",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "games-for-impact",
+      "name": "Games for Impact",
+      "honorary": false,
+      "display_order": 8,
+      "entries": [
+        {
+          "key": "ebf63173fb6d944d11262b12",
+          "nominee_name": "Hellblade: Senua's Sacrifice",
+          "nominee_type": "game",
+          "game_title": "Hellblade: Senua's Sacrifice",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "ac470f7b872cb3c1c6ba21ea",
+          "nominee_name": "Bury Me, My Love",
+          "nominee_type": "game",
+          "game_title": "Bury Me, My Love",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b1f5806688183868d3840cdf",
+          "nominee_name": "Life Is Strange: Before the Storm",
+          "nominee_type": "game",
+          "game_title": "Life Is Strange: Before the Storm",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "25d328ddf37caded7ffc66df",
+          "nominee_name": "Night in the Woods",
+          "nominee_type": "game",
+          "game_title": "Night in the Woods",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "6891a07680ef4b80660d9d0f",
+          "nominee_name": "Please Knock on My Door",
+          "nominee_type": "game",
+          "game_title": "Please Knock on My Door",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "9df74d519cc92527408e5582",
+          "nominee_name": "What Remains of Edith Finch",
+          "nominee_type": "game",
+          "game_title": "What Remains of Edith Finch",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-ongoing-game",
+      "name": "Best Ongoing Game",
+      "honorary": false,
+      "display_order": 9,
+      "entries": [
+        {
+          "key": "9643d8f7d89070368d71aa28",
+          "nominee_name": "Overwatch",
+          "nominee_type": "game",
+          "game_title": "Overwatch",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "87a8e4ca3fc1b2e73475d986",
+          "nominee_name": "Grand Theft Auto Online",
+          "nominee_type": "game",
+          "game_title": "Grand Theft Auto Online",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "1adbff935c28d3f297188a25",
+          "nominee_name": "PlayerUnknown's Battlegrounds",
+          "nominee_type": "game",
+          "game_title": "PlayerUnknown's Battlegrounds",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "330400527c158cae88bdd7cb",
+          "nominee_name": "Tom Clancy's Rainbow Six Siege",
+          "nominee_type": "game",
+          "game_title": "Tom Clancy's Rainbow Six Siege",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "16ac1c56da859096f9e9f232",
+          "nominee_name": "Warframe",
+          "nominee_type": "game",
+          "game_title": "Warframe",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-independent-game",
+      "name": "Best Independent Game",
+      "honorary": false,
+      "display_order": 11,
+      "entries": [
+        {
+          "key": "2c09a9a11e9e1e037a9ae325",
+          "nominee_name": "Cuphead",
+          "nominee_type": "game",
+          "game_title": "Cuphead",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "ebf63173fb6d944d11262b12",
+          "nominee_name": "Hellblade: Senua's Sacrifice",
+          "nominee_type": "game",
+          "game_title": "Hellblade: Senua's Sacrifice",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "25d328ddf37caded7ffc66df",
+          "nominee_name": "Night in the Woods",
+          "nominee_type": "game",
+          "game_title": "Night in the Woods",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "1de4490acd3413f0969712e0",
+          "nominee_name": "Pyre",
+          "nominee_type": "game",
+          "game_title": "Pyre",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "9df74d519cc92527408e5582",
+          "nominee_name": "What Remains of Edith Finch",
+          "nominee_type": "game",
+          "game_title": "What Remains of Edith Finch",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-mobile-game",
+      "name": "Best Mobile Game",
+      "honorary": false,
+      "display_order": 13,
+      "entries": [
+        {
+          "key": "12df24bd94bbc34701267ee9",
+          "nominee_name": "Monument Valley 2",
+          "nominee_type": "game",
+          "game_title": "Monument Valley 2",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "e0bead5d9c24877ca698b3b2",
+          "nominee_name": "Fire Emblem Heroes",
+          "nominee_type": "game",
+          "game_title": "Fire Emblem Heroes",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "6e30aa1f52ced9fac942d10e",
+          "nominee_name": "Hidden Folks",
+          "nominee_type": "game",
+          "game_title": "Hidden Folks",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "9f6c7135b79dfcea5eeae902",
+          "nominee_name": "Old Man's Journey",
+          "nominee_type": "game",
+          "game_title": "Old Man's Journey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "ba86c679216211061cc180ef",
+          "nominee_name": "Super Mario Run",
+          "nominee_type": "game",
+          "game_title": "Super Mario Run",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-handheld-game",
+      "name": "Best Handheld Game",
+      "honorary": false,
+      "display_order": 111,
+      "entries": [
+        {
+          "key": "57c0c994bcc745cf85b26d43",
+          "nominee_name": "Metroid: Samus Returns",
+          "nominee_type": "game",
+          "game_title": "Metroid: Samus Returns",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "30fd37c4fd0acb051db55ac3",
+          "nominee_name": "Ever Oasis",
+          "nominee_type": "game",
+          "game_title": "Ever Oasis",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "e27150731d0ffa3b5ca5facf",
+          "nominee_name": "Fire Emblem Echoes: Shadows of Valentia",
+          "nominee_type": "game",
+          "game_title": "Fire Emblem Echoes: Shadows of Valentia",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "bf1d330cb00c53a5512a406b",
+          "nominee_name": "Monster Hunter Stories",
+          "nominee_type": "game",
+          "game_title": "Monster Hunter Stories",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "9736636e3462e4637e7feb5a",
+          "nominee_name": "Poochy and Yoshi's Woolly World",
+          "nominee_type": "game",
+          "game_title": "Poochy and Yoshi's Woolly World",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-vr-ar-game",
+      "name": "Best VR/AR Game",
+      "honorary": false,
+      "display_order": 14,
+      "entries": [
+        {
+          "key": "77f895b06b6cd2af93059172",
+          "nominee_name": "Resident Evil 7: Biohazard",
+          "nominee_type": "game",
+          "game_title": "Resident Evil 7: Biohazard",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "f4041b26724b4558fc4691e0",
+          "nominee_name": "Farpoint",
+          "nominee_type": "game",
+          "game_title": "Farpoint",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "4e1aec20111dd84cd6bf2104",
+          "nominee_name": "Lone Echo",
+          "nominee_type": "game",
+          "game_title": "Lone Echo",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "10f413976f7fcf63575315bf",
+          "nominee_name": "Star Trek: Bridge Crew",
+          "nominee_type": "game",
+          "game_title": "Star Trek: Bridge Crew",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "4e5626ba0c1ebcf62d11557b",
+          "nominee_name": "Superhot VR",
+          "nominee_type": "game",
+          "game_title": "Superhot VR",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-action-game",
+      "name": "Best Action Game",
+      "honorary": false,
+      "display_order": 15,
+      "entries": [
+        {
+          "key": "b2de88f73a534a3c4dd604d2",
+          "nominee_name": "Wolfenstein II: The New Colossus",
+          "nominee_type": "game",
+          "game_title": "Wolfenstein II: The New Colossus",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "2c09a9a11e9e1e037a9ae325",
+          "nominee_name": "Cuphead",
+          "nominee_type": "game",
+          "game_title": "Cuphead",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57405338b96f3785f3ab8345",
+          "nominee_name": "Nioh",
+          "nominee_type": "game",
+          "game_title": "Nioh",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "d07d64fe1d70438bdcb988c9",
+          "nominee_name": "Prey",
+          "nominee_type": "game",
+          "game_title": "Prey",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-action-adventure-game",
+      "name": "Best Action/Adventure",
+      "honorary": false,
+      "display_order": 16,
+      "entries": [
+        {
+          "key": "b3302a06e5a9fa289683978f",
+          "nominee_name": "The Legend of Zelda: Breath of the Wild",
+          "nominee_type": "game",
+          "game_title": "The Legend of Zelda: Breath of the Wild",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "1b56cb29b7eb611e897d4e98",
+          "nominee_name": "Assassin's Creed: Origins",
+          "nominee_type": "game",
+          "game_title": "Assassin's Creed: Origins",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c9cd5f75e23d5b73a8d86cfd",
+          "nominee_name": "Horizon Zero Dawn",
+          "nominee_type": "game",
+          "game_title": "Horizon Zero Dawn",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "f31917fff583a9a07c6c13ae",
+          "nominee_name": "Uncharted: The Lost Legacy",
+          "nominee_type": "game",
+          "game_title": "Uncharted: The Lost Legacy",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-rpg",
+      "name": "Best Role Playing Game",
+      "honorary": false,
+      "display_order": 17,
+      "entries": [
+        {
+          "key": "584fe50cb14955949b69136b",
+          "nominee_name": "Persona 5",
+          "nominee_type": "game",
+          "game_title": "Persona 5",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "90f1d0962a27c684b8202945",
+          "nominee_name": "Divinity: Original Sin II",
+          "nominee_type": "game",
+          "game_title": "Divinity: Original Sin II",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "84e46002ebb373da6c560f49",
+          "nominee_name": "Final Fantasy XV",
+          "nominee_type": "game",
+          "game_title": "Final Fantasy XV",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "cb205b68892cb71d7f572048",
+          "nominee_name": "Nier: Automata",
+          "nominee_type": "game",
+          "game_title": "Nier: Automata",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "ed9b1e14ccbe58441412aa58",
+          "nominee_name": "South Park: The Fractured but Whole",
+          "nominee_type": "game",
+          "game_title": "South Park: The Fractured but Whole",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-fighting-game",
+      "name": "Best Fighting Game",
+      "honorary": false,
+      "display_order": 18,
+      "entries": [
+        {
+          "key": "487f9b76b3dd1fcfd24146fa",
+          "nominee_name": "Injustice 2",
+          "nominee_type": "game",
+          "game_title": "Injustice 2",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "6c134a78b6594361fea75594",
+          "nominee_name": "ARMS",
+          "nominee_type": "game",
+          "game_title": "ARMS",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "71a8164919e0b159e119cf0f",
+          "nominee_name": "Marvel vs. Capcom: Infinite",
+          "nominee_type": "game",
+          "game_title": "Marvel vs. Capcom: Infinite",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b8665e554779f89bedccffa8",
+          "nominee_name": "Nidhogg 2",
+          "nominee_type": "game",
+          "game_title": "Nidhogg 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "936c0859c1c5c2c586392b44",
+          "nominee_name": "Tekken 7",
+          "nominee_type": "game",
+          "game_title": "Tekken 7",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-family-game",
+      "name": "Best Family Game",
+      "honorary": false,
+      "display_order": 19,
+      "entries": [
+        {
+          "key": "57f1caaf65e9bad46c4580d5",
+          "nominee_name": "Super Mario Odyssey",
+          "nominee_type": "game",
+          "game_title": "Super Mario Odyssey",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "69702a7feec60ecc75be448e",
+          "nominee_name": "Mario Kart 8 Deluxe",
+          "nominee_type": "game",
+          "game_title": "Mario Kart 8 Deluxe",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "425a22d98c6571ee4f331d39",
+          "nominee_name": "Mario + Rabbids Kingdom Battle",
+          "nominee_type": "game",
+          "game_title": "Mario + Rabbids Kingdom Battle",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "fdadad92c4ab6db672b8c6cc",
+          "nominee_name": "Sonic Mania",
+          "nominee_type": "game",
+          "game_title": "Sonic Mania",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "bc959730f1c9c60a5cfb307f",
+          "nominee_name": "Splatoon 2",
+          "nominee_type": "game",
+          "game_title": "Splatoon 2",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-strategy-game",
+      "name": "Best Strategy Game",
+      "honorary": false,
+      "display_order": 118,
+      "entries": [
+        {
+          "key": "425a22d98c6571ee4f331d39",
+          "nominee_name": "Mario + Rabbids Kingdom Battle",
+          "nominee_type": "game",
+          "game_title": "Mario + Rabbids Kingdom Battle",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "4f63ef8f295885bf2e6b7004",
+          "nominee_name": "Halo Wars 2",
+          "nominee_type": "game",
+          "game_title": "Halo Wars 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c7324eefe176ce98cacb0c65",
+          "nominee_name": "Total War: Warhammer II",
+          "nominee_type": "game",
+          "game_title": "Total War: Warhammer II",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "dcb28d84a81b528b56098142",
+          "nominee_name": "Tooth and Tail",
+          "nominee_type": "game",
+          "game_title": "Tooth and Tail",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "edc6610d41b8a85fa0bac758",
+          "nominee_name": "XCOM 2: War of the Chosen",
+          "nominee_type": "game",
+          "game_title": "XCOM 2: War of the Chosen",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-sports-racing-game",
+      "name": "Best Sports/Racing Game",
+      "honorary": false,
+      "display_order": 21,
+      "entries": [
+        {
+          "key": "4e22ec7ff5b20d435693dad1",
+          "nominee_name": "Forza Motorsport 7",
+          "nominee_type": "game",
+          "game_title": "Forza Motorsport 7",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "6fbdb09745ce94db82b83768",
+          "nominee_name": "FIFA 18",
+          "nominee_type": "game",
+          "game_title": "FIFA 18",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "4608769e1bd06aa50bc325aa",
+          "nominee_name": "Gran Turismo Sport",
+          "nominee_type": "game",
+          "game_title": "Gran Turismo Sport",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "86e7c6eb2821df7d2f89116a",
+          "nominee_name": "NBA 2K18",
+          "nominee_type": "game",
+          "game_title": "NBA 2K18",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "e01e4e12940e034293ab97f8",
+          "nominee_name": "Pro Evolution Soccer 2018",
+          "nominee_type": "game",
+          "game_title": "Pro Evolution Soccer 2018",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "dcea0a7ef9ea7ae5efc9099b",
+          "nominee_name": "Project Cars 2",
+          "nominee_type": "game",
+          "game_title": "Project Cars 2",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-multiplayer",
+      "name": "Best Multiplayer",
+      "honorary": false,
+      "display_order": 120,
+      "entries": [
+        {
+          "key": "1adbff935c28d3f297188a25",
+          "nominee_name": "PlayerUnknown's Battlegrounds",
+          "nominee_type": "game",
+          "game_title": "PlayerUnknown's Battlegrounds",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "20b6b7f3ce20bf8287e700f8",
+          "nominee_name": "Call of Duty: WWII",
+          "nominee_type": "game",
+          "game_title": "Call of Duty: WWII",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "f553749911ed2486dfc17380",
+          "nominee_name": "Destiny 2",
+          "nominee_type": "game",
+          "game_title": "Destiny 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "d89409034d673aff2d69ebc8",
+          "nominee_name": "Fortnite",
+          "nominee_type": "game",
+          "game_title": "Fortnite",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "69702a7feec60ecc75be448e",
+          "nominee_name": "Mario Kart 8 Deluxe",
+          "nominee_type": "game",
+          "game_title": "Mario Kart 8 Deluxe",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "bc959730f1c9c60a5cfb307f",
+          "nominee_name": "Splatoon 2",
+          "nominee_type": "game",
+          "game_title": "Splatoon 2",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "student-game-award",
+      "name": "Student Game Award",
+      "honorary": false,
+      "display_order": 121,
+      "entries": [
+        {
+          "key": "0a89d48396bee6917cee7b51",
+          "nominee_name": "Level Squared",
+          "nominee_type": "game",
+          "game_title": "Level Squared",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "49ddbb33c69e3e33fed73e8f",
+          "nominee_name": "Falling Sky",
+          "nominee_type": "game",
+          "game_title": "Falling Sky",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "d7e9243666c33c90863d7101",
+          "nominee_name": "From Light",
+          "nominee_type": "game",
+          "game_title": "From Light",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "482f9e3f43cd8b6134b59be0",
+          "nominee_name": "Hollowed",
+          "nominee_type": "game",
+          "game_title": "Hollowed",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "7cd8c7914ed1c29bd9aec2c2",
+          "nominee_name": "Impulsion",
+          "nominee_type": "game",
+          "game_title": "Impulsion",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "6772d78bf0268f8caa3bc206",
+          "nominee_name": "Meaning",
+          "nominee_type": "game",
+          "game_title": "Meaning",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-debut-indie-game",
+      "name": "Best Debut Indie Game",
+      "honorary": false,
+      "display_order": 12,
+      "entries": [
+        {
+          "key": "2c09a9a11e9e1e037a9ae325",
+          "nominee_name": "Cuphead",
+          "nominee_type": "game",
+          "game_title": "Cuphead",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "6f5768e1a4351a0730ed2d98",
+          "nominee_name": "Golf Story",
+          "nominee_type": "game",
+          "game_title": "Golf Story",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "268a9c5ea13a21ee70e4e00a",
+          "nominee_name": "Hollow Knight",
+          "nominee_type": "game",
+          "game_title": "Hollow Knight",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "4cf336381d1db5638cdd58b6",
+          "nominee_name": "Mr. Shifty",
+          "nominee_type": "game",
+          "game_title": "Mr. Shifty",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "008c1fcbbd46dd4612daeb76",
+          "nominee_name": "Slime Rancher",
+          "nominee_type": "game",
+          "game_title": "Slime Rancher",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "most-anticipated-game",
+      "name": "Most Anticipated Game",
+      "honorary": false,
+      "display_order": 123,
+      "entries": [
+        {
+          "key": "c11485e8cf2afdd28389d015",
+          "nominee_name": "The Last of Us Part II",
+          "nominee_type": "game",
+          "game_title": "The Last of Us Part II",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "6426f39c8539f2766f6a4558",
+          "nominee_name": "God of War",
+          "nominee_type": "game",
+          "game_title": "God of War",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "cc3eda89c7918e67d0ec22e7",
+          "nominee_name": "Marvel's Spider-Man",
+          "nominee_type": "game",
+          "game_title": "Marvel's Spider-Man",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "00591ab9c1d36b01025d1091",
+          "nominee_name": "Monster Hunter: World",
+          "nominee_type": "game",
+          "game_title": "Monster Hunter: World",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "df98e55fd7b690d8352a79f0",
+          "nominee_name": "Red Dead Redemption 2",
+          "nominee_type": "game",
+          "game_title": "Red Dead Redemption 2",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "trending-gamer",
+      "name": "Trending Gamer",
+      "honorary": false,
+      "display_order": 124,
+      "entries": [
+        {
+          "key": "6346f8d1eba68281c66313f8",
+          "nominee_name": "Guy \"Dr DisRespect\" Beahm",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "2f0480b77a578efc035bdf5e",
+          "nominee_name": "Andrea Rene",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "b042901cc5669b2589e8c1bd",
+          "nominee_name": "Clint \"Halfcoordinated\" Lexa",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "24d2897440eb723e44b60ae0",
+          "nominee_name": "Michael \"Shroud\" Grzesiek",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "bebf33ea80421349a18c59d5",
+          "nominee_name": "Steven Spohn",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-esports-game",
+      "name": "Best Esports Game",
+      "honorary": false,
+      "display_order": 125,
+      "entries": [
+        {
+          "key": "9643d8f7d89070368d71aa28",
+          "nominee_name": "Overwatch",
+          "nominee_type": "game",
+          "game_title": "Overwatch",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "3f85dc5d35e1123fbba73402",
+          "nominee_name": "Counter-Strike: Global Offensive",
+          "nominee_type": "game",
+          "game_title": "Counter-Strike: Global Offensive",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "2e813d7dbf8e3d51354f786e",
+          "nominee_name": "Dota 2",
+          "nominee_type": "game",
+          "game_title": "Dota 2",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c081e5d44d7bd60454f5eeed",
+          "nominee_name": "League of Legends",
+          "nominee_type": "game",
+          "game_title": "League of Legends",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "de332bbaaa73bd6c5ff7355c",
+          "nominee_name": "Rocket League",
+          "nominee_type": "game",
+          "game_title": "Rocket League",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-esports-player",
+      "name": "Best Esports Player",
+      "honorary": false,
+      "display_order": 126,
+      "entries": [
+        {
+          "key": "9843b3c72b1e8ff8c17b9596",
+          "nominee_name": "Lee \"Faker\" Sang-hyeok",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "b1a227ce2047f1183fa1a347",
+          "nominee_name": "Marcelo \"coldzera\" David",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "43c1bb69f0d74dd42f4b63b9",
+          "nominee_name": "Nikola \"NiKo\" Kovač",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "2db0978f783230c00a6d6f27",
+          "nominee_name": "Ryu \"ryujehong\" Je-hong",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "0a5c8e500c951a9f8527f3e9",
+          "nominee_name": "Kurosh \"KuroKy\" Salehi Takhasomi",
+          "nominee_type": "person",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "best-esports-team",
+      "name": "Best Esports Team",
+      "honorary": false,
+      "display_order": 127,
+      "entries": [
+        {
+          "key": "c291604d7b96838b34862af5",
+          "nominee_name": "Cloud9",
+          "nominee_type": "team",
+          "game_title": null,
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "dee757f15c2e04d279deda7c",
+          "nominee_name": "FaZe Clan",
+          "nominee_type": "team",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "4fc7204f616608c474555dd1",
+          "nominee_name": "Lunatic-Hai",
+          "nominee_type": "team",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "e46b72f9fbe4783798d46d6b",
+          "nominee_name": "SK Telecom T1",
+          "nominee_type": "team",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "c7732d279c8bb64c9a834324",
+          "nominee_name": "Team Liquid",
+          "nominee_type": "team",
+          "game_title": null,
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "chinese-fan-game-award",
+      "name": "Chinese Fan Game Award",
+      "honorary": false,
+      "display_order": 128,
+      "entries": [
+        {
+          "key": "639421eb82f0d03faa34a2b5",
+          "nominee_name": "jx3 HD",
+          "nominee_type": "game",
+          "game_title": "jx3 HD",
+          "status": "winner",
+          "image_url": null
+        },
+        {
+          "key": "d66b98267e5fb25d4313a9ad",
+          "nominee_name": "Honor of Kings",
+          "nominee_type": "game",
+          "game_title": "Honor of Kings",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "817e6c94dd8887397282b482",
+          "nominee_name": "Icey",
+          "nominee_type": "game",
+          "game_title": "Icey",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "2c189ca8df8eea45b927bcf7",
+          "nominee_name": "Gumballs & Dungeons",
+          "nominee_type": "game",
+          "game_title": "Gumballs & Dungeons",
+          "status": "nominee",
+          "image_url": null
+        },
+        {
+          "key": "12df24bd94bbc34701267ee9",
+          "nominee_name": "Monument Valley 2",
+          "nominee_type": "game",
+          "game_title": "Monument Valley 2",
+          "status": "nominee",
+          "image_url": null
+        }
+      ]
+    },
+    {
+      "key": "industry-icon-award",
+      "name": "Industry Icon Award",
+      "honorary": true,
+      "display_order": 129,
+      "entries": [
+        {
+          "key": "ddb92bacac67b8428e126416",
+          "nominee_name": "Carol Shaw",
+          "nominee_type": "other",
+          "game_title": null,
+          "status": "winner",
+          "image_url": null
+        }
+      ]
+    }
+  ],
+  "gaps": []
+}

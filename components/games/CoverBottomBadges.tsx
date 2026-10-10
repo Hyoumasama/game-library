@@ -2,10 +2,12 @@
 // store/hardware icons on the left, and the hours pill on the right.
 // Shared by the Home sections, All Games grid, and entity browsing pages.
 import Image from "next/image";
+import AwardBadge from "@/components/awards/AwardBadge";
 import { formatHours, getIcon } from "@/lib/gameHelpers";
 import { getIconBadgeWidth } from "@/lib/gameIcons";
 
 type IconSource = {
+  award_summary?: import("@/lib/awards").AwardSummary;
   Store?: string | null;
   Platform?: string | null;
   Hardware?: string | null;
@@ -33,10 +35,11 @@ export default function CoverBottomBadges({ game }: { game: IconSource }) {
   const icons = getGameIconItems(game);
   const hours = Number(game["Hours Played"] || 0);
 
-  if (icons.length === 0 && hours <= 0) return null;
+  if (icons.length === 0 && hours <= 0 && !game.award_summary) return null;
 
   return (
     <>
+      <AwardBadge summary={game.award_summary} />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 to-transparent" />
 
       <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center justify-between gap-1.5">

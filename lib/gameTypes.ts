@@ -12,6 +12,7 @@ export type GameAchievementRelation =
   | undefined;
 
 export type DbGame = {
+  award_summary?: import("./awards").AwardSummary;
   id?: number | string;
   slug?: string | null;
   title?: string | null;

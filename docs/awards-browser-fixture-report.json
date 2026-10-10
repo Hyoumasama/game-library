@@ -1,0 +1,26 @@
+{
+  "report": [
+    {
+      "width": 1440,
+      "total": 156,
+      "winners": 31,
+      "incomplete": false,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "total": 156,
+      "winners": 31,
+      "incomplete": false,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "total": 156,
+      "winners": 31,
+      "incomplete": false,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { withAwardBadges } from "@/lib/server/awards";
 import { mapDbGameToUiGame } from "@/lib/gameMappers";
 import type { DbGame, UiGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
@@ -134,6 +135,14 @@ async function fetchHomeGames() {
     wishlistGamesById.set(game.id || `${game.title}-${game.release}`, game);
   }
 
+  const cardGames = await withAwardBadges([
+    ...((playingResult.data || []) as DbGame[]),
+    ...((addedResult.data || []) as DbGame[]),
+    ...((completedResult.data || []) as DbGame[]),
+    ...wishlistGamesById.values(),
+  ]);
+  const awardsById = new Map(cardGames.map(g => [g.id, g.award_summary]));
+  const mapCard = (g: DbGame) => mapDbGameToUiGame({ ...g, award_summary: awardsById.get(g.id) });
   return {
     wishlist: [...wishlistGamesById.values()]
       .sort((first, second) => {
@@ -148,7 +157,7 @@ async function fetchHomeGames() {
         );
       })
       .map((game) => {
-      const mappedGame = mapDbGameToUiGame(game);
+      const mappedGame = mapCard(game);
       const releaseText = game.release ? String(game.release).slice(0, 10) : null;
       const homeTag: UiGame["home_tag"] =
         releaseText && releaseText < todayText ? "Available Now" : "Upcoming";
@@ -159,11 +168,11 @@ async function fetchHomeGames() {
       };
     }),
     currentlyPlaying: ((playingResult.data || []) as DbGame[]).map(
-      mapDbGameToUiGame
+      mapCard
     ),
-    recentlyAdded: ((addedResult.data || []) as DbGame[]).map(mapDbGameToUiGame),
+    recentlyAdded: ((addedResult.data || []) as DbGame[]).map(mapCard),
     recentlyCompleted: ((completedResult.data || []) as DbGame[]).map(
-      mapDbGameToUiGame
+      mapCard
     ),
   };
 }

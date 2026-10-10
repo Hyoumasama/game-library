@@ -1,0 +1,13 @@
+{
+  "environment": "isolated localhost PGlite fixture",
+  "beforeWins": 146,
+  "afterWins": 163,
+  "immediate": [
+    "GOTY",
+    "Game Details",
+    "game card badges",
+    "Stats"
+  ],
+  "wrongDatabaseRejected": true,
+  "unverifiedYearRejected": true
+}

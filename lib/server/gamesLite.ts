@@ -3,6 +3,7 @@ import type { DbGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
 import { CACHE_TAGS } from "@/lib/server/cacheTags";
 import { unstable_cache } from "next/cache";
+import { withAwardBadges } from "@/lib/server/awards";
 import { resolvePlayHistoryFilter, applyNeverPlayedFilter } from "@/lib/playHistoryFilters";
 
 export const GAMES_LITE_PAGE_SIZE = 24;
@@ -560,7 +561,7 @@ async function fetchGamesLiteData({
   const total = gamesResult.count || 0;
 
   return {
-    games: enrichedGames,
+    games: await withAwardBadges(enrichedGames),
     total,
     page: safePage,
     pageSize: safePageSize,

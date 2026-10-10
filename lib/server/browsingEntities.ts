@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { mapDbGameToUiGame } from "@/lib/gameMappers";
+import { withAwardBadges } from "@/lib/server/awards";
 import { slugify } from "@/lib/gameHelpers";
 import type { DbGame, UiGame } from "@/lib/gameTypes";
 import { supabase } from "@/lib/supabase";
@@ -68,7 +69,7 @@ async function fetchGamesByIds(ids: number[]): Promise<UiGame[]> {
     games.push(...((data || []) as DbGame[]));
   }
 
-  return sortByTitle(games.map(mapDbGameToUiGame));
+  return sortByTitle((await withAwardBadges(games)).map(mapDbGameToUiGame));
 }
 
 async function fetchFranchisePageData(
@@ -200,7 +201,7 @@ async function fetchCompanyPageData(
   if (error) throw new Error(error.message);
 
   const games = sortByTitle(
-    ((data || []) as DbGame[]).map(mapDbGameToUiGame)
+    (await withAwardBadges((data || []) as DbGame[])).map(mapDbGameToUiGame)
   );
 
   // Variants normally collapse to a single exact string (confirmed against

@@ -24,6 +24,7 @@ const eslintConfig = defineConfig([
     ".codex/**",
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-awards-preview/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

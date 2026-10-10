@@ -36,6 +36,7 @@ const gameItems: NavItem[] = [
   },
   { href: "/news", label: "News", match: (path) => path.startsWith("/news") },
   { href: "/stats", label: "Stats", match: (path) => path.startsWith("/stats") },
+  { href: "/goty", label: "GOTY", match: (path) => path.startsWith("/goty") },
   {
     href: "/monthly-log",
     label: "Monthly Log",

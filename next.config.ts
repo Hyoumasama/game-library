@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Isolated awards QA can run beside the user's normal development server.
+  distDir: process.env.AWARDS_PREVIEW_BUILD_DIR || ".next",
   experimental: {
     // Every route here is dynamic (force-dynamic / no revalidate), so by
     // default Next.js treats client-side navigation back to an

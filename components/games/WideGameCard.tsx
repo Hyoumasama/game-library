@@ -4,6 +4,7 @@
 // hero_url as fallback) instead of the portrait cover.
 import Link from "next/link";
 import SafeImage from "@/components/SafeImage";
+import AwardBadge from "@/components/awards/AwardBadge";
 import type { UiGame } from "@/lib/gameTypes";
 
 export type WideGameCardTone = "released" | "upcoming" | "tba";
@@ -42,6 +43,7 @@ export default function WideGameCard({
       }`}
     >
       <div className="relative aspect-[460/215] overflow-hidden bg-zinc-900">
+        <AwardBadge summary={game.award_summary} />
         {image ? (
           <SafeImage
             src={image}

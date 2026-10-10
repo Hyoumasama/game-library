@@ -1,0 +1,132 @@
+{
+  "inventorySize": 2348,
+  "years": [
+    {
+      "year": 2014,
+      "categories": 22,
+      "entries": 106,
+      "matched": 39,
+      "unmatched": 41,
+      "ambiguous": 0,
+      "nonGame": 26,
+      "status": "published"
+    },
+    {
+      "year": 2015,
+      "categories": 23,
+      "entries": 109,
+      "matched": 47,
+      "unmatched": 37,
+      "ambiguous": 0,
+      "nonGame": 25,
+      "status": "published"
+    },
+    {
+      "year": 2016,
+      "categories": 25,
+      "entries": 119,
+      "matched": 38,
+      "unmatched": 63,
+      "ambiguous": 4,
+      "nonGame": 18,
+      "status": "published"
+    },
+    {
+      "year": 2017,
+      "categories": 30,
+      "entries": 152,
+      "matched": 70,
+      "unmatched": 66,
+      "ambiguous": 1,
+      "nonGame": 16,
+      "status": "published"
+    },
+    {
+      "year": 2018,
+      "categories": 32,
+      "entries": 156,
+      "matched": 56,
+      "unmatched": 60,
+      "ambiguous": 0,
+      "nonGame": 40,
+      "status": "published"
+    },
+    {
+      "year": 2019,
+      "categories": 31,
+      "entries": 164,
+      "matched": 65,
+      "unmatched": 62,
+      "ambiguous": 0,
+      "nonGame": 37,
+      "status": "published"
+    },
+    {
+      "year": 2020,
+      "categories": 33,
+      "entries": 168,
+      "matched": 77,
+      "unmatched": 58,
+      "ambiguous": 0,
+      "nonGame": 33,
+      "status": "published"
+    },
+    {
+      "year": 2021,
+      "categories": 32,
+      "entries": 160,
+      "matched": 75,
+      "unmatched": 57,
+      "ambiguous": 1,
+      "nonGame": 28,
+      "status": "published"
+    },
+    {
+      "year": 2022,
+      "categories": 32,
+      "entries": 162,
+      "matched": 66,
+      "unmatched": 66,
+      "ambiguous": 1,
+      "nonGame": 30,
+      "status": "published"
+    },
+    {
+      "year": 2023,
+      "categories": 32,
+      "entries": 165,
+      "matched": 61,
+      "unmatched": 73,
+      "ambiguous": 4,
+      "nonGame": 31,
+      "status": "published"
+    },
+    {
+      "year": 2024,
+      "categories": 32,
+      "entries": 156,
+      "matched": 67,
+      "unmatched": 66,
+      "ambiguous": 5,
+      "nonGame": 23,
+      "status": "published"
+    },
+    {
+      "year": 2025,
+      "categories": 31,
+      "entries": 156,
+      "matched": 73,
+      "unmatched": 61,
+      "ambiguous": 0,
+      "nonGame": 22,
+      "status": "published"
+    }
+  ],
+  "totals": {
+    "entries": 1773,
+    "matched": 734,
+    "unmatched": 710,
+    "ambiguous": 16,
+    "nonGame": 329
+  }
+}
