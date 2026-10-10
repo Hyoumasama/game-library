@@ -321,7 +321,6 @@ const displayPrice =
   </div>
 ) : null}
 
-            <GameAwards awards={awards} />
             <RelatedEntries entries={relatedEntries} />
           </div>
         </div>
@@ -352,6 +351,7 @@ const displayPrice =
     : null}
 </div>
         </section>
+        <GameAwards awards={awards} />
         {game.screenshots ? (
   <section className="mt-3">
 
@@ -518,7 +518,6 @@ const displayPrice =
       </p>
     )}
   </div>
-  <GameAwards awards={awards} />
   <RelatedEntries entries={relatedEntries} />
   <div className="mt-2 flex flex-wrap items-center gap-2">
   {/* No price (e.g. wishlist games) would render an empty "-" chip here;
@@ -599,6 +598,7 @@ const displayPrice =
     </section>
   ) : null}
 
+  <GameAwards awards={awards} />
   {game.screenshots ? (
     <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4">
       <h2 className="mb-4 text-xl font-bold">Screenshots</h2>
