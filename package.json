@@ -10,6 +10,7 @@
     "watch:match": "node --env-file=.env.local --experimental-strip-types --import ./scripts/watch/node-loader.mjs scripts/watch/matchImportItem.ts",
     "hltb:backfill": "node --env-file=.env.local --experimental-strip-types --import ./scripts/watch/node-loader.mjs scripts/backfill-hltb.ts",
     "typecheck": "tsc --noEmit",
+    "test:metadata": "node --experimental-strip-types --import ./scripts/watch/node-loader.mjs --import ./tests/core/setup.mjs --import ./tests/metadata/setup.mjs --test --test-isolation=none tests/metadata/refresh.test.mjs tests/core/metadata-refresh.test.mjs",
     "test": "node --experimental-strip-types --import ./scripts/watch/node-loader.mjs --import ./tests/core/setup.mjs --test --test-isolation=none tests/core/*.test.mjs",
     "awards:fetch": "node scripts/awards/fetch-history.mjs",
     "awards:import": "node --env-file=.env.local --experimental-strip-types scripts/awards/import.mjs",

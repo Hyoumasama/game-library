@@ -177,14 +177,17 @@ export async function findMetacriticScore({
   title,
   year,
   steamAppId,
+  throwOnError = false,
 }: {
   title: string;
   year: number | null;
   steamAppId: number | null;
+  throwOnError?: boolean;
 }): Promise<MetacriticScoreResult | null> {
   const query = toSearchQuery(title);
 
   if (!query || NON_SCORABLE_PATTERN.test(title)) return null;
+  let lookupError: unknown;
 
   try {
     let match = pickBestMatch(title, year, await searchMetacritic(query));
@@ -209,14 +212,21 @@ export async function findMetacriticScore({
     }
   } catch (error) {
     console.error("Metacritic lookup failed:", error);
+    lookupError = error;
   }
 
-  if (!steamAppId) return null;
+  if (!steamAppId) {
+    if (throwOnError && lookupError) throw lookupError;
+    return null;
+  }
 
   try {
-    return await getSteamMetacriticScore(steamAppId);
+    const result = await getSteamMetacriticScore(steamAppId);
+    if (!result && throwOnError && lookupError) throw lookupError;
+    return result;
   } catch (error) {
     console.error("Steam Metacritic lookup failed:", error);
+    if (throwOnError) throw error;
     return null;
   }
 }

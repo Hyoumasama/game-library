@@ -94,9 +94,11 @@ performance measurements remain unavailable without a connected browser.
 ## Cross-route dragging — 2026-10-08
 
 `20261008185222_move_play_route_game.sql` adds `move_play_route_game`, called by
-the existing admin-only API. This migration is prepared for review and **has not
-been applied to production**. Apply it in an authorized test database before
-testing persistent transfers there; the UI requires this RPC for cross-route saves.
+the existing admin-only API. Applied to production on 2026-10-16 with explicit
+user authorization. Verified that the RPC exists, uses security invoker, and
+allows execution by service_role only (not anon or authenticated). The isolated
+14-check browser suite and transfer database tests pass; production memberships
+were not moved during verification.
 
 The transfer updates both routes in one transaction, checks both revisions,
 preserves membership IDs, timestamps and route statuses, and renumbers positions.

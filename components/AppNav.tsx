@@ -17,6 +17,7 @@ const AddGameModal = dynamic(() => import("@/components/games/AddGameModal"), {
 const AddWorkModal = dynamic(() => import("@/components/watch/AddWorkModal"), {
   ssr: false,
 });
+const MetadataRefreshModal = dynamic(() => import("@/components/admin/MetadataRefreshModal"), { ssr: false });
 
 type NavItem = {
   href: string;
@@ -78,8 +79,8 @@ function navItemClass(isActive: boolean) {
     : "border-transparent text-zinc-400 hover:text-white"}`;
 }
 
-function MoreNavigation({ items, pathname, mobile = false, onNavigate }: {
-  items: NavItem[]; pathname: string; mobile?: boolean; onNavigate?: () => void;
+function MoreNavigation({ items, pathname, mobile = false, onNavigate, onRefresh }: {
+  items: NavItem[]; pathname: string; mobile?: boolean; onNavigate?: () => void; onRefresh?: () => void;
 }) {
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -101,6 +102,7 @@ function MoreNavigation({ items, pathname, mobile = false, onNavigate }: {
     <summary className={`${navItemClass(items.some(item => item.match(pathname)))} cursor-pointer list-none [&::-webkit-details-marker]:hidden ${mobile ? "text-center" : ""}`}>More <span className="ml-1 text-xs text-zinc-500" aria-hidden="true">▾</span></summary>
     <div className={`${mobile ? "mt-2" : "absolute right-0 top-full z-40 mt-2 w-48"} rounded-xl border border-zinc-800 bg-zinc-950 p-2 shadow-xl shadow-black/40`}>
       {items.map(item => <Link key={item.href} href={item.href} onClick={close} aria-current={item.match(pathname) ? "page" : undefined} className={`${rowClass} ${item.match(pathname) ? "text-cyan-300" : "text-zinc-300"}`}>{item.label}</Link>)}
+      {onRefresh && <button type="button" onClick={() => { close(); onRefresh(); }} className={`${rowClass} text-cyan-300`}>Refresh Metadata</button>}
       <div className="my-2 border-t border-zinc-800" />
       <AuthButton className={`${rowClass} text-zinc-300`} onAction={close} />
     </div>
@@ -181,6 +183,7 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
   const pathname = usePathname();
   const isAdmin = useIsAdmin();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [refreshOpen, setRefreshOpen] = useState(false);
   const section = isWatchPath(pathname) ? "watch" : "games";
   const items = section === "watch" ? watchItems : gameItems;
   const primaryItems = section === "watch" ? items.slice(0, 2) : items.slice(0, 3);
@@ -215,7 +218,7 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
             );
           })}
 
-          <MoreNavigation items={moreItems} pathname={pathname} />
+          <MoreNavigation items={moreItems} pathname={pathname} onRefresh={showAddGame ? () => setRefreshOpen(true) : undefined} />
         </nav>
         <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
           {actions}
@@ -284,7 +287,7 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
                 );
               })}
 
-              <MoreNavigation items={moreItems} pathname={pathname} mobile onNavigate={() => setIsMenuOpen(false)} />
+              <MoreNavigation items={moreItems} pathname={pathname} mobile onNavigate={() => setIsMenuOpen(false)} onRefresh={showAddGame ? () => setRefreshOpen(true) : undefined} />
 
               {actions && (
                 <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-3 [&>div]:flex-col [&>div]:gap-3 [&_a]:w-full [&_a]:justify-center [&_a]:py-3 [&_button]:w-full [&_button]:justify-center [&_button]:py-3">
@@ -297,6 +300,7 @@ export default function AppNav({ onGameAdded, actions }: AppNavProps) {
           </div>
         </div>
       )}
+      {isAdmin && refreshOpen && <MetadataRefreshModal onClose={() => setRefreshOpen(false)} onUpdated={onGameAdded} />}
     </div>
   );
 }

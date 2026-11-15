@@ -7,7 +7,6 @@ import {
   useGameFilters,
 } from "@/components/games/GameFilters";
 import CoverBottomBadges, { getGameIconItems } from "@/components/games/CoverBottomBadges";
-import HltbRefreshButton from "@/components/games/HltbRefreshButton";
 import LongPressGameCard from "@/components/games/LongPressGameCard";
 import SafeImage from "@/components/SafeImage";
 import {
@@ -258,7 +257,6 @@ function AllGamesContent({
                 A cleaner, darker, stat-focused version of your game library.
               </p>
 
-              {isAdmin && <HltbRefreshButton />}
             </div>
 
             <div className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-4">

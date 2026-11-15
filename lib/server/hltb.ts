@@ -397,11 +397,12 @@ export async function getHltbTimesById(hltbId: number): Promise<HltbResult | nul
 export async function findHltbTimes(input: {
   title: string;
   year: number | null;
+  throwOnError?: boolean;
 }): Promise<HltbResult | null> {
   try {
     return await lookupHltb(input);
   } catch (error) {
-    if (error instanceof HltbRateLimitError) throw error;
+    if (input.throwOnError || error instanceof HltbRateLimitError) throw error;
 
     console.error("HLTB lookup failed:", error);
     return null;

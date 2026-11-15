@@ -9,8 +9,6 @@ import StatsYearSelect from "./StatsYearSelect";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import AppNav from "@/components/AppNav";
-import AwardsStats from "@/components/awards/AwardsStats";
-import { Suspense } from "react";
 
 const monthNames = [
   "",
@@ -1424,7 +1422,6 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
 
       <div className="relative mx-auto max-w-7xl px-4 py-6 md:px-8">
         <AppNav />
-        <Suspense><AwardsStats /></Suspense>
 
         {availableYears.length > 0 && (
           <div className="flex justify-end">

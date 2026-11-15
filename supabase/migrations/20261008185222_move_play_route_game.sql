@@ -1,4 +1,4 @@
--- Atomic cross-route transfer. Review locally; no production application authorized.
+-- Atomic cross-route transfer. Applied to production with user authorization on 2026-10-16.
 create function public.move_play_route_game(payload jsonb) returns uuid
 language plpgsql security invoker set search_path = '' as $$
 declare

@@ -55,8 +55,6 @@ const [recentlyCompletedGames, setRecentlyCompletedGames] = useState<Game[]>(
 
 const [editingGame, setEditingGame] = useState<Game | null>(null);
 const [editSignal, setEditSignal] = useState(0);
-const [isRefreshingMetadata, setIsRefreshingMetadata] = useState(false);
-const [metadataRefreshMessage, setMetadataRefreshMessage] = useState("");
 
 function openEditGame(game: Game) {
   setEditingGame(game);
@@ -101,33 +99,6 @@ async function deleteGame(gameId: number) {
   await loadGames();
 }
 
-async function refreshWishlistMetadata() {
-  setIsRefreshingMetadata(true);
-  setMetadataRefreshMessage("");
-
-  try {
-    const response = await fetch("/api/admin/wishlist-release-refresh", {
-      method: "POST",
-    });
-    const data = await response.json();
-
-    if (!response.ok) {
-      setMetadataRefreshMessage(data.error || "Refresh failed");
-      return;
-    }
-
-    await loadGames();
-    setMetadataRefreshMessage(
-      `Updated ${data.updated || 0}, Cleared ${data.cleared || 0}, TBA ${data.stillTba || 0}`
-    );
-  } catch (error) {
-    console.error("Wishlist metadata refresh failed:", error);
-    setMetadataRefreshMessage("Refresh failed");
-  } finally {
-    setIsRefreshingMetadata(false);
-  }
-}
-
     return (
     <main className="min-h-screen bg-[#070a0f] p-4 text-white md:p-8">
       <div className="relative mx-auto max-w-7xl">
@@ -150,9 +121,6 @@ async function refreshWishlistMetadata() {
 <WishlistReleaseCalendar
   games={wishlistGames}
   isAdmin={isAdmin}
-  isRefreshingMetadata={isRefreshingMetadata}
-  metadataRefreshMessage={metadataRefreshMessage}
-  onRefreshMetadata={refreshWishlistMetadata}
   onEdit={openEditGame}
   onDelete={deleteGame}
 />
@@ -302,17 +270,11 @@ function getWishlistCalendarPortraitImage(game: Game) {
 function WishlistReleaseCalendar({
   games,
   isAdmin,
-  isRefreshingMetadata,
-  metadataRefreshMessage,
-  onRefreshMetadata,
   onEdit,
   onDelete,
 }: {
   games: Game[];
   isAdmin: boolean;
-  isRefreshingMetadata: boolean;
-  metadataRefreshMessage: string;
-  onRefreshMetadata: () => void;
   onEdit: (game: Game) => void;
   onDelete: (gameId: number) => void;
 }) {
@@ -437,25 +399,6 @@ function WishlistReleaseCalendar({
         <h2 className="text-xl font-black text-white md:text-2xl">
           Upcoming Games
         </h2>
-
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={onRefreshMetadata}
-            disabled={isRefreshingMetadata}
-            aria-label="Refresh wishlist release dates"
-            title="Refresh release dates"
-            className={`-my-2 flex h-9 w-9 items-center justify-center rounded border border-cyan-300/40 bg-cyan-300 text-lg font-black leading-none text-black transition hover:bg-white focus-visible:opacity-100 group-hover/header:opacity-100 disabled:cursor-not-allowed ${isRefreshingMetadata ? "opacity-60" : "opacity-0"}`}
-          >
-            {isRefreshingMetadata ? "..." : "↻"}
-          </button>
-        )}
-
-        {metadataRefreshMessage && (
-          <span className="text-xs font-black uppercase text-zinc-400">
-            {metadataRefreshMessage}
-          </span>
-        )}
 
         <Link
           href="/wishlist"
