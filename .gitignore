@@ -51,5 +51,6 @@ data/awards/*.js
 
 # Supabase CLI cache
 supabase/.temp/
+/.cache/
 .next-awards-preview/
 /.next-*/

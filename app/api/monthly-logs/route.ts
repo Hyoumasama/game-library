@@ -121,3 +121,57 @@ export async function DELETE(request: Request) {
     data: Array.isArray(data) ? data[0] : data,
   });
 }
+
+export async function PATCH(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid request" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object") {
+    return Response.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const id = Number(body.log_id);
+  const hours = Number(body.hours);
+  const month = Number(body.month);
+  const year = Number(body.year);
+  const expectedHours = Number(body.expectedHours);
+  const expectedMonth = Number(body.expectedMonth);
+  const expectedYear = Number(body.expectedYear);
+  if (
+    !Number.isSafeInteger(id) || id <= 0 ||
+    !Number.isFinite(hours) || hours <= 0 ||
+    !Number.isInteger(month) || month < 1 || month > 12 ||
+    !Number.isInteger(year) || year < 2000 || year > 9999 ||
+    body.expectedHours == null || !Number.isFinite(expectedHours) || expectedHours < 0 ||
+    !Number.isInteger(expectedMonth) || expectedMonth < 1 || expectedMonth > 12 ||
+    !Number.isInteger(expectedYear) || expectedYear < 2000 || expectedYear > 9999
+  ) {
+    return Response.json({ error: "Invalid hours, month, or year" }, { status: 400 });
+  }
+
+  const { data, error } = await supabase.rpc("update_monthly_play_log", {
+    p_log_id: id,
+    p_hours: hours,
+    p_month: month,
+    p_year: year,
+    p_expected_hours: expectedHours,
+    p_expected_month: expectedMonth,
+    p_expected_year: expectedYear,
+  });
+  if (error) {
+    const status = error.code === "PT409" ? 409 : error.code === "P0002" ? 404 : 500;
+    const message = status === 409
+      ? "This log changed elsewhere. Reload the page before editing it."
+      : status === 404 ? "This log no longer exists. Reload the page." : "Failed to update monthly log";
+    return Response.json({ error: message }, { status });
+  }
+
+  revalidateGameCaches();
+  return Response.json({ data: Array.isArray(data) ? data[0] : data });
+}

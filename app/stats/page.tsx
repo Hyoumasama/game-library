@@ -6,6 +6,7 @@ import { unstable_cache } from "next/cache";
 import { getIcon } from "@/lib/gameIcons";
 import { getGameIconItems } from "@/components/games/CoverBottomBadges";
 import StatsYearSelect from "./StatsYearSelect";
+import ExpandableGameGrid from "./ExpandableGameGrid";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import AppNav from "@/components/AppNav";
@@ -73,6 +74,7 @@ type GameRelation =
       score: string | number | null;
       price: string | number | null;
       genres: string[] | null;
+      hours_played: string | number | null;
     }
   | {
       id: number;
@@ -91,6 +93,7 @@ type GameRelation =
       score: string | number | null;
       price: string | number | null;
       genres: string[] | null;
+      hours_played: string | number | null;
     }[]
   | null;
 
@@ -153,6 +156,7 @@ type TimelineGame = {
   id: number;
   title: string;
   hours: number;
+  totalHours: number;
   month: number;
   percent: number;
   cover: string | null;
@@ -179,6 +183,7 @@ type TopGame = {
   id: number;
   title: string;
   hours: number;
+  totalHours: number;
   percent: number;
   cover: string | null;
   store: string | null;
@@ -428,6 +433,7 @@ function buildTimelineGames(
       id: log.game_id,
       title: game?.title || log.title,
       hours,
+      totalHours: Number(game?.hours_played || 0),
       month: log.month,
       percent: monthTotal > 0 ? (hours / monthTotal) * 100 : 0,
       cover: getCover(log),
@@ -487,8 +493,7 @@ function getDeviceStats(games: TimelineGame[]) {
 
 function getTopGames(
   games: TimelineGame[],
-  totalHours: number,
-  limit = 3
+  totalHours: number
 ) {
   const topGames = games.reduce<
     Record<number, Omit<TopGame, "percent" | "months"> & { months: Set<number> }>
@@ -498,6 +503,7 @@ function getTopGames(
         id: game.id,
         title: game.title,
         hours: 0,
+        totalHours: game.totalHours,
         cover: game.cover,
         store: game.store,
         hardware: game.hardware,
@@ -520,8 +526,7 @@ function getTopGames(
       percent: totalHours > 0 ? (game.hours / totalHours) * 100 : 0,
       months: Array.from(game.months).sort((a, b) => a - b),
     }))
-    .sort((a, b) => b.hours - a.hours)
-    .slice(0, limit);
+    .sort((a, b) => b.hours - a.hours);
 }
 
 function getTopDroppedGames(games: TimelineGame[], limit = 5) {
@@ -740,11 +745,15 @@ async function getAvailableStatsYears() {
   return Array.from(years).sort((a, b) => b - a);
 }
 
-function getTopRatedCompletions(games: TimelineGame[], selectedYear: number) {
+function getTopRatedGames(
+  games: TimelineGame[],
+  selectedYear: number,
+  status: "Completed" | "Dropped"
+) {
   const completed = games.reduce<Record<number, PurchaseGame>>(
     (groups, game) => {
       if (
-        game.status !== "Completed" ||
+        game.status !== status ||
         getYear(game.completionDate) !== selectedYear ||
         game.score <= 0
       ) {
@@ -936,6 +945,11 @@ function TopGameCard({
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-3xl font-black">{Math.round(game.hours)}h</p>
+            {game.totalHours - game.hours > 0.01 && (
+              <p className="text-xs font-semibold text-zinc-400">
+                total: {Math.round(game.totalHours)}h
+              </p>
+            )}
             <p className="text-[10px] font-bold uppercase text-zinc-500">
               Playtime
             </p>
@@ -1101,7 +1115,8 @@ async function fetchStatsYearData(year: number) {
               status,
               score,
               price,
-              genres
+              genres,
+              hours_played
             )
           `
           )
@@ -1198,7 +1213,7 @@ async function fetchStatsYearData(year: number) {
   };
 }
 
-const getStatsYearData = unstable_cache(fetchStatsYearData, ["stats-year-data", "v1"], {
+const getStatsYearData = unstable_cache(fetchStatsYearData, ["stats-year-data", "v2"], {
   tags: [CACHE_TAGS.stats],
   revalidate: 300,
 });
@@ -1264,7 +1279,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     hours: Number(g.hours_played || 0),
     month: getMonth(g.completion_last_played) || 1,
     year: year,
-    games: g as any,
+    games: archiveGames[idx] as any,
     isEstimated: useArchiveTimeline,
   }));
 
@@ -1369,18 +1384,25 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
     (sum, game) => sum + game.hours,
     0
   );
-  const topGames = getTopGames(completedGames, completedHours, 5);
+  const topGames = getTopGames(completedGames, completedHours);
+  const droppedGames = timelineGames.filter(
+    (game) =>
+      game.status === "Dropped" && getYear(game.completionDate) === selectedYear
+  );
+  const droppedHours = droppedGames.reduce((sum, game) => sum + game.hours, 0);
+  const droppedHighlights = getTopGames(droppedGames, droppedHours);
   const paidPurchases = getPaidPurchasesFromLibrary(
     (libraryGamesResult.data || []) as LibraryGame[],
     selectedYear
   );
   const gamesAdded = (libraryGamesResult.data || []) as LibraryGame[];
-  const topRatedCompletions = getTopRatedCompletions(
+  const topRatedCompletions = getTopRatedGames(
     timelineGames,
-    selectedYear
+    selectedYear,
+    "Completed"
   );
   const uniqueGameIds = new Set(timelineGames.map((game) => game.id));
-  const topDroppedGames = getTopDroppedGames(timelineGames);
+  const topDroppedGames = getTopDroppedGames(droppedGames);
   const completedPurchaseImpact = getCompletedPurchaseImpact(
     timelineGames,
     selectedYear
@@ -1495,17 +1517,42 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
               </div>
 
               {topGames.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <ExpandableGameGrid key={`completed-${selectedYear}`}>
                   {topGames.map((game) => (
                     <TopGameCard
                       key={game.id}
                       game={game}
                     />
                   ))}
-                </div>
+                </ExpandableGameGrid>
               ) : (
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 text-sm font-semibold text-zinc-400">
                   No completed games with logged playtime in {selectedYear} yet.
+                </div>
+              )}
+            </section>
+
+            <section className="mx-auto mt-16 max-w-6xl">
+              <div className="mb-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan-300">
+                    Dropped highlights
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black">Top Dropped Games</h2>
+                </div>
+                <p className="hidden max-w-sm text-right text-sm font-semibold text-zinc-500 md:block">
+                  Dropped in {selectedYear}, ranked by playtime that year.
+                </p>
+              </div>
+              {droppedHighlights.length > 0 ? (
+                <ExpandableGameGrid key={`dropped-${selectedYear}`}>
+                  {droppedHighlights.map((game) => (
+                    <TopGameCard key={game.id} game={game} />
+                  ))}
+                </ExpandableGameGrid>
+              ) : (
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 text-sm font-semibold text-zinc-400">
+                  No games dropped in {selectedYear} yet.
                 </div>
               )}
             </section>
@@ -1770,7 +1817,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                     Dropped Games
                   </p>
                   <p className="mt-2 text-sm font-semibold text-zinc-400">
-                    Highest-rated games played in {selectedYear} that are now dropped.
+                    Highest-rated games dropped in {selectedYear}.
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
                     {topDroppedGames.length > 0 ? (
@@ -1806,7 +1853,7 @@ export default async function StatsPage({ searchParams }: StatsPageProps) {
                       ))
                     ) : (
                       <p className="text-sm font-semibold text-zinc-500">
-                        No dropped games played in {selectedYear}.
+                        No games dropped in {selectedYear}.
                       </p>
                     )}
                   </div>

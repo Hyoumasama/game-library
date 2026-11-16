@@ -6,6 +6,7 @@ import { unstable_cache } from "next/cache";
 import MonthlyLogAddModal from "@/components/MonthlyLogAddModal";
 import MonthlyLogYearSelect from "@/components/MonthlyLogYearSelect";
 import MonthlyLogDeleteButton from "@/components/MonthlyLogDeleteButton";
+import MonthlyLogEditButton from "@/components/MonthlyLogEditButton";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/adminAuth";
@@ -260,11 +261,11 @@ const bestMonth = months
 
               <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 md:hidden">
                 {monthLogs.map((log) => (
-                  <Link
+                  <div
                     key={log.log_id}
-                    href={`/game/${log.game_id}`}
                     className="block border-b border-zinc-900 px-4 py-3 last:border-b-0 active:bg-zinc-900"
                   >
+                  <Link href={`/game/${log.game_id}`} className="block">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         {getSteamVerticalCover(log) && (
@@ -296,11 +297,18 @@ const bestMonth = months
                       </div>
                     </div>
                   </Link>
+                  {isAdmin && (
+                    <div className="mt-2 flex items-center justify-end gap-3">
+                      <MonthlyLogEditButton log={log} />
+                      <MonthlyLogDeleteButton logId={log.log_id} />
+                    </div>
+                  )}
+                  </div>
                 ))}
               </div>
 
               <div className="hidden overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 md:block">
-  <div className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_40px]" : "grid-cols-[1fr_160px_140px]"} border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300`}>
+  <div className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_88px]" : "grid-cols-[1fr_160px_140px]"} border-b border-zinc-800 bg-zinc-900 px-4 py-3 text-sm font-black text-zinc-300`}>
     <div>Game</div>
     <div>Hours</div>
     <div>Month</div>
@@ -310,7 +318,7 @@ const bestMonth = months
   {monthLogs.map((log) => (
                   <div
                     key={log.log_id}
-                   className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_40px]" : "grid-cols-[1fr_160px_140px]"} items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0`}
+                   className={`grid ${isAdmin ? "grid-cols-[1fr_160px_140px_88px]" : "grid-cols-[1fr_160px_140px]"} items-center border-b border-zinc-900 px-4 py-4 text-sm font-bold last:border-b-0`}
                   >
                     <Link
                       href={`/game/${log.game_id}`}
@@ -337,7 +345,8 @@ const bestMonth = months
   {monthNames[log.month] || log.month}
 </div>
                     {isAdmin && (
-                      <div className="text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <MonthlyLogEditButton log={log} />
                         <MonthlyLogDeleteButton logId={log.log_id} />
                       </div>
                     )}

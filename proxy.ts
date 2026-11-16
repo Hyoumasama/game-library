@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
   const isAdminMeApi = pathname === "/api/admin/me";
   const isMonthlyLogsWrite =
     pathname === "/api/monthly-logs" &&
-    (request.method === "POST" || request.method === "DELETE");
+    (request.method === "POST" || request.method === "PATCH" || request.method === "DELETE");
 
   const isProtectedApi =
     (pathname.startsWith("/api/admin") && !isAdminLoginApi && !isAdminMeApi) ||
